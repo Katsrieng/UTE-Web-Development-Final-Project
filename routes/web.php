@@ -4,6 +4,12 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\FacilityController;
+use App\Http\Controllers\RoomTypeController;
+Route::get('/', function () {
+    return redirect('/rooms');
+});
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -12,6 +18,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('welcome');
 
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| Rooms & Facilities Routes (Lim Sak)
+|--------------------------------------------------------------------------
+*/
+Route::resource('room-types', RoomTypeController::class);
+Route::resource('rooms', RoomController::class);
+Route::resource('facilities', FacilityController::class);    
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [RegisterController::class, 'create'])->name('register');

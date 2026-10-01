@@ -12,9 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+
+    $table->foreignId('user_id');
+
+    $table->foreignId('booking_id')->nullable();
+    $table->foreignId('event_booking_id')->nullable();
+
+    $table->decimal('amount', 10, 2);
+
+    $table->string('payment_method');
+
+    $table->date('payment_date');
+
+    $table->string('status');
+
+    $table->string('reference_number')->unique();
+
+    $table->timestamps();
+});
     }
 
     /**

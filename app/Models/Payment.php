@@ -2,9 +2,21 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    //
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'booking_id',
+        'event_booking_id',
+        'amount',
+        'payment_method',
+        'payment_date',
+        'status',
+        'reference_number',
+    ];
 }

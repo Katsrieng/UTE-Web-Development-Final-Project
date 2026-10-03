@@ -3,13 +3,13 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
 
 class PaymentSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('payments')->insert([
+        $payments = [
             [
                 'user_id' => 1,
                 'booking_id' => 1,
@@ -58,6 +58,12 @@ class PaymentSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-        ]);
+        ];
+        foreach ($payments as $payment) {
+            Payment::firstOrCreate(
+                ['reference_number' => $payment['reference_number']],
+                $payment
+                );
+                }
     }
 }

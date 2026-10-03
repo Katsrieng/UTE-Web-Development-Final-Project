@@ -14,18 +14,20 @@
 
 <body>
 
+@include('partials.navbar')
+
 <div class="container mt-5">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h1>Payments</h1>
+    <h1>Payments</h1>
 
-        <a href="{{ route('payments.create') }}"
-           class="btn btn-primary">
-            Add Payment
-        </a>
+    <a href="{{ route('payments.create') }}"
+       class="btn btn-primary">
+        Add Payment
+    </a>
 
-    </div>
+</div>
 
 
     @if(session('success'))
@@ -171,4 +173,5 @@
 </div>
 
 </body>
+
 </html>

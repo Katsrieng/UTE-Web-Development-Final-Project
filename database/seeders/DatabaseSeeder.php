@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PaymentSeeder::class,
             RoomModuleSeeder::class,
+            UserSeeder::class,
+            
         ]);
     }
 }

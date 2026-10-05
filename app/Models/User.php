@@ -49,6 +49,11 @@ class User extends Authenticatable
         return $this->hasMany(Payment::class);
     }
 
+    public function eventBookings(): HasMany
+    {
+        return $this->hasMany(EventBooking::class);
+    }
+
     /* ---------- Role helpers ---------- */
 
     public function hasRole(string ...$roles): bool

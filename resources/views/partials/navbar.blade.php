@@ -6,7 +6,19 @@
         <a class="navbar-brand" href="{{ url('/') }}">Hotel &amp; Hospitality</a>
 
         <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('venues.*') ? 'active' : '' }}"
+                   href="{{ route('venues.index') }}">Venues</a>
+            </li>
+
             @auth
+                @if(auth()->user()->isCustomer())
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('event-reservations.*') ? 'active' : '' }}"
+                           href="{{ route('event-reservations.index') }}">My Event Reservations</a>
+                    </li>
+                @endif
+
                 @if(auth()->user()->hasRole('admin', 'staff'))
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
@@ -15,6 +27,14 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}"
                            href="{{ route('payments.index') }}">Payments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('management.venues.*') ? 'active' : '' }}"
+                           href="{{ route('management.venues.index') }}">Manage Venues</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('management.event-reservations.*') ? 'active' : '' }}"
+                           href="{{ route('management.event-reservations.index') }}">Event Reservations</a>
                     </li>
                 @endif
 

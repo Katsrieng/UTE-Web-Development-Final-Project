@@ -28,7 +28,7 @@ class FacilityController extends Controller
 
         Facility::create($validated);
 
-        return redirect()->route('facilities.index')->with('success', 'Facility created successfully.');
+        return redirect()->route('management.facilities.index')->with('success', 'Facility created successfully.');
     }
 
     public function show(Facility $facility)
@@ -51,13 +51,13 @@ class FacilityController extends Controller
 
         $facility->update($validated);
 
-        return redirect()->route('facilities.index')->with('success', 'Facility updated successfully.');
+        return redirect()->route('management.facilities.index')->with('success', 'Facility updated successfully.');
     }
 
     public function destroy(Facility $facility)
     {
         $facility->delete();
 
-        return redirect()->route('facilities.index')->with('success', 'Facility deleted successfully.');
+        return redirect()->route('management.facilities.index')->with('success', 'Facility deleted successfully.');
     }
 }

@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', $venue->name.' Management')
+@section('page-label', 'Venues')
 
 @section('content')
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">

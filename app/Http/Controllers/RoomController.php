@@ -47,7 +47,7 @@ class RoomController extends Controller
             $room->facilities()->sync($request->facilities);
         }
 
-        return redirect()->route('rooms.index')->with('success', 'Room created successfully.');
+        return redirect()->route('management.rooms.index')->with('success', 'Room created successfully.');
     }
 
     public function show(Room $room)
@@ -95,7 +95,7 @@ class RoomController extends Controller
             $room->facilities()->detach();
         }
 
-        return redirect()->route('rooms.index')->with('success', 'Room #' . $room->room_number . ' updated successfully!');
+        return redirect()->route('management.rooms.index')->with('success', 'Room #' . $room->room_number . ' updated successfully!');
     }
 
     public function destroy(Room $room)
@@ -106,6 +106,6 @@ class RoomController extends Controller
 
         $room->delete();
 
-        return redirect()->route('rooms.index')->with('success', 'Room deleted successfully.');
+        return redirect()->route('management.rooms.index')->with('success', 'Room deleted successfully.');
     }
 }

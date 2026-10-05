@@ -92,8 +92,10 @@
     <div class="col-12">
         <label for="images" class="form-label">{{ $editing ? 'Add images' : 'Venue images' }} <span class="text-muted">(up to 5 total)</span></label>
         <input id="images" type="file" name="images[]" multiple accept="image/jpeg,image/png,image/webp"
-               class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror">
+               class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror"
+               data-preview-target="venue-image-preview">
         <div class="form-text">JPG, PNG, or WebP. Maximum 5 MB per image.</div>
+        <div id="venue-image-preview" class="image-preview-grid"></div>
     </div>
 
     @if($editing)

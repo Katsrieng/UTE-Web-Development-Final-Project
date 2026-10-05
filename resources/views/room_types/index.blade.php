@@ -1,93 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Types</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+@extends(request()->routeIs('management.room-types.*') ? 'layouts.management' : 'layouts.app')
 
-    @include('partials.navbar')
+@section('title', 'Room Types')
+@section('page-label', 'Room Types')
 
-    <div class="container py-4" style="max-width: 1000px;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Room Types</h2>
-            <div>
-                <a href="{{ route('rooms.index') }}" class="btn btn-outline-secondary me-2">View Rooms</a>
-                <a href="{{ route('room-types.create') }}" class="btn btn-primary">+ Add Room Type</a>
-            </div>
+@section('content')
+@php($managing = request()->routeIs('management.room-types.*'))
+
+@unless($managing)
+    <section class="page-hero"><div class="container"><p class="section-kicker">Choose your comfort</p><h1>Room types for every stay</h1><p>Compare capacity, bed options, and starting rates before exploring individual rooms.</p></div></section>
+@endunless
+
+<section class="{{ $managing ? '' : 'content-section' }}">
+    <div class="{{ $managing ? '' : 'container' }}">
+        <div class="page-heading">
+            <div>@if($managing)<p class="section-kicker">Room catalogue</p>@endif<h1>{{ $managing ? 'Manage Room Types' : 'Explore Room Types' }}</h1><p>{{ $managing ? 'Maintain room categories, pricing, capacity, and catalogue images.' : 'Find the space that best suits your visit.' }}</p></div>
+            @if($managing)<div class="d-flex gap-2"><a href="{{ route('management.rooms.index') }}" class="btn btn-outline-secondary">Rooms</a><a href="{{ route('management.room-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> Add Room Type</a></div>@endif
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        @if($managing)
+            <div class="table-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th class="ps-4">Room type</th><th>Base Price</th><th>Capacity</th><th>Bed Type</th><th>Rooms</th><th class="text-end pe-4">Actions</th></tr></thead>
+                        <tbody>
+                            @forelse($roomTypes as $type)
+                                @php($typeImage = $type->image ? (str_starts_with($type->image, '/storage/') ? asset(ltrim($type->image, '/')) : asset('storage/'.$type->image)) : null)
+                                <tr>
+                                    <td class="ps-4"><div class="d-flex align-items-center gap-3">@if($typeImage)<img src="{{ $typeImage }}" alt="" class="table-thumb" loading="lazy">@else<span class="table-thumb table-thumb-placeholder"><i class="bi bi-house-door"></i></span>@endif<div><strong>{{ $type->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($type->description, 55) }}</small></div></div></td>
+                                    <td class="fw-semibold">${{ number_format($type->base_price, 2) }}</td>
+                                    <td>{{ $type->capacity }} guests</td>
+                                    <td>{{ $type->bed_type ?: '—' }}</td>
+                                    <td>{{ $type->rooms_count }}</td>
+                                    <td class="text-end pe-4 text-nowrap"><a href="{{ route('management.room-types.show', $type) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a> <a href="{{ route('management.room-types.edit', $type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <form action="{{ route('management.room-types.destroy', $type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" data-confirm="Delete {{ $type->name }}?" type="submit"><i class="bi bi-trash"></i></button></form></td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6"><x-empty-state icon="bi-house-door" title="No room types found" message="Create a room type to organize hotel inventory." /></td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @else
+            <div class="row g-4">
+                @forelse($roomTypes as $type)
+                    @php($typeImage = $type->image ? (str_starts_with($type->image, '/storage/') ? asset(ltrim($type->image, '/')) : asset('storage/'.$type->image)) : null)
+                    <div class="col-md-6 col-lg-4">
+                        <article class="hotel-card room-type-card overflow-hidden">
+                            @if($typeImage)<img src="{{ $typeImage }}" alt="{{ $type->name }}" class="room-type-card-image" loading="lazy" decoding="async">@endif
+                            <div class="p-4">
+                                <p class="section-kicker mb-2">From ${{ number_format($type->base_price, 2) }}</p>
+                                <h2 class="h3">{{ $type->name }}</h2>
+                                <p class="text-muted">{{ Illuminate\Support\Str::limit($type->description ?: 'Comfortable accommodation designed for a relaxing stay.', 120) }}</p>
+                                <div class="d-flex gap-3 text-muted small mb-4"><span><i class="bi bi-people me-1"></i>{{ $type->capacity }} guests</span><span><i class="bi bi-moon-stars me-1"></i>{{ $type->bed_type ?: 'Flexible bed' }}</span></div>
+                                <a href="{{ route('room-types.show', $type) }}" class="btn btn-outline-primary mt-auto">View rooms</a>
+                            </div>
+                        </article>
+                    </div>
+                @empty
+                    <div class="col-12"><x-empty-state icon="bi-house-door" title="No room types available" message="Please check back soon." /></div>
+                @endforelse
             </div>
         @endif
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-dark">
-                        <tr>
-                            <th class="ps-4">Photo</th>
-                            <th>Name</th>
-                            <th>Base Price</th>
-                            <th>Capacity</th>
-                            <th>Bed Type</th>
-                            <th>Description</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($roomTypes as $type)
-                            <tr>
-                                <td class="ps-4">
-                                    @if(!empty($type->image))
-                                        <img src="{{ $type->image }}" 
-                                             alt="{{ $type->name }}" 
-                                             class="rounded shadow-sm" 
-                                             style="width: 60px; height: 42px; object-fit: cover;">
-                                    @else
-                                        <div class="bg-secondary-subtle text-secondary rounded d-flex align-items-center justify-content-center" 
-                                             style="width: 60px; height: 42px; font-size: 11px;">
-                                            No photo
-                                        </div>
-                                    @endif
-                                </td>
-                                <td><strong>{{ $type->name }}</strong></td>
-                                <td>${{ number_format($type->base_price, 2) }}</td>
-                                <td>{{ $type->capacity }} Guests</td>
-                                <td>{{ $type->bed_type ?? '—' }}</td>
-                                <td>{{ $type->description ?? '—' }}</td>
-                                <td class="text-end pe-4">
-                                    <a href="{{ route('room-types.edit', $type->id) }}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
-                                    <form action="{{ route('room-types.destroy', $type->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room type?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
-                                    No room types found.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                @if(method_exists($roomTypes, 'links'))
-                    <div class="p-3 border-top">
-                        {{ $roomTypes->links() }}
-                    </div>
-                @endif
-            </div>
-        </div>
+        @if($roomTypes->hasPages())<div class="mt-4">{{ $roomTypes->links('pagination::bootstrap-5') }}</div>@endif
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</section>
+@endsection

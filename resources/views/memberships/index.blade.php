@@ -1,53 +1,13 @@
 @extends('layouts.app')
-
+@section('title', 'Membership')
 @section('content')
-<div class="container py-4">
-    <h2>Resort Membership</h2>
-
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    @if ($currentMembership && $currentMembership->isActive())
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">You're a {{ $currentMembership->membershipType->name }} member</h5>
-                <p class="card-text">
-                    {{ $currentMembership->discountPercentage() }}% discount on bookings.<br>
-                    Valid until {{ $currentMembership->end_date->format('M d, Y') }}.
-                </p>
-                <form action="{{ route('memberships.cancel', $currentMembership) }}" method="POST"
-                      onsubmit="return confirm('Cancel your membership?');">
-                    @csrf
-                    <button class="btn btn-outline-danger btn-sm">Cancel Membership</button>
-                </form>
-            </div>
-        </div>
+<section class="page-hero"><div class="container"><p class="section-kicker">More value, every visit</p><h1>Hotel membership</h1><p>Enjoy member recognition and savings designed for guests who return.</p></div></section>
+<section class="content-section"><div class="container">
+    @if($currentMembership && $currentMembership->isActive())
+        <div class="row justify-content-center"><div class="col-xl-9"><div class="hotel-card p-4 p-lg-5"><div class="row align-items-center g-4"><div class="col-md-auto"><span class="empty-state-icon m-0" style="width:100px;height:100px;font-size:2.4rem"><i class="bi bi-award"></i></span></div><div class="col"><p class="section-kicker">Active membership</p><div class="d-flex flex-wrap justify-content-between gap-3 align-items-start"><h1 class="section-title mb-2">{{ $currentMembership->membershipType->name }} Member</h1><x-status-badge status="active" /></div><p class="section-copy">Enjoy {{ $currentMembership->discountPercentage() }}% off eligible bookings through {{ $currentMembership->end_date->format('F j, Y') }}.</p><form action="{{ route('memberships.cancel',$currentMembership) }}" method="POST" class="mt-4">@csrf<button type="submit" class="btn btn-outline-danger" data-confirm="Cancel your active membership?">Cancel Membership</button></form></div></div></div></div></div>
     @else
-        <p class="text-muted">You don't have an active membership yet. Choose a tier below:</p>
-
-        <div class="row g-3">
-            @foreach ($membershipTypes as $type)
-                <div class="col-md-4">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ $type->name }}</h5>
-                            <p class="card-text">{{ $type->description }}</p>
-                            <p class="fw-bold">{{ $type->discount_percentage }}% off bookings</p>
-                            <p class="text-muted small">{{ $type->duration_months }} months</p>
-                            <form action="{{ route('memberships.subscribe') }}" method="POST" class="mt-auto">
-                                @csrf
-                                <input type="hidden" name="membership_type_id" value="{{ $type->id }}">
-                                <button class="btn btn-primary w-100">Join {{ $type->name }}</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+        <div class="text-center mb-5"><p class="section-kicker">Choose your level</p><h1 class="section-title">Membership made rewarding</h1><p class="section-copy mx-auto">Select the tier that matches how you stay and enjoy benefits throughout its membership period.</p></div>
+        <div class="row g-4 justify-content-center">@forelse($membershipTypes as $type)<div class="col-md-6 col-lg-4"><article class="hotel-card p-4 p-lg-5 d-flex flex-column"><span class="metric-icon"><i class="bi bi-gem"></i></span><p class="section-kicker">{{ $type->duration_months }} months</p><h2 class="h3">{{ $type->name }}</h2><p class="text-muted flex-grow-1">{{ $type->description ?: 'Extra value for returning hotel guests.' }}</p><p class="display-6 font-display mb-1">{{ number_format($type->discount_percentage, 0) }}%</p><p class="text-muted">off eligible bookings</p><form action="{{ route('memberships.subscribe') }}" method="POST" class="mt-3">@csrf<input type="hidden" name="membership_type_id" value="{{ $type->id }}"><button class="btn btn-hotel w-100">Join {{ $type->name }}</button></form></article></div>@empty<div class="col-12"><x-empty-state icon="bi-award" title="Memberships coming soon" message="No active membership tiers are currently available." /></div>@endforelse</div>
     @endif
-</div>
+</div></section>
 @endsection

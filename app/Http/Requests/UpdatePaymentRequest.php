@@ -15,10 +15,15 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer',
+            'user_id' => 'required|integer|exists:users,id',
 
             'booking_id' => 'nullable|integer',
-            'event_booking_id' => 'nullable|integer',
+            'event_booking_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('event_bookings', 'id')
+                    ->where('user_id', $this->input('user_id')),
+            ],
 
             'amount' => 'required|numeric|min:0.01',
 

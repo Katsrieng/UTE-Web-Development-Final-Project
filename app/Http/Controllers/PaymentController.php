@@ -4,20 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdatePaymentRequest;
+use App\Models\EventBooking;
 use App\Models\Payment;
+use App\Models\User;
 
 class PaymentController extends Controller
 {
     public function index()
     {
-        $payments = Payment::latest()->paginate(10);
+        $payments = Payment::with(['user', 'eventBooking.user', 'eventBooking.venue'])
+            ->latest()
+            ->paginate(10);
 
         return view('payments.index', compact('payments'));
     }
 
     public function create()
     {
-        return view('payments.create');
+        $users = User::where('role', User::ROLE_CUSTOMER)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        $eventBookings = EventBooking::with(['user', 'venue'])->latest()->get();
+
+        return view('payments.create', compact('users', 'eventBookings'));
     }
 
     public function store(StorePaymentRequest $request)
@@ -31,12 +41,23 @@ class PaymentController extends Controller
 
     public function show(Payment $payment)
     {
+        $payment->load(['user', 'eventBooking.user', 'eventBooking.venue']);
+
         return view('payments.show', compact('payment'));
     }
 
     public function edit(Payment $payment)
     {
-        return view('payments.edit', compact('payment'));
+        $users = User::where(function ($query) {
+            $query->where('role', User::ROLE_CUSTOMER)
+                ->where('is_active', true);
+        })
+            ->orWhere('id', $payment->user_id)
+            ->orderBy('name')
+            ->get();
+        $eventBookings = EventBooking::with(['user', 'venue'])->latest()->get();
+
+        return view('payments.edit', compact('payment', 'users', 'eventBookings'));
     }
 
     public function update(UpdatePaymentRequest $request, Payment $payment)
@@ -58,6 +79,8 @@ class PaymentController extends Controller
     }
     public function receipt(Payment $payment)
     {
+        $payment->load(['user', 'eventBooking.user', 'eventBooking.venue']);
+
         return view('payments.receipt', compact('payment'));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
+use App\Models\BookingStatusLog;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -106,6 +107,7 @@ class BookingController extends Controller
     public function update(Request $request, string $id)
     {
         $booking = Booking::findOrFail($id);
+        $oldStatus = $booking->status;
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -127,6 +129,15 @@ class BookingController extends Controller
         $validated['total_amount'] = $room->price_per_night * $numberOfNights;
 
         $booking->update($validated);
+        if ($oldStatus !== $booking->status) {
+            BookingStatusLog::create([
+                'booking_id' => $booking->id,
+                'changed_by' => $request->user()->id,
+                'old_status' => $oldStatus,
+                'new_status' => $booking->status,
+                'note' => null,
+            ]);
+        }
 
         return redirect()
             ->route('bookings.index')

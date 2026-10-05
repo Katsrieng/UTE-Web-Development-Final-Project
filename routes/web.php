@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -24,13 +24,16 @@ Route::view('/', 'welcome')->name('welcome');
 
 // Visitors can view rooms and facilities
 Route::resource('room-types', RoomTypeController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('room_type');
 
 Route::resource('rooms', RoomController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('room');
 
 Route::resource('facilities', FacilityController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('facility');
 
 
 // ==========================================
@@ -91,6 +94,9 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('facilities', FacilityController::class)
             ->except(['index', 'show']);
+        
+        // Booking management
+        Route::resource('bookings', BookingController::class);
 
 
         // Payments

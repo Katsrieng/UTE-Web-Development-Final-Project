@@ -7,6 +7,8 @@ use App\Models\Room;
 use App\Models\User;
 use App\Models\BookingStatusLog;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
 {
@@ -45,15 +47,20 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => [
+                'required', 'integer',
+                Rule::exists('users', 'id')->where('role', User::ROLE_CUSTOMER)->where('is_active', true),
+            ],
             'room_id' => 'required|exists:rooms,id',
             'check_in_date' => 'required|date|after_or_equal:today',
             'check_out_date' => 'required|date|after:check_in_date',
             'number_of_guests' => 'required|integer|min:1',
             'special_request' => 'nullable|string',
+        ], [
+            'user_id.exists' => 'Please select an active customer for this booking.',
         ]);
 
-        $room = Room::findOrFail($validated['room_id']);
+        $room = $this->validateRoom($validated);
 
         $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
         $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
@@ -110,16 +117,21 @@ class BookingController extends Controller
         $oldStatus = $booking->status;
 
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => [
+                'required', 'integer',
+                Rule::exists('users', 'id')->where('role', User::ROLE_CUSTOMER)->where('is_active', true),
+            ],
             'room_id' => 'required|exists:rooms,id',
             'check_in_date' => 'required|date',
             'check_out_date' => 'required|date|after:check_in_date',
             'number_of_guests' => 'required|integer|min:1',
             'status' => 'required|in:Pending,Confirmed,Checked In,Checked Out,Cancelled',
             'special_request' => 'nullable|string',
+        ], [
+            'user_id.exists' => 'Please select an active customer for this booking.',
         ]);
 
-        $room = Room::findOrFail($validated['room_id']);
+        $room = $this->validateRoom($validated, $booking);
 
         $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
         $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
@@ -143,6 +155,45 @@ class BookingController extends Controller
             ->route('bookings.index')
             ->with('success', 'Booking updated successfully.');
     }
+    /**
+     * Validate the selected room before pricing or saving the booking.
+     */
+    private function validateRoom(array $validated, ?Booking $booking = null): Room
+    {
+        $room = Room::with('roomType')->findOrFail($validated['room_id']);
+        $errors = [];
+
+        // An ordinary update may keep its existing room even if its operational status changed.
+        if ((! $booking || (int) $booking->room_id !== (int) $room->id) && $room->status !== 'available') {
+            $errors['room_id'] = 'Please select a room with an available operational status.';
+        }
+
+        $capacity = $room->roomType->capacity;
+        if ($validated['number_of_guests'] > $capacity) {
+            $errors['number_of_guests'] = "The number of guests may not exceed this room type's capacity of {$capacity}.";
+        }
+
+        // Terminal bookings do not reserve dates; reactivating one must check availability again.
+        if (in_array($validated['status'] ?? 'Pending', Booking::ACTIVE_STATUSES, true)) {
+            $overlaps = Booking::overlapping(
+                $room->id,
+                \Carbon\Carbon::parse($validated['check_in_date'])->toDateString(),
+                \Carbon\Carbon::parse($validated['check_out_date'])->toDateString(),
+                $booking?->id
+            )->exists();
+
+            if ($overlaps && ! isset($errors['room_id'])) {
+                $errors['room_id'] = 'This room already has an active booking during the selected dates.';
+            }
+        }
+
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        return $room;
+    }
+
     /**
      * Remove the specified resource from storage.
      */

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePaymentRequest extends FormRequest
 {
@@ -14,10 +15,15 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|integer',
+            'user_id' => 'required|integer|exists:users,id',
 
-            'booking_id' => 'nullable|integer',
-            'event_booking_id' => 'nullable|integer',
+            'booking_id' => 'nullable|integer|min:1',
+            'event_booking_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('event_bookings', 'id')
+                    ->where('user_id', $this->input('user_id')),
+            ],
 
             'amount' => 'required|numeric|min:0.01',
 
@@ -25,7 +31,7 @@ class StorePaymentRequest extends FormRequest
 
             'payment_date' => 'required|date',
 
-            'status' => 'required|in:Pending,Paid,Refunded',
+            'status' => 'required|in:Pending,Paid',
 
             'reference_number' => 'required|string|max:255|unique:payments,reference_number',
         ];

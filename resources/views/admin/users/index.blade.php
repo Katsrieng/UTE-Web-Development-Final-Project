@@ -1,16 +1,21 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', 'Manage Users')
+@section('page-label', 'Users')
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">Users</h2>
-    <a href="{{ route('admin.users.create') }}" class="btn btn-primary">Add User</a>
+<div class="page-heading">
+    <div>
+        <p class="section-kicker">Access control</p>
+        <h1>Users</h1>
+        <p>Manage customer, staff, and administrator accounts.</p>
+    </div>
+    <a href="{{ route('admin.users.create') }}" class="btn btn-hotel"><i class="bi bi-person-plus me-1"></i> Add User</a>
 </div>
 
 {{-- Search + filter --}}
-<form method="GET" action="{{ route('admin.users.index') }}" class="row g-2 mb-3">
+<form method="GET" action="{{ route('admin.users.index') }}" class="filter-panel row g-2 mb-4">
     <div class="col-md-5">
         <input type="text" name="search" value="{{ request('search') }}"
                class="form-control" placeholder="Search by name or email">
@@ -29,13 +34,13 @@
     </div>
 </form>
 
-<div class="card">
+<div class="table-card">
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th class="ps-4">ID</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -47,7 +52,7 @@
                 <tbody>
                     @forelse($users as $user)
                         <tr>
-                            <td>{{ $user->id }}</td>
+                            <td class="ps-4">#{{ $user->id }}</td>
                             <td>
                                 {{ $user->name }}
                                 @if($user->is(auth()->user()))
@@ -66,31 +71,25 @@
                                 @endphp
                                 <span class="badge text-bg-{{ $color }}">{{ ucfirst($user->role) }}</span>
                             </td>
-                            <td>
-                                @if($user->is_active)
-                                    <span class="badge text-bg-success">Active</span>
-                                @else
-                                    <span class="badge text-bg-warning">Disabled</span>
-                                @endif
-                            </td>
-                            <td>
+                            <td><x-status-badge :status="$user->is_active ? 'active' : 'disabled'" /></td>
+                            <td class="text-nowrap">
                                 <a href="{{ route('admin.users.edit', $user) }}"
-                                   class="btn btn-sm btn-warning">Edit</a>
+                                   class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
 
                                 @unless($user->is(auth()->user()))
                                     <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
                                           class="d-inline"
-                                          onsubmit="return confirm('Delete {{ addslashes($user->name) }}? This cannot be undone.');">
+                                          >
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete {{ $user->name }}? This cannot be undone."><i class="bi bi-trash"></i></button>
                                     </form>
                                 @endunless
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center">No users found.</td>
+                            <td colspan="7"><x-empty-state icon="bi-people" title="No users found" message="Try different search filters or add a user account." /></td>
                         </tr>
                     @endforelse
                 </tbody>

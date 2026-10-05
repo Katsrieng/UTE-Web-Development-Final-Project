@@ -1,14 +1,7 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'New Membership Type')
+@section('page-label', 'Membership Types')
 @section('content')
-<div class="container py-4">
-    <h2>New Membership Type</h2>
-
-    <form action="{{ route('admin.membership-types.store') }}" method="POST">
-        @csrf
-        @include('admin.membership_types._form')
-        <button class="btn btn-primary mt-3">Create</button>
-        <a href="{{ route('admin.membership-types.index') }}" class="btn btn-link mt-3">Cancel</a>
-    </form>
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest loyalty</p><h1>New Membership Type</h1><p>Define a loyalty tier, discount, and active period.</p></div></div>
+<form action="{{ route('admin.membership-types.store') }}" method="POST">@csrf @include('admin.membership_types._form')</form>
 @endsection

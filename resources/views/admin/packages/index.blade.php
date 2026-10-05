@@ -1,56 +1,8 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'Packages')
+@section('page-label', 'Packages')
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Packages</h2>
-        <a href="{{ route('admin.packages.create') }}" class="btn btn-primary">+ New Package</a>
-    </div>
-
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    <table class="table table-bordered align-middle">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($packages as $package)
-                <tr>
-                    <td>{{ $package->name }}</td>
-                    <td>{{ ucfirst($package->type) }}</td>
-                    <td>${{ number_format($package->price, 2) }}</td>
-                    <td>
-                        <span class="badge {{ $package->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
-                            {{ ucfirst($package->status) }}
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <a href="{{ route('admin.packages.edit', $package) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <form action="{{ route('admin.packages.destroy', $package) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Delete this package?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="5" class="text-center text-muted">No packages yet.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    {{ $packages->links() }}
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest offers</p><h1>Packages</h1><p>Manage accommodation, dining, romantic, and family extras.</p></div><a href="{{ route('admin.packages.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> New Package</a></div>
+<div class="table-card"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th class="ps-4">Package</th><th>Type</th><th>Price</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody>@forelse($packages as $package)<tr><td class="ps-4"><strong>{{ $package->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($package->description ?: 'No description',70) }}</small></td><td><span class="badge text-bg-light border">{{ ucfirst($package->type) }}</span></td><td class="fw-semibold">${{ number_format($package->price,2) }}</td><td><x-status-badge :status="$package->status" /></td><td class="text-end pe-4"><a href="{{ route('admin.packages.edit',$package) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <form action="{{ route('admin.packages.destroy',$package) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete package {{ $package->name }}?"><i class="bi bi-trash"></i></button></form></td></tr>@empty<tr><td colspan="5"><x-empty-state icon="bi-gift" title="No packages" message="Create the first optional package for hotel bookings." /></td></tr>@endforelse</tbody></table></div></div>
+@if($packages->hasPages())<div class="mt-4">{{ $packages->links('pagination::bootstrap-5') }}</div>@endif
 @endsection

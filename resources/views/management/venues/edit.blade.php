@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', 'Edit '.$venue->name)
+@section('page-label', 'Venues')
 
 @section('content')
 <div class="row justify-content-center">

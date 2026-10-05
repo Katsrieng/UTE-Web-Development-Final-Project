@@ -1,22 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\MembershipTypeController;
+use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\RoomController;
 use App\Http\Controllers\FacilityController;
-use App\Http\Controllers\RoomTypeController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomTypeController;
+use Illuminate\Support\Facades\Route;
 
 // Homepage
 Route::view('/', 'welcome')->name('welcome');
-
 
 // ==========================================
 // PUBLIC ROUTES
@@ -34,7 +35,6 @@ Route::resource('rooms', RoomController::class)
 Route::resource('facilities', FacilityController::class)
     ->only(['index', 'show'])
     ->whereNumber('facility');
-
 
 // ==========================================
 // GUEST ROUTES
@@ -54,7 +54,6 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:5,1');
 
 });
-
 
 // ==========================================
 // AUTHENTICATED USERS
@@ -78,6 +77,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password');
 
+    Route::middleware('role:customer')->group(function () {
+        Route::get('/memberships', [MembershipController::class, 'index'])
+            ->name('memberships.index');
+        Route::post('/memberships/subscribe', [MembershipController::class, 'subscribe'])
+            ->name('memberships.subscribe');
+        Route::post('/memberships/{membership}/cancel', [MembershipController::class, 'cancel'])
+            ->name('memberships.cancel');
+    });
 
     // ======================================
     // ADMIN & STAFF ONLY
@@ -85,19 +92,16 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:admin,staff')->group(function () {
 
-        // Room management
-        Route::resource('room-types', RoomTypeController::class)
-            ->except(['index', 'show']);
+        // Room management uses dedicated URLs so public catalogue links keep
+        // the public navigation even for signed-in admin and staff users.
+        Route::prefix('management')->name('management.')->group(function () {
+            Route::resource('room-types', RoomTypeController::class);
+            Route::resource('rooms', RoomController::class);
+            Route::resource('facilities', FacilityController::class);
+        });
 
-        Route::resource('rooms', RoomController::class)
-            ->except(['index', 'show']);
-
-        Route::resource('facilities', FacilityController::class)
-            ->except(['index', 'show']);
-        
         // Booking management
         Route::resource('bookings', BookingController::class);
-
 
         // Payments
         Route::get(
@@ -105,15 +109,16 @@ Route::middleware('auth')->group(function () {
             [PaymentController::class, 'receipt']
         )->name('payments.receipt');
 
-        Route::resource('payments', PaymentController::class);
+        Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund'])
+            ->name('payments.refund');
 
+        Route::resource('payments', PaymentController::class);
 
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
     });
-
 
     // ======================================
     // ADMIN ONLY
@@ -125,6 +130,12 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
 
             Route::resource('users', UserController::class)
+                ->except('show');
+
+            Route::resource('membership-types', MembershipTypeController::class)
+                ->except('show');
+
+            Route::resource('packages', PackageController::class)
                 ->except('show');
 
         });

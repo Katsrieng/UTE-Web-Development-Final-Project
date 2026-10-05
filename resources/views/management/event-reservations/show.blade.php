@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', 'Review Event Reservation #'.$eventBooking->id)
+@section('page-label', 'Event Reservations')
 
 @section('content')
 @php

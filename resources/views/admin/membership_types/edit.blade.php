@@ -1,15 +1,7 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'Edit '.$membershipType->name)
+@section('page-label', 'Membership Types')
 @section('content')
-<div class="container py-4">
-    <h2>Edit Membership Type</h2>
-
-    <form action="{{ route('admin.membership-types.update', $membershipType) }}" method="POST">
-        @csrf
-        @method('PUT')
-        @include('admin.membership_types._form', ['membershipType' => $membershipType])
-        <button class="btn btn-primary mt-3">Update</button>
-        <a href="{{ route('admin.membership-types.index') }}" class="btn btn-link mt-3">Cancel</a>
-    </form>
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest loyalty</p><h1>Edit {{ $membershipType->name }}</h1><p>Update this membership tier and its benefits.</p></div><x-status-badge :status="$membershipType->status" /></div>
+<form action="{{ route('admin.membership-types.update',$membershipType) }}" method="POST">@csrf @method('PUT') @include('admin.membership_types._form')</form>
 @endsection

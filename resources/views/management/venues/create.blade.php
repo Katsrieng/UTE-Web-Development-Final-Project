@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', 'Create Venue')
+@section('page-label', 'Venues')
 
 @section('content')
 <div class="row justify-content-center">

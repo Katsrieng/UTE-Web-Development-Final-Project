@@ -1,75 +1,10 @@
 @extends('layouts.app')
-
 @section('title', 'Event Reservation #'.$eventBooking->id)
-
 @section('content')
-@php
-    $statusColor = match($eventBooking->status) {
-        'approved' => 'success',
-        'rejected' => 'danger',
-        'cancelled' => 'secondary',
-        default => 'warning',
-    };
-@endphp
-
-<div class="mb-3">
-    <a href="{{ route('event-reservations.index') }}" class="text-decoration-none">&larr; My reservations</a>
-</div>
-
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
-                <div>
-                    <p class="text-muted small mb-1">Reservation #{{ $eventBooking->id }}</p>
-                    <h1 class="h3 mb-0">{{ $eventBooking->venue->name }}</h1>
-                </div>
-                <span class="badge text-bg-{{ $statusColor }} fs-6">{{ ucfirst($eventBooking->status) }}</span>
-            </div>
-
-            <div class="card-body p-4">
-                <dl class="row mb-0">
-                    <dt class="col-sm-4">Event type</dt>
-                    <dd class="col-sm-8">{{ ucfirst($eventBooking->event_type) }}</dd>
-
-                    <dt class="col-sm-4">Date</dt>
-                    <dd class="col-sm-8">{{ $eventBooking->starts_at->format('F j, Y') }}</dd>
-
-                    <dt class="col-sm-4">Time</dt>
-                    <dd class="col-sm-8">
-                        {{ $eventBooking->starts_at->format('g:i A') }}–{{ $eventBooking->ends_at->format('g:i A') }}
-                        <span class="text-muted">({{ config('app.timezone') }})</span>
-                    </dd>
-
-                    <dt class="col-sm-4">Guests</dt>
-                    <dd class="col-sm-8">{{ number_format($eventBooking->guest_count) }}</dd>
-
-                    <dt class="col-sm-4">Venue price</dt>
-                    <dd class="col-sm-8">
-                        {{ $eventBooking->quoted_price !== null ? '$'.number_format((float) $eventBooking->quoted_price, 2) : 'Not specified' }}
-                    </dd>
-
-                    <dt class="col-sm-4">Special requests</dt>
-                    <dd class="col-sm-8">{{ $eventBooking->special_requests ?: 'None' }}</dd>
-
-                    @if($eventBooking->status_note)
-                        <dt class="col-sm-4">Status note</dt>
-                        <dd class="col-sm-8">{{ $eventBooking->status_note }}</dd>
-                    @endif
-                </dl>
-            </div>
-
-            @if($eventBooking->canBeCancelled())
-                <div class="card-footer bg-white p-4 text-end">
-                    <form method="POST" action="{{ route('event-reservations.cancel', $eventBooking) }}"
-                          onsubmit="return confirm('Cancel this event reservation?');">
-                        @csrf
-                        @method('PATCH')
-                        <button type="submit" class="btn btn-outline-danger">Cancel Reservation</button>
-                    </form>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
+<div class="breadcrumb-bar"><div class="container"><a href="{{ route('event-reservations.index') }}"><i class="bi bi-arrow-left me-1"></i> My reservations</a></div></div>
+<section class="content-section compact"><div class="container"><div class="row justify-content-center"><div class="col-xl-9">
+    <div class="card shadow-sm border-0 overflow-hidden"><div class="card-header bg-white p-4 p-lg-5 d-flex flex-column flex-sm-row justify-content-between gap-3 align-items-sm-center"><div><p class="section-kicker">Reservation #{{ $eventBooking->id }}</p><h1 class="h2 mb-0">{{ $eventBooking->venue->name }}</h1></div><x-status-badge :status="$eventBooking->status" class="fs-6 px-3 py-2" /></div>
+    <div class="card-body p-4 p-lg-5"><div class="row g-4"><div class="col-md-6"><small class="text-muted d-block">Event type</small><strong>{{ ucfirst($eventBooking->event_type) }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Guests</small><strong>{{ number_format($eventBooking->guest_count) }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Date</small><strong>{{ $eventBooking->starts_at->format('F j, Y') }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Time</small><strong>{{ $eventBooking->starts_at->format('g:i A') }}–{{ $eventBooking->ends_at->format('g:i A') }}</strong><small class="text-muted d-block">{{ config('app.timezone') }}</small></div><div class="col-md-6"><small class="text-muted d-block">Quoted venue price</small><strong>{{ $eventBooking->quoted_price !== null ? '$'.number_format((float)$eventBooking->quoted_price,2) : 'Not specified' }}</strong></div><div class="col-12"><hr><small class="text-muted d-block mb-1">Special requests</small><p class="mb-0">{{ $eventBooking->special_requests ?: 'None' }}</p></div>@if($eventBooking->status_note)<div class="col-12"><div class="alert alert-light border mb-0"><strong class="d-block mb-1">Status note</strong>{{ $eventBooking->status_note }}</div></div>@endif</div></div>
+    @if($eventBooking->canBeCancelled())<div class="card-footer bg-white p-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3"><p class="text-muted small mb-0">Plans changed? Future active reservations can be cancelled.</p><form method="POST" action="{{ route('event-reservations.cancel',$eventBooking) }}">@csrf @method('PATCH')<button type="submit" class="btn btn-outline-danger" data-confirm="Cancel this event reservation?">Cancel Reservation</button></form></div>@endif</div>
+</div></div></div></section>
 @endsection

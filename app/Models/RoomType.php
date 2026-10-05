@@ -10,14 +10,14 @@ class RoomType extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'base_price',
-        'capacity',
-        'bed_type',
-    ];
-
+  protected $fillable = [
+    'name',
+    'description',
+    'base_price',
+    'capacity',
+    'bed_type',
+    'image', 
+];
     /**
      * A room type has many individual rooms (e.g. Deluxe Suite has Room 101, Room 102).
      */

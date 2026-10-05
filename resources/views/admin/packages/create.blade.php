@@ -1,14 +1,7 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'New Package')
+@section('page-label', 'Packages')
 @section('content')
-<div class="container py-4">
-    <h2>New Package</h2>
-
-    <form action="{{ route('admin.packages.store') }}" method="POST">
-        @csrf
-        @include('admin.packages._form')
-        <button class="btn btn-primary mt-3">Create</button>
-        <a href="{{ route('admin.packages.index') }}" class="btn btn-link mt-3">Cancel</a>
-    </form>
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest offers</p><h1>New Package</h1><p>Create an optional extra for future hotel bookings.</p></div></div>
+<form action="{{ route('admin.packages.store') }}" method="POST">@csrf @include('admin.packages._form')</form>
 @endsection

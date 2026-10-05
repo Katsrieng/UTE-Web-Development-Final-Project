@@ -1,56 +1,8 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'Membership Types')
+@section('page-label', 'Membership Types')
 @section('content')
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Membership Types</h2>
-        <a href="{{ route('admin.membership-types.create') }}" class="btn btn-primary">+ New Membership Type</a>
-    </div>
-
-    @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-
-    <table class="table table-bordered align-middle">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Discount</th>
-                <th>Duration</th>
-                <th>Status</th>
-                <th class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($membershipTypes as $type)
-                <tr>
-                    <td>{{ $type->name }}</td>
-                    <td>{{ $type->discount_percentage }}%</td>
-                    <td>{{ $type->duration_months }} months</td>
-                    <td>
-                        <span class="badge {{ $type->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
-                            {{ ucfirst($type->status) }}
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <a href="{{ route('admin.membership-types.edit', $type) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <form action="{{ route('admin.membership-types.destroy', $type) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Delete this membership type?');">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="5" class="text-center text-muted">No membership types yet.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    {{ $membershipTypes->links() }}
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest loyalty</p><h1>Membership Types</h1><p>Manage customer discount tiers and membership duration.</p></div><a href="{{ route('admin.membership-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> New Membership Type</a></div>
+<div class="table-card"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th class="ps-4">Membership</th><th>Discount</th><th>Duration</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody>@forelse($membershipTypes as $type)<tr><td class="ps-4"><strong>{{ $type->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($type->description ?: 'No description',70) }}</small></td><td class="fw-semibold">{{ number_format($type->discount_percentage,2) }}%</td><td>{{ $type->duration_months }} months</td><td><x-status-badge :status="$type->status" /></td><td class="text-end pe-4"><a href="{{ route('admin.membership-types.edit',$type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <form action="{{ route('admin.membership-types.destroy',$type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete membership type {{ $type->name }}?"><i class="bi bi-trash"></i></button></form></td></tr>@empty<tr><td colspan="5"><x-empty-state icon="bi-award" title="No membership types" message="Create the first loyalty tier for hotel customers." /></td></tr>@endforelse</tbody></table></div></div>
+@if($membershipTypes->hasPages())<div class="mt-4">{{ $membershipTypes->links('pagination::bootstrap-5') }}</div>@endif
 @endsection

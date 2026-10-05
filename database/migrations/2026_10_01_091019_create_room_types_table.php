@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('room_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g. Deluxe Suite, Superior Twin
+            $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('base_price', 10, 2); // Base nightly rate
-            $table->integer('capacity'); // Max occupants
-            $table->string('bed_type')->nullable(); // King, Queen, Twin
+            $table->decimal('base_price', 10, 2);
+            $table->integer('capacity');
+            $table->string('bed_type')->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

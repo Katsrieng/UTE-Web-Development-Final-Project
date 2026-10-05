@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoomType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RoomTypeController extends Controller
 {
@@ -13,6 +14,7 @@ class RoomTypeController extends Controller
     public function index()
     {
         $roomTypes = RoomType::withCount('rooms')->latest()->paginate(10);
+
         return view('room_types.index', compact('roomTypes'));
     }
 
@@ -30,16 +32,22 @@ class RoomTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:room_types,name',
+            'name' => 'required|string|max:255|unique:room_types,name',
             'description' => 'nullable|string',
-            'base_price'  => 'required|numeric|min:0',
-            'capacity'    => 'required|integer|min:1',
-            'bed_type'    => 'nullable|string|max:100',
+            'base_price' => 'required|numeric|min:0',
+            'capacity' => 'required|integer|min:1',
+            'bed_type' => 'nullable|string|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('room_types', 'public');
+            $validated['image'] = '/storage/'.$path;
+        }
 
         RoomType::create($validated);
 
-        return redirect()->route('room-types.index')->with('success', 'Room Type created successfully.');
+        return redirect()->route('management.room-types.index')->with('success', 'Room Type created successfully.');
     }
 
     /**
@@ -48,6 +56,7 @@ class RoomTypeController extends Controller
     public function show(RoomType $roomType)
     {
         $roomType->load('rooms');
+
         return view('room_types.show', compact('roomType'));
     }
 
@@ -65,16 +74,27 @@ class RoomTypeController extends Controller
     public function update(Request $request, RoomType $roomType)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:255|unique:room_types,name,' . $roomType->id,
+            'name' => 'required|string|max:255|unique:room_types,name,'.$roomType->id,
             'description' => 'nullable|string',
-            'base_price'  => 'required|numeric|min:0',
-            'capacity'    => 'required|integer|min:1',
-            'bed_type'    => 'nullable|string|max:100',
+            'base_price' => 'required|numeric|min:0',
+            'capacity' => 'required|integer|min:1',
+            'bed_type' => 'nullable|string|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // Delete the previous uploaded file if one exists
+            if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
+            }
+
+            $path = $request->file('image')->store('room_types', 'public');
+            $validated['image'] = '/storage/'.$path;
+        }
 
         $roomType->update($validated);
 
-        return redirect()->route('room-types.index')->with('success', 'Room Type updated successfully.');
+        return redirect()->route('management.room-types.index')->with('success', 'Room Type updated successfully.');
     }
 
     /**
@@ -82,8 +102,12 @@ class RoomTypeController extends Controller
      */
     public function destroy(RoomType $roomType)
     {
+        if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
+        }
+
         $roomType->delete();
 
-        return redirect()->route('room-types.index')->with('success', 'Room Type deleted successfully.');
+        return redirect()->route('management.room-types.index')->with('success', 'Room Type deleted successfully.');
     }
 }

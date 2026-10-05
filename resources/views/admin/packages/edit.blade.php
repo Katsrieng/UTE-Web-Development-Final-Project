@@ -1,15 +1,7 @@
-@extends('layouts.app')
-
+@extends('layouts.management')
+@section('title', 'Edit '.$package->name)
+@section('page-label', 'Packages')
 @section('content')
-<div class="container py-4">
-    <h2>Edit Package</h2>
-
-    <form action="{{ route('admin.packages.update', $package) }}" method="POST">
-        @csrf
-        @method('PUT')
-        @include('admin.packages._form', ['package' => $package])
-        <button class="btn btn-primary mt-3">Update</button>
-        <a href="{{ route('admin.packages.index') }}" class="btn btn-link mt-3">Cancel</a>
-    </form>
-</div>
+<div class="page-heading"><div><p class="section-kicker">Guest offers</p><h1>Edit {{ $package->name }}</h1><p>Update package details, pricing, or availability.</p></div><x-status-badge :status="$package->status" /></div>
+<form action="{{ route('admin.packages.update',$package) }}" method="POST">@csrf @method('PUT') @include('admin.packages._form')</form>
 @endsection

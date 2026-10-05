@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.management')
 
 @section('title', 'Manage Venues')
+@section('page-label', 'Venues')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -44,7 +45,7 @@
     </div>
 </form>
 
-<div class="card shadow-sm border-0">
+<div class="table-card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">

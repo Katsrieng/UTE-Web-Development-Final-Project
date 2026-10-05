@@ -30,6 +30,9 @@
 
                     @auth
                         @if(auth()->user()->isCustomer())
+                            @if(auth()->user()->is_active)
+                                <li class="nav-item"><a class="nav-link {{ request()->routeIs('customer.bookings.index', 'customer.bookings.show') ? 'active' : '' }}" href="{{ route('customer.bookings.index') }}">My Bookings</a></li>
+                            @endif
                             @if(Route::has('memberships.index'))
                                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('memberships.*') ? 'active' : '' }}" href="{{ route('memberships.index') }}">Membership</a></li>
                             @endif

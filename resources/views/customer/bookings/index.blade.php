@@ -1,0 +1,30 @@
+@extends('layouts.app')
+@section('title', 'My Bookings')
+@section('content')
+<section class="page-hero"><div class="container"><p class="section-kicker">Your stays</p><h1>My Bookings</h1><p>View your room reservations and their current status.</p></div></section>
+<section class="content-section compact"><div class="container">
+    <div class="page-heading"><div><h2>Your reservations</h2></div><a href="{{ route('rooms.index') }}" class="btn btn-hotel">Browse Rooms</a></div>
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead><tr><th class="ps-4">Booking</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Status</th><th class="pe-4">Details</th></tr></thead>
+                <tbody>
+                    @forelse($bookings as $booking)
+                        <tr>
+                            <td class="ps-4">#{{ $booking->id }}</td>
+                            <td><strong>Room {{ $booking->room->room_number }}</strong><small class="d-block text-muted">{{ $booking->room->roomType->name }}</small></td>
+                            <td>{{ $booking->check_in_date }}</td><td>{{ $booking->check_out_date }}</td>
+                            <td>${{ number_format($booking->total_amount, 2) }}</td>
+                            <td><x-status-badge :status="$booking->status" /></td>
+                            <td class="pe-4"><a href="{{ route('customer.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">View details</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7"><x-empty-state icon="bi-calendar-check" title="No bookings yet" message="Browse our rooms to plan your first stay." /></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="mt-4">{{ $bookings->links() }}</div>
+</div></section>
+@endsection

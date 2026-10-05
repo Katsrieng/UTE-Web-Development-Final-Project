@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\MembershipTypeController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
+use App\Http\Middleware\EnsureActiveCustomer;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -84,6 +86,15 @@ Route::middleware('auth')->group(function () {
             ->name('memberships.subscribe');
         Route::post('/memberships/{membership}/cancel', [MembershipController::class, 'cancel'])
             ->name('memberships.cancel');
+    });
+
+    Route::middleware(['role:customer', EnsureActiveCustomer::class])->name('customer.bookings.')->group(function () {
+        Route::get('/rooms/{room}/book', [CustomerBookingController::class, 'create'])->name('create');
+        Route::post('/rooms/{room}/availability', [CustomerBookingController::class, 'availability'])->name('availability');
+        Route::post('/rooms/{room}/book', [CustomerBookingController::class, 'store'])->name('store');
+        Route::get('/my-bookings', [CustomerBookingController::class, 'index'])->name('index');
+        Route::get('/my-bookings/{booking}', [CustomerBookingController::class, 'show'])->name('show');
+        Route::patch('/my-bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('cancel');
     });
 
     // ======================================

@@ -19,10 +19,13 @@
                 @if($managing)
                     <a href="{{ route('management.rooms.edit', $room) }}" class="btn btn-hotel w-100">Edit Room</a>
                 @elseif(auth()->guest())
-                    <a href="{{ route('login') }}" class="btn btn-hotel w-100">Sign in to continue</a>
-                    <p class="text-muted small text-center mt-3 mb-0">Online room booking will be available when the booking module is connected.</p>
+                    <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Sign in to reserve this room</a>
+                @elseif(auth()->user()->isCustomer() && auth()->user()->is_active)
+                    <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Reserve this room</a>
+                @elseif(auth()->user()->isCustomer())
+                    <p class="text-muted small text-center mb-0">Your account is inactive. Please contact the hotel administrator.</p>
                 @else
-                    <p class="text-muted small text-center mb-0">You are viewing the public room catalogue. Online room booking will be available when the booking module is connected.</p>
+                    <p class="text-muted small text-center mb-0">You are viewing the public room catalogue.</p>
                 @endif
             </aside>
         </div>

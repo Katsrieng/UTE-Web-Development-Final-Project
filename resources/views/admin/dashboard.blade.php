@@ -185,7 +185,7 @@
                         <td class="fw-semibold">${{ number_format($payment->amount, 2) }}</td>
                         <td>{{ $payment->payment_method }}</td>
                         <td><x-status-badge :status="$payment->status" /></td>
-                        <td>{{ $payment->payment_date }}</td>
+                        <td>{{ $payment->payment_date?->format('M j, Y') }}</td>
                         <td class="text-end pe-4"><a href="{{ route('payments.show', $payment) }}" class="btn btn-sm btn-outline-primary">View</a></td>
                     </tr>
                 @empty

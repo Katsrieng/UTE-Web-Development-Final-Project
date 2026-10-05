@@ -95,6 +95,7 @@ class PaymentDashboardTest extends TestCase
         $this->assertSame(1, $response->viewData('refundedPayments'));
         $this->assertEqualsWithDelta(150.00, (float) $response->viewData('roomBookingRevenue'), 0.001);
         $this->assertEqualsWithDelta(250.00, (float) $response->viewData('eventBookingRevenue'), 0.001);
+        $response->assertSeeText('Oct 4, 2026');
     }
 
     public function test_dashboard_returns_only_the_latest_five_payments(): void

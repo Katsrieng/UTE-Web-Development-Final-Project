@@ -102,6 +102,9 @@ Route::middleware('auth')->group(function () {
             [PaymentController::class, 'receipt']
         )->name('payments.receipt');
 
+        Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund'])
+            ->name('payments.refund');
+
         Route::resource('payments', PaymentController::class);
 
         // Dashboard

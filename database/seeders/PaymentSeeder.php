@@ -18,7 +18,7 @@ class PaymentSeeder extends Seeder
         }
 
         Payment::updateOrCreate(
-            ['reference_number' => 'PAY-003'],
+            ['reference_number' => 'DEMO-EVENT-PAYMENT'],
             [
                 'user_id' => $eventBooking->user_id,
                 'booking_id' => null,

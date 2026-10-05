@@ -17,7 +17,7 @@ class UpdatePaymentRequest extends FormRequest
         return [
             'user_id' => 'required|integer|exists:users,id',
 
-            'booking_id' => 'nullable|integer',
+            'booking_id' => 'nullable|integer|min:1',
             'event_booking_id' => [
                 'nullable',
                 'integer',

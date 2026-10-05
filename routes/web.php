@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MembershipTypeController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -24,13 +25,16 @@ Route::view('/', 'welcome')->name('welcome');
 
 // Visitors can view rooms and facilities
 Route::resource('room-types', RoomTypeController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('room_type');
 
 Route::resource('rooms', RoomController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('room');
 
 Route::resource('facilities', FacilityController::class)
-    ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->whereNumber('facility');
 
 // ==========================================
 // GUEST ROUTES
@@ -95,6 +99,13 @@ Route::middleware('auth')->group(function () {
             Route::resource('rooms', RoomController::class);
             Route::resource('facilities', FacilityController::class);
         });
+
+        // Booking management
+        Route::patch('/bookings/{id}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+        Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::patch('/bookings/{id}/check-in', [BookingController::class, 'checkIn'])->name('bookings.check-in');
+        Route::patch('/bookings/{id}/check-out', [BookingController::class, 'checkOut'])->name('bookings.check-out');
+        Route::resource('bookings', BookingController::class);
 
         // Payments
         Route::get(

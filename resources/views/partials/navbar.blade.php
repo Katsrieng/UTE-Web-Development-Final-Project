@@ -1,5 +1,3 @@
-{{-- Top navigation bar. No JavaScript needed, so it also works on the older
-     standalone pages (payments, dashboard) that only load Bootstrap CSS. --}}
 <nav class="navbar navbar-expand navbar-dark bg-dark">
     <div class="container flex-wrap">
 
@@ -23,6 +21,14 @@
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"
                            href="{{ route('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('rooms.*') ? 'active' : '' }}"
+                           href="{{ route('rooms.index') }}">Rooms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('facilities.*') ? 'active' : '' }}"
+                           href="{{ route('facilities.index') }}">Facilities</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}"

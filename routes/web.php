@@ -13,25 +13,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 
-
 // Homepage
 Route::view('/', 'welcome')->name('welcome');
-
-
-// ==========================================
-// PUBLIC ROUTES
-// ==========================================
-
-// Visitors can view rooms and facilities
-Route::resource('room-types', RoomTypeController::class)
-    ->only(['index', 'show']);
-
-Route::resource('rooms', RoomController::class)
-    ->only(['index', 'show']);
-
-Route::resource('facilities', FacilityController::class)
-    ->only(['index', 'show']);
-
 
 // ==========================================
 // GUEST ROUTES
@@ -51,7 +34,6 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:5,1');
 
 });
-
 
 // ==========================================
 // AUTHENTICATED USERS
@@ -75,7 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password');
 
-
     // ======================================
     // ADMIN & STAFF ONLY
     // ======================================
@@ -83,15 +64,9 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,staff')->group(function () {
 
         // Room management
-        Route::resource('room-types', RoomTypeController::class)
-            ->except(['index', 'show']);
-
-        Route::resource('rooms', RoomController::class)
-            ->except(['index', 'show']);
-
-        Route::resource('facilities', FacilityController::class)
-            ->except(['index', 'show']);
-
+        Route::resource('room-types', RoomTypeController::class);
+        Route::resource('rooms', RoomController::class);
+        Route::resource('facilities', FacilityController::class);
 
         // Payments
         Route::get(
@@ -101,13 +76,11 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('payments', PaymentController::class);
 
-
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
     });
-
 
     // ======================================
     // ADMIN ONLY

@@ -6,8 +6,11 @@
     <title>Room Types</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light p-4">
-    <div class="container" style="max-width: 950px;">
+<body class="bg-light">
+
+    @include('partials.navbar')
+
+    <div class="container py-4" style="max-width: 1000px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Room Types</h2>
             <div>
@@ -28,7 +31,8 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th class="ps-4">Name</th>
+                            <th class="ps-4">Photo</th>
+                            <th>Name</th>
                             <th>Base Price</th>
                             <th>Capacity</th>
                             <th>Bed Type</th>
@@ -39,7 +43,20 @@
                     <tbody>
                         @forelse($roomTypes as $type)
                             <tr>
-                                <td class="ps-4"><strong>{{ $type->name }}</strong></td>
+                                <td class="ps-4">
+                                    @if(!empty($type->image))
+                                        <img src="{{ $type->image }}" 
+                                             alt="{{ $type->name }}" 
+                                             class="rounded shadow-sm" 
+                                             style="width: 60px; height: 42px; object-fit: cover;">
+                                    @else
+                                        <div class="bg-secondary-subtle text-secondary rounded d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 42px; font-size: 11px;">
+                                            No photo
+                                        </div>
+                                    @endif
+                                </td>
+                                <td><strong>{{ $type->name }}</strong></td>
                                 <td>${{ number_format($type->base_price, 2) }}</td>
                                 <td>{{ $type->capacity }} Guests</td>
                                 <td>{{ $type->bed_type ?? '—' }}</td>
@@ -55,18 +72,22 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
+                                <td colspan="7" class="text-center py-4 text-muted">
                                     No room types found.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-                <div class="p-3">
-                    {{ $roomTypes->links() }}
-                </div>
+                @if(method_exists($roomTypes, 'links'))
+                    <div class="p-3 border-top">
+                        {{ $roomTypes->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

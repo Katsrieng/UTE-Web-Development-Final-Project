@@ -6,8 +6,11 @@
     <title>Rooms Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="p-4 bg-white">
-    <div class="container-fluid" style="max-width: 1200px;">
+<body class="bg-white">
+
+    @include('partials.navbar')
+
+    <div class="container-fluid py-4" style="max-width: 1200px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold mb-0">Rooms Management</h2>
             <div class="d-flex gap-2">

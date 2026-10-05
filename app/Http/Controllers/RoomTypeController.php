@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoomType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RoomTypeController extends Controller
 {
@@ -35,7 +36,13 @@ class RoomTypeController extends Controller
             'base_price'  => 'required|numeric|min:0',
             'capacity'    => 'required|integer|min:1',
             'bed_type'    => 'nullable|string|max:100',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('room_types', 'public');
+            $validated['image'] = '/storage/' . $path;
+        }
 
         RoomType::create($validated);
 
@@ -70,7 +77,18 @@ class RoomTypeController extends Controller
             'base_price'  => 'required|numeric|min:0',
             'capacity'    => 'required|integer|min:1',
             'bed_type'    => 'nullable|string|max:100',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // Delete the previous uploaded file if one exists
+            if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
+            }
+
+            $path = $request->file('image')->store('room_types', 'public');
+            $validated['image'] = '/storage/' . $path;
+        }
 
         $roomType->update($validated);
 
@@ -82,6 +100,10 @@ class RoomTypeController extends Controller
      */
     public function destroy(RoomType $roomType)
     {
+        if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
+        }
+
         $roomType->delete();
 
         return redirect()->route('room-types.index')->with('success', 'Room Type deleted successfully.');

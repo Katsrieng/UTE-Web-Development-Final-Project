@@ -101,6 +101,10 @@ Route::middleware('auth')->group(function () {
         });
 
         // Booking management
+        Route::patch('/bookings/{id}/confirm', [BookingController::class, 'confirm'])->name('bookings.confirm');
+        Route::patch('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::patch('/bookings/{id}/check-in', [BookingController::class, 'checkIn'])->name('bookings.check-in');
+        Route::patch('/bookings/{id}/check-out', [BookingController::class, 'checkOut'])->name('bookings.check-out');
         Route::resource('bookings', BookingController::class);
 
         // Payments

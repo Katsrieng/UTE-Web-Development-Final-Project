@@ -6,7 +6,9 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\User;
 use App\Models\BookingStatusLog;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -113,48 +115,119 @@ class BookingController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $booking = Booking::findOrFail($id);
-        $oldStatus = $booking->status;
+        return DB::transaction(function () use ($request, $id) {
+            // Serialize ordinary edits with lifecycle actions so an edit cannot restore stale status or room data.
+            $booking = Booking::query()->lockForUpdate()->findOrFail($id);
 
-        $validated = $request->validate([
-            'user_id' => [
-                'required', 'integer',
-                Rule::exists('users', 'id')->where('role', User::ROLE_CUSTOMER)->where('is_active', true),
-            ],
-            'room_id' => 'required|exists:rooms,id',
-            'check_in_date' => 'required|date',
-            'check_out_date' => 'required|date|after:check_in_date',
-            'number_of_guests' => 'required|integer|min:1',
-            'status' => 'required|in:Pending,Confirmed,Checked In,Checked Out,Cancelled',
-            'special_request' => 'nullable|string',
-        ], [
-            'user_id.exists' => 'Please select an active customer for this booking.',
-        ]);
+            $validated = $request->validate([
+                'user_id' => [
+                    'required', 'integer',
+                    Rule::exists('users', 'id')->where('role', User::ROLE_CUSTOMER)->where('is_active', true),
+                ],
+                'room_id' => 'required|exists:rooms,id',
+                'check_in_date' => 'required|date',
+                'check_out_date' => 'required|date|after:check_in_date',
+                'number_of_guests' => 'required|integer|min:1',
+                'status' => ['sometimes', 'required', 'string', Rule::in([$booking->status])],
+                'special_request' => 'nullable|string',
+            ], [
+                'user_id.exists' => 'Please select an active customer for this booking.',
+                'status.in' => 'Manage booking status using the actions on Booking Details.',
+            ]);
 
-        $room = $this->validateRoom($validated, $booking);
+            if ($booking->status === 'Checked In' && (int) $validated['room_id'] !== (int) $booking->room_id) {
+                throw ValidationException::withMessages([
+                    'room_id' => 'The room cannot be changed while this booking is Checked In.',
+                ]);
+            }
 
-        $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
-        $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
+            $room = $this->validateRoom(array_merge($validated, ['status' => $booking->status]), $booking);
+            unset($validated['status']);
 
-        $numberOfNights = $checkIn->diffInDays($checkOut);
+            $checkIn = \Carbon\Carbon::parse($validated['check_in_date']);
+            $checkOut = \Carbon\Carbon::parse($validated['check_out_date']);
 
-        $validated['total_amount'] = $room->price_per_night * $numberOfNights;
+            $numberOfNights = $checkIn->diffInDays($checkOut);
+            $validated['total_amount'] = $room->price_per_night * $numberOfNights;
 
-        $booking->update($validated);
-        if ($oldStatus !== $booking->status) {
+            $booking->update($validated);
+
+            return redirect()
+                ->route('bookings.index')
+                ->with('success', 'Booking updated successfully.');
+        });
+    }
+
+    public function confirm(Request $request, string $id): RedirectResponse
+    {
+        return $this->transition($request, $id, 'Confirmed');
+    }
+
+    public function cancel(Request $request, string $id): RedirectResponse
+    {
+        return $this->transition($request, $id, 'Cancelled');
+    }
+
+    public function checkIn(Request $request, string $id): RedirectResponse
+    {
+        return $this->transition($request, $id, 'Checked In');
+    }
+
+    public function checkOut(Request $request, string $id): RedirectResponse
+    {
+        return $this->transition($request, $id, 'Checked Out');
+    }
+
+    private function transition(Request $request, string $id, string $newStatus): RedirectResponse
+    {
+        $booking = DB::transaction(function () use ($request, $id, $newStatus) {
+            $booking = Booking::query()->lockForUpdate()->findOrFail($id);
+            $room = Room::query()->lockForUpdate()->findOrFail($booking->room_id);
+
+            if (! $booking->canTransitionTo($newStatus)) {
+                throw ValidationException::withMessages([
+                    'status' => "Cannot change booking status from {$booking->status} to {$newStatus}.",
+                ]);
+            }
+
+            if ($newStatus === 'Checked In' && $room->status !== 'available') {
+                throw ValidationException::withMessages([
+                    'room_id' => 'Check-in requires a room with an available operational status.',
+                ]);
+            }
+
+            $oldStatus = $booking->status;
+            $booking->update(['status' => $newStatus]);
+
+            if ($newStatus === 'Checked In') {
+                $room->update(['status' => 'occupied']);
+            } elseif ($newStatus === 'Checked Out') {
+                $room->update(['status' => 'cleaning']);
+            }
+
             BookingStatusLog::create([
                 'booking_id' => $booking->id,
                 'changed_by' => $request->user()->id,
                 'old_status' => $oldStatus,
-                'new_status' => $booking->status,
+                'new_status' => $newStatus,
                 'note' => null,
             ]);
-        }
+
+            return $booking;
+        });
+
+        $messages = [
+            'Confirmed' => 'Booking confirmed successfully.',
+            'Cancelled' => 'Booking cancelled successfully.',
+            'Checked In' => 'Guest checked in successfully.',
+            'Checked Out' => 'Guest checked out successfully. The room now requires cleaning.',
+        ];
 
         return redirect()
-            ->route('bookings.index')
-            ->with('success', 'Booking updated successfully.');
+            ->route('bookings.show', $booking)
+            ->with('success', $messages[$newStatus]);
     }
+
     /**
      * Validate the selected room before pricing or saving the booking.
      */
@@ -173,7 +246,7 @@ class BookingController extends Controller
             $errors['number_of_guests'] = "The number of guests may not exceed this room type's capacity of {$capacity}.";
         }
 
-        // Terminal bookings do not reserve dates; reactivating one must check availability again.
+        // Terminal bookings do not reserve dates, including during ordinary edits.
         if (in_array($validated['status'] ?? 'Pending', Booking::ACTIVE_STATUSES, true)) {
             $overlaps = Booking::overlapping(
                 $room->id,

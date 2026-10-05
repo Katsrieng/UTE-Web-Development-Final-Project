@@ -100,20 +100,15 @@ class BookingValidationTest extends TestCase
         return $cases;
     }
 
-    public function test_updating_a_booking_excludes_itself_and_preserves_history(): void
+    public function test_updating_a_booking_excludes_itself_and_does_not_create_history(): void
     {
         $booking = $this->makeBooking();
-        $this->submit(['status' => 'Confirmed', 'total_amount' => 1], $booking)
+        $this->submit(['total_amount' => 1], $booking)
             ->assertSessionHasNoErrors()->assertRedirect(route('bookings.index'));
 
         $this->assertEquals(225, $booking->fresh()->total_amount);
-        $this->assertDatabaseHas('booking_status_logs', [
-            'booking_id' => $booking->id, 'changed_by' => $this->staff->id,
-            'old_status' => 'Pending', 'new_status' => 'Confirmed',
-        ]);
-
-        $this->submit(['status' => 'Confirmed'], $booking)->assertSessionHasNoErrors();
-        $this->assertDatabaseCount('booking_status_logs', 1);
+        $this->assertSame('Pending', $booking->fresh()->status);
+        $this->assertDatabaseCount('booking_status_logs', 0);
     }
 
     public function test_other_rooms_do_not_block_the_selected_room(): void
@@ -127,7 +122,7 @@ class BookingValidationTest extends TestCase
     public function test_terminal_updates_are_allowed_even_when_another_booking_overlaps(string $status): void
     {
         $this->makeBooking();
-        $booking = $this->makeBooking(['status' => 'Cancelled']);
+        $booking = $this->makeBooking(['status' => $status]);
         $this->submit(['status' => $status], $booking)->assertSessionHasNoErrors();
         $this->assertSame($status, $booking->fresh()->status);
     }
@@ -137,11 +132,11 @@ class BookingValidationTest extends TestCase
         return [['Cancelled'], ['Checked Out']];
     }
 
-    public function test_reactivating_a_cancelled_booking_checks_overlap(): void
+    public function test_edit_cannot_reactivate_a_cancelled_booking(): void
     {
         $this->makeBooking();
         $booking = $this->makeBooking(['status' => 'Cancelled']);
-        $this->submit(['status' => 'Confirmed'], $booking)->assertSessionHasErrors('room_id');
+        $this->submit(['status' => 'Confirmed'], $booking)->assertSessionHasErrors('status');
         $this->assertSame('Cancelled', $booking->fresh()->status);
         $this->assertDatabaseCount('booking_status_logs', 0);
     }

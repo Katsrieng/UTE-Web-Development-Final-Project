@@ -34,6 +34,37 @@
 
     </div>
 
+    @if(session('success'))
+        <div class="alert alert-success" role="alert">{{ session('success') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        @foreach([
+            'Confirmed' => ['confirm', 'Confirm Booking', 'btn-success'],
+            'Cancelled' => ['cancel', 'Cancel Booking', 'btn-danger'],
+            'Checked In' => ['check-in', 'Check In', 'btn-primary'],
+            'Checked Out' => ['check-out', 'Check Out', 'btn-primary'],
+        ] as $status => [$action, $label, $buttonClass])
+            @if($booking->canTransitionTo($status))
+                <form action="{{ route('bookings.'.$action, $booking) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit" class="btn {{ $buttonClass }}">{{ $label }}</button>
+                </form>
+            @endif
+        @endforeach
+    </div>
+
 
     <div class="card mb-4">
 

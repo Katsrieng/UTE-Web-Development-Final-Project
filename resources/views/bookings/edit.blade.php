@@ -93,6 +93,7 @@
                         name="room_id"
                         class="form-select"
                         required
+                        @disabled($booking->status === 'Checked In')
                     >
 
                         @foreach($rooms as $room)
@@ -100,7 +101,7 @@
                             <option
                                 value="{{ $room->id }}"
                                 data-price="{{ $room->price_per_night }}"
-                                {{ old('room_id', $booking->room_id) == $room->id ? 'selected' : '' }}
+                                {{ ($booking->status === 'Checked In' ? $booking->room_id : old('room_id', $booking->room_id)) == $room->id ? 'selected' : '' }}
                             >
                                 Room {{ $room->room_number }}
                                 - ${{ number_format($room->price_per_night, 2) }}/night
@@ -109,6 +110,11 @@
                         @endforeach
 
                     </select>
+
+                    @if($booking->status === 'Checked In')
+                        <input type="hidden" name="room_id" value="{{ $booking->room_id }}">
+                        <div class="form-text">Room reassignment is unavailable while Checked In.</div>
+                    @endif
 
                 </div>
 
@@ -188,30 +194,11 @@
                         Status
                     </label>
 
-                    <select
-                        name="status"
-                        class="form-select"
-                        required
-                    >
-
-                        @foreach([
-                            'Pending',
-                            'Confirmed',
-                            'Checked In',
-                            'Checked Out',
-                            'Cancelled'
-                        ] as $status)
-
-                            <option
-                                value="{{ $status }}"
-                                {{ old('status', $booking->status) == $status ? 'selected' : '' }}
-                            >
-                                {{ $status }}
-                            </option>
-
-                        @endforeach
-
-                    </select>
+                    <input type="text" class="form-control" value="{{ $booking->status }}" readonly>
+                    <div class="form-text">
+                        Manage status from Booking Details.
+                        <a href="{{ route('bookings.show', $booking) }}">View Booking Details</a>
+                    </div>
 
                 </div>
 

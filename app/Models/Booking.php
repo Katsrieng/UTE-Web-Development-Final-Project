@@ -9,6 +9,14 @@ class Booking extends Model
 {
     public const ACTIVE_STATUSES = ['Pending', 'Confirmed', 'Checked In'];
 
+    public const STATUS_TRANSITIONS = [
+        'Pending' => ['Confirmed', 'Cancelled'],
+        'Confirmed' => ['Checked In', 'Cancelled'],
+        'Checked In' => ['Checked Out'],
+        'Checked Out' => [],
+        'Cancelled' => [],
+    ];
+
     protected $fillable = [
     'user_id',
     'room_id',
@@ -19,6 +27,11 @@ class Booking extends Model
     'status',
     'special_request',
 ];
+    public function canTransitionTo(string $status): bool
+    {
+        return in_array($status, self::STATUS_TRANSITIONS[$this->status] ?? [], true);
+    }
+
     /**
      * Checkout is exclusive, so back-to-back stays do not overlap.
      */

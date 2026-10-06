@@ -1,4 +1,30 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const roomPhotoInput = document.getElementById('images');
+    document.querySelectorAll('[data-choose-room-photos]').forEach(button => {
+        button.addEventListener('click', () => roomPhotoInput?.click());
+    });
+    roomPhotoInput?.addEventListener('change', () => {
+        const status = document.getElementById('photo-selection-status');
+        if (!status) return;
+        const count = roomPhotoInput.files.length;
+        const editUpload = roomPhotoInput.form?.id === 'photo-upload-form';
+        status.textContent = count
+            ? `${count} photo${count === 1 ? '' : 's'} selected — ${editUpload ? 'ready to upload' : 'ready to save with this room'}.`
+            : (editUpload ? 'Photo actions save separately from room details.' : 'Photos upload when you create the room.');
+    });
+    document.querySelectorAll('[data-room-gallery]').forEach(gallery => {
+        const main = gallery.querySelector('[data-room-main]');
+        gallery.querySelectorAll('[data-room-thumbnail]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!main) return;
+                main.src = button.dataset.imageSrc;
+                main.alt = button.dataset.imageAlt;
+                gallery.querySelectorAll('[data-room-thumbnail]').forEach(item => {
+                    item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+                });
+            });
+        });
+    });
     document.querySelectorAll('[data-password-toggle]').forEach((button) => {
         button.addEventListener('click', () => {
             const input = document.getElementById(button.dataset.passwordToggle);

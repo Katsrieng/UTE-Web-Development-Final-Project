@@ -3,12 +3,20 @@
 @section('page-label', 'Rooms')
 @section('content')
 @php($managing = request()->routeIs('management.rooms.*'))
-@php($roomImage = $room->image ? (str_starts_with($room->image, 'images/') ? asset($room->image) : asset('storage/'.$room->image)) : null)
+@php($roomImage = $room->coverImageUrl())
+@php($coverPhoto = $room->images->firstWhere('is_primary', true) ?? $room->images->first())
 <section class="{{ $managing ? '' : 'content-section compact' }}"><div class="{{ $managing ? '' : 'container' }}">
     <div class="mb-4"><a href="{{ route($managing ? 'management.rooms.index' : 'rooms.index') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Back to rooms</a></div>
     <div class="row g-4 align-items-start">
         <div class="col-lg-7">
-            <div class="detail-gallery-main">@if($roomImage)<img src="{{ $roomImage }}" alt="Room {{ $room->room_number }}">@else<div class="detail-placeholder"><i class="bi bi-door-open"></i></div>@endif</div>
+            <div data-room-gallery>
+                <div class="detail-gallery-main">@if($roomImage)<img data-room-main src="{{ $roomImage }}" alt="{{ $coverPhoto?->alt_text ?: 'Room '.$room->room_number }}">@else<div class="detail-placeholder"><i class="bi bi-door-open"></i></div>@endif</div>
+                @if($room->images->isNotEmpty())
+                    <div class="room-gallery-thumbnails" aria-label="Room photos">
+                        @foreach($room->images as $photo)<button type="button" data-room-thumbnail data-image-src="{{ $photo->url() }}" data-image-alt="{{ $photo->alt_text ?: 'Room '.$room->room_number.' photo '.($loop->iteration) }}" aria-label="View {{ $photo->alt_text ?: 'room photo '.$loop->iteration }}" aria-pressed="{{ $photo->id === $coverPhoto->id ? 'true' : 'false' }}"><img src="{{ $photo->url() }}" alt="{{ $photo->alt_text ?: 'Room photo '.$loop->iteration }}" loading="lazy"></button>@endforeach
+                    </div>
+                @endif
+            </div>
             <div class="mt-4"><p class="section-kicker">Room details</p><h1 class="section-title">Room {{ $room->room_number }}</h1><p class="section-copy">{{ $room->description ?: 'A comfortable hotel room prepared for a relaxing stay.' }}</p></div>
             @if($room->facilities->isNotEmpty())<div class="mt-4"><h2 class="h4 mb-3">Included facilities</h2><div class="row g-3">@foreach($room->facilities as $facility)<div class="col-sm-6"><div class="p-3 bg-white border rounded"><i class="bi bi-check-circle text-success me-2"></i>{{ $facility->name }}</div></div>@endforeach</div></div>@endif
         </div>

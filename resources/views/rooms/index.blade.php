@@ -66,7 +66,7 @@
         @else
             <div class="row g-4">
                 @forelse($rooms as $room)
-                    @php($roomImage = $room->image ? (str_starts_with($room->image, 'images/') ? asset($room->image) : asset('storage/'.$room->image)) : null)
+                    @php($roomImage = $room->coverImageUrl())
                     <div class="col-md-6 col-lg-4">
                         <article class="catalog-card {{ $roomImage ? 'has-image' : '' }}">
                             @if($roomImage)<img class="catalog-card-image" src="{{ $roomImage }}" alt="" loading="lazy" decoding="async" fetchpriority="low">@endif

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RoomImage;
 use App\Models\RoomType;
+use App\Services\RoomGalleryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class RoomTypeController extends Controller
@@ -100,13 +103,19 @@ class RoomTypeController extends Controller
     /**
      * Remove the specified room type from storage.
      */
-    public function destroy(RoomType $roomType)
+    public function destroy(RoomType $roomType, RoomGalleryService $gallery)
     {
         if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
             Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
         }
 
-        $roomType->delete();
+        DB::transaction(function () use ($roomType, $gallery) {
+            $locked = RoomType::whereKey($roomType->id)->lockForUpdate()->firstOrFail();
+            $rooms = $locked->rooms()->orderBy('id')->lockForUpdate()->get();
+            $paths = RoomImage::whereIn('room_id', $rooms->pluck('id'))->pluck('image_path')->all();
+            $locked->delete();
+            DB::afterCommit(fn () => $gallery->cleanup($paths));
+        });
 
         return redirect()->route('management.room-types.index')->with('success', 'Room Type deleted successfully.');
     }

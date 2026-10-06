@@ -2,12 +2,11 @@
 
 use App\Http\Controllers\Admin\MembershipTypeController;
 use App\Http\Controllers\Admin\PackageController;
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
-use App\Http\Middleware\EnsureActiveCustomer;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\HomeController;
@@ -15,7 +14,9 @@ use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\RoomImageController;
 use App\Http\Controllers\RoomTypeController;
+use App\Http\Middleware\EnsureActiveCustomer;
 use Illuminate\Support\Facades\Route;
 
 // Homepage
@@ -106,6 +107,10 @@ Route::middleware('auth')->group(function () {
         // Room management uses dedicated URLs so public catalogue links keep
         // the public navigation even for signed-in admin and staff users.
         Route::prefix('management')->name('management.')->group(function () {
+            Route::post('rooms/{room}/images', [RoomImageController::class, 'store'])->name('rooms.images.store');
+            Route::patch('rooms/{room}/images/{roomImage}/primary', [RoomImageController::class, 'primary'])->name('rooms.images.primary');
+            Route::patch('rooms/{room}/images/{roomImage}', [RoomImageController::class, 'update'])->name('rooms.images.update');
+            Route::delete('rooms/{room}/images/{roomImage}', [RoomImageController::class, 'destroy'])->name('rooms.images.destroy');
             Route::resource('room-types', RoomTypeController::class);
             Route::resource('rooms', RoomController::class);
             Route::resource('facilities', FacilityController::class);

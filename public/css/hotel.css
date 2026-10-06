@@ -1388,3 +1388,47 @@ textarea.form-control {
         padding: 0 !important;
     }
 }
+.room-gallery-thumbnails { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+.room-gallery-thumbnails button { border: 2px solid transparent; border-radius: .5rem; padding: .15rem; background: transparent; }
+.room-gallery-thumbnails button[aria-pressed="true"] { border-color: var(--hotel-primary, #176b65); }
+.room-gallery-thumbnails button:focus-visible { outline: 2px solid #176b65; outline-offset: 3px; }
+.room-gallery-thumbnails img { display: block; width: 90px; height: 65px; object-fit: cover; border-radius: .35rem; }
+.room-management-photo { width: 100%; height: 180px; object-fit: cover; }
+.room-photos-count { padding: .25rem .7rem; border-radius: 999px; background: var(--hotel-cream); font-size: .85rem; font-weight: 600; }
+.room-photos-upload { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px dashed var(--hotel-border); border-radius: .6rem; background: var(--hotel-cream); }
+.room-photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 1rem; }
+.room-photo-card { min-width: 0; border: 1px solid var(--hotel-border); border-radius: .6rem; overflow: hidden; }
+.room-photo-preview { position: relative; aspect-ratio: 16 / 10; }
+.room-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.room-photo-cover { position: absolute; top: .6rem; left: .6rem; padding: .25rem .55rem; border-radius: .35rem; background: var(--hotel-navy); color: white; font-size: .75rem; font-weight: 600; }
+.room-photo-controls { padding: .85rem; }
+.room-photo-order { width: 70px; flex-shrink: 0; }
+.room-photo-actions { display: flex; justify-content: space-between; align-items: center; gap: .5rem; border-top: 1px solid var(--hotel-border); margin-top: .75rem; padding-top: .75rem; }
+.room-photo-delete { padding-right: 0; text-decoration: none; }
+.room-photos-empty { grid-column: 1 / -1; text-align: center; padding: 2rem 1rem; border: 1px solid var(--hotel-border); border-radius: .6rem; }
+.room-photos-empty > i { display: block; font-size: 1.75rem; color: var(--hotel-muted); margin-bottom: .5rem; }
+[data-room-gallery] .detail-gallery-main { aspect-ratio: 16 / 10; min-height: 0; }
+[data-room-gallery] .detail-gallery-main > img { display: block; height: 100%; object-fit: cover; }
+[data-room-gallery] .detail-placeholder { height: 100%; min-height: 0; }
+[data-room-gallery] .room-gallery-thumbnails { gap: .5rem; }
+[data-room-gallery] .room-gallery-thumbnails button[aria-pressed="true"] { border-color: var(--hotel-gold-dark); background: var(--hotel-cream); box-shadow: 0 0 0 1px var(--hotel-gold-dark); }
+[data-room-gallery] .room-gallery-thumbnails img { width: 84px; height: 60px; object-fit: cover; }
+@media (max-width: 575px) {
+    .room-photos-upload { flex-direction: column; align-items: stretch; }
+    [data-room-gallery] .room-gallery-thumbnails img { width: 68px; height: 50px; }
+}
+.room-photos { padding: 1.25rem 0; border-top: 1px solid var(--hotel-border); border-bottom: 1px solid var(--hotel-border); }
+.room-photos .room-photos-upload { display: block; padding: .85rem 1rem; border: 0; border-radius: .5rem; background: #f0f2f4; }
+.room-upload-row { display: flex; align-items: center; gap: .75rem; }
+.room-upload-row .form-control { min-width: 0; flex: 1; }
+.room-upload-row .btn { flex-shrink: 0; }
+.room-photos .room-photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.room-photos .room-photo-card { border: 0; border-radius: .5rem; background: white; }
+.room-photos .room-photo-preview { aspect-ratio: 16 / 9; }
+.room-photos .room-photo-controls { padding: .75rem .1rem .25rem; }
+.room-photos .room-photo-actions { border: 0; padding-top: .25rem; margin-top: .5rem; }
+.room-photos .room-photos-empty { padding: 1.25rem 1rem; border: 0; }
+.room-facilities { display: flex; flex-wrap: wrap; column-gap: 2rem; row-gap: .25rem; }
+.room-facilities h2 { flex-basis: 100%; }
+@media (max-width: 991px) { .room-photos .room-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575px) { .room-photos .room-photo-grid { grid-template-columns: minmax(0, 1fr); } }

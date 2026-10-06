@@ -103,6 +103,7 @@
                 <strong>Total Amount:</strong>
                 ${{ number_format($booking->total_amount, 2) }}
             </p>
+            @include('bookings._package-summary')
 
             <p>
                 <strong>Status:</strong>

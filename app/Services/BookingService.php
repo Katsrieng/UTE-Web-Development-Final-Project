@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\BookingStatusLog;
+use App\Models\Package;
 use App\Models\Room;
 use App\Models\User;
 use Carbon\Carbon;
@@ -14,12 +15,59 @@ class BookingService
 {
     public function create(array $validated): Booking
     {
-        $room = $this->validateRoom($validated);
+        return DB::transaction(function () use ($validated) {
+            Room::whereKey($validated['room_id'])->lockForUpdate()->firstOrFail();
+            $room = $this->validateRoom($validated);
+            $quote = $this->quotePackages($validated['packages'] ?? [], (int) $validated['number_of_guests'], true);
+            unset($validated['packages']);
+            $booking = Booking::create(array_merge($validated, [
+                'total_amount' => $this->combineTotal($this->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $quote['total_cents']),
+                'status' => 'Pending',
+            ]));
+            foreach ($quote['lines'] as $line) {
+                $booking->bookingPackages()->create(['package_id' => $line['package_id'], 'quantity' => $line['quantity'], 'price' => $line['price']]);
+            }
 
-        return Booking::create(array_merge($validated, [
-            'total_amount' => $this->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']),
-            'status' => 'Pending',
-        ]));
+            return $booking;
+        });
+    }
+
+    public function quotePackages(array $selection, int $guests, bool $lock = false): array
+    {
+        $query = Package::active()->whereIn('id', array_column($selection, 'package_id'))->orderBy('id');
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+        $packages = $query->get()->keyBy('id');
+        $lines = [];
+        $total = 0;
+        foreach ($selection as $index => $selected) {
+            $package = $packages->get($selected['package_id']);
+            if (! $package) {
+                throw ValidationException::withMessages(["packages.$index.package_id" => 'This add-on is no longer available. Please review your selection.']);
+            }
+            $submittedQuantity = $selected['quantity'] ?? 1;
+            $limit = $package->bookingQuantityLimit($guests);
+            if (filter_var($submittedQuantity, FILTER_VALIDATE_INT) === false || $submittedQuantity < 1 || $submittedQuantity > $limit) {
+                throw ValidationException::withMessages(["packages.$index.quantity" => "Choose between 1 and {$limit} units for this add-on."]);
+            }
+            $quantity = (int) $submittedQuantity;
+            $lineCents = (int) round((float) $package->price * 100) * $quantity;
+            $total += $lineCents;
+            $lines[] = ['package_id' => $package->id, 'name' => $package->name, 'quantity' => $quantity, 'price' => $package->price, 'line_total' => $lineCents / 100];
+        }
+
+        return ['lines' => $lines, 'total_cents' => $total];
+    }
+
+    public function combineTotal(float $roomTotal, int $packageCents): float
+    {
+        $total = (int) round($roomTotal * 100) + $packageCents;
+        if ($total > 9999999999) {
+            throw ValidationException::withMessages(['total_amount' => 'The booking total exceeds the supported amount.']);
+        }
+
+        return $total / 100;
     }
 
     public function calculateTotal(Room $room, string $checkIn, string $checkOut): float

@@ -66,7 +66,8 @@ class BookingController extends Controller
         $booking = Booking::with([
             'user',
             'room',
-            'statusLogs.changedBy'
+            'bookingPackages.package',
+            'statusLogs.changedBy',
         ])->findOrFail($id);
 
         return view('bookings.show', compact('booking'));
@@ -123,7 +124,7 @@ class BookingController extends Controller
             $room = $this->bookings->validateRoom(array_merge($validated, ['status' => $booking->status]), $booking);
             unset($validated['status']);
 
-            $validated['total_amount'] = $this->bookings->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']);
+            $validated['total_amount'] = $this->bookings->combineTotal($this->bookings->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $booking->packageTotalCents());
 
             $booking->update($validated);
 

@@ -1461,3 +1461,36 @@ textarea.form-control {
 @media (max-width: 767.98px) {
     .footer-bottom a.footer-staff-access { margin-left: 0; align-self: flex-start; }
 }
+.reservation-checkout .checkout-inputs { padding: 1.5rem; background: white; border-radius: var(--hotel-radius); }
+.checkout-summary { padding: 1.5rem; background: white; border: 1px solid var(--hotel-border); border-top: 3px solid var(--hotel-gold); border-radius: var(--hotel-radius); }
+.checkout-add-on { display: flex; align-items: flex-start; gap: .85rem; padding: 1rem 0; border-bottom: 1px solid var(--hotel-border); }
+.checkout-add-on:last-child { border-bottom: 0; padding-bottom: 0; }
+.checkout-add-on > .form-check-input { flex-shrink: 0; margin-top: .25rem; }
+.checkout-add-on-content { flex: 1; min-width: 0; }
+.checkout-unit-price { flex-shrink: 0; font-weight: 600; font-size: .9rem; }
+.checkout-quantity { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.checkout-quantity[hidden] { display: none; }
+.checkout-quantity .form-control { width: 65px; }
+.checkout-availability { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; font-weight: 500; color: var(--hotel-success); background: #eef7f1; padding: .4rem .6rem; border-radius: .35rem; }
+.checkout-availability[hidden] { display: none; }
+.checkout-prices { padding-top: 1rem; border-top: 1px solid var(--hotel-border); }
+.checkout-price-line { display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: .7rem; font-size: .9rem; }
+.checkout-price-line > span:last-child { white-space: nowrap; }
+.checkout-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; border-top: 1px solid var(--hotel-border); padding-top: 1rem; margin-top: 1rem; font-weight: 600; }
+.checkout-total strong { font-size: 1.65rem; color: var(--hotel-navy); }
+.checkout-stale { margin: 1rem 0 0; padding-left: .75rem; border-left: 3px solid var(--hotel-gold); color: var(--hotel-ink); }
+@media (min-width: 992px) { .reservation-checkout .checkout-summary { position: sticky; top: 24px; } }
+@media (max-width: 575px) { .reservation-checkout .checkout-inputs, .checkout-summary { padding: 1.15rem; } }
+
+.checkout-add-on-actions { flex-shrink: 0; text-align: right; }
+.checkout-add-on-actions .checkout-quantity { justify-content: flex-end; flex-wrap: nowrap; }
+.checkout-add-on-actions .checkout-quantity .form-control { width: 52px; text-align: center; }
+.checkout-add-on-actions .checkout-quantity .btn { width: 30px; padding: .25rem; }
+.checkout-add-on-actions .checkout-quantity [data-package-quantity] { -moz-appearance: textfield; appearance: textfield; flex-shrink: 0; }
+.checkout-add-on-actions .checkout-quantity [data-package-quantity]::-webkit-inner-spin-button,
+.checkout-add-on-actions .checkout-quantity [data-package-quantity]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.checkout-add-on-actions .checkout-quantity .btn { flex-shrink: 0; }
+@media (max-width: 575px) {
+    .checkout-add-on { flex-wrap: wrap; }
+    .checkout-add-on-actions { margin-left: auto; }
+}

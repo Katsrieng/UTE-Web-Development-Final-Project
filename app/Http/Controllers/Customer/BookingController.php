@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
+use App\Models\Package;
 use App\Models\Room;
 use App\Services\BookingService;
 use Carbon\Carbon;
@@ -21,7 +22,7 @@ class BookingController extends Controller
     {
         $room->load('roomType');
 
-        return view('customer.bookings.create', compact('room'));
+        return view('customer.bookings.create', ['room' => $room, 'packages' => Package::active()->orderBy('name')->get()]);
     }
 
     public function availability(StoreBookingRequest $request, Room $room): View|RedirectResponse
@@ -29,10 +30,13 @@ class BookingController extends Controller
         $reservation = $request->validated();
         try {
             $room = $this->bookings->validateRoom($reservation);
+            $quote = $this->bookings->quotePackages($reservation['packages'] ?? [], (int) $reservation['number_of_guests']);
+            $roomTotal = $this->bookings->calculateTotal($room, $reservation['check_in_date'], $reservation['check_out_date']);
+            $total = $this->bookings->combineTotal($roomTotal, $quote['total_cents']);
         } catch (ValidationException $exception) {
             return redirect()->route('customer.bookings.create', $room)
                 ->withErrors($exception->errors())->withInput($request->only([
-                    'check_in_date', 'check_out_date', 'number_of_guests', 'special_request',
+                    'check_in_date', 'check_out_date', 'number_of_guests', 'special_request', 'packages',
                 ]));
         }
 
@@ -40,7 +44,11 @@ class BookingController extends Controller
             'room' => $room,
             'reservation' => $reservation,
             'numberOfNights' => Carbon::parse($reservation['check_in_date'])->diffInDays(Carbon::parse($reservation['check_out_date'])),
-            'totalAmount' => $this->bookings->calculateTotal($room, $reservation['check_in_date'], $reservation['check_out_date']),
+            'totalAmount' => $total,
+            'roomTotal' => $roomTotal,
+            'packageLines' => $quote['lines'],
+            'packageTotal' => $quote['total_cents'] / 100,
+            'packages' => Package::active()->orderBy('name')->get(),
         ]);
     }
 
@@ -51,7 +59,7 @@ class BookingController extends Controller
         } catch (ValidationException $exception) {
             return redirect()->route('customer.bookings.create', $room)
                 ->withErrors($exception->errors())->withInput($request->only([
-                    'check_in_date', 'check_out_date', 'number_of_guests', 'special_request',
+                    'check_in_date', 'check_out_date', 'number_of_guests', 'special_request', 'packages',
                 ]));
         }
 
@@ -69,7 +77,7 @@ class BookingController extends Controller
 
     public function show(Request $request, string $booking): View
     {
-        $booking = Booking::with('room.roomType')->where('user_id', $request->user()->id)->findOrFail($booking);
+        $booking = Booking::with(['room.roomType', 'bookingPackages.package'])->where('user_id', $request->user()->id)->findOrFail($booking);
         $numberOfNights = Carbon::parse($booking->check_in_date)->diffInDays(Carbon::parse($booking->check_out_date));
 
         return view('customer.bookings.show', compact('booking', 'numberOfNights'));

@@ -13,6 +13,7 @@
         </div>
         <div class="card-body p-4 p-lg-5">
             @if($booking->status === 'Pending')<p class="text-muted mb-4">Your request is awaiting hotel confirmation.</p>@endif
+            @include('bookings._package-summary')
             <div class="row g-4">
                 <div class="col-md-6"><small class="text-muted d-block">Check-in</small><strong>{{ $booking->check_in_date }}</strong></div>
                 <div class="col-md-6"><small class="text-muted d-block">Check-out</small><strong>{{ $booking->check_out_date }}</strong></div>

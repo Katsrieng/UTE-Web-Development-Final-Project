@@ -44,6 +44,8 @@ Route::resource('facilities', FacilityController::class)
 // ==========================================
 
 Route::middleware('guest')->group(function () {
+    Route::get('/staff/login', [LoginController::class, 'staffCreate'])->name('staff.login');
+    Route::post('/staff/login', [LoginController::class, 'staffStore'])->middleware('throttle:5,1')->name('staff.login.store');
 
     Route::get('/register', [RegisterController::class, 'create'])
         ->name('register');

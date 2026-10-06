@@ -13,6 +13,7 @@
             <a class="management-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
 
             <p class="nav-section-label">Hotel operations</p>
+            <a class="management-nav-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}" href="{{ route('bookings.index') }}"><i class="bi bi-calendar-check"></i><span>Bookings</span></a>
             <a class="management-nav-link {{ request()->routeIs('management.rooms.*') ? 'active' : '' }}" href="{{ route('management.rooms.index') }}"><i class="bi bi-door-open"></i><span>Rooms</span></a>
             <a class="management-nav-link {{ request()->routeIs('management.room-types.*') ? 'active' : '' }}" href="{{ route('management.room-types.index') }}"><i class="bi bi-house-door"></i><span>Room Types</span></a>
             <a class="management-nav-link {{ request()->routeIs('management.facilities.*') ? 'active' : '' }}" href="{{ route('management.facilities.index') }}"><i class="bi bi-stars"></i><span>Facilities</span></a>

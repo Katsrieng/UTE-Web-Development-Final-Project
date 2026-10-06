@@ -14,7 +14,7 @@ class PaymentDashboardTest extends TestCase
 
     public function test_guest_cannot_access_dashboard(): void
     {
-        $this->get(route('dashboard'))->assertRedirect(route('login'));
+        $this->get(route('dashboard'))->assertRedirect(route('staff.login'));
     }
 
     public function test_customer_cannot_access_dashboard(): void

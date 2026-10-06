@@ -85,7 +85,8 @@ class CustomerBookingFlowTest extends TestCase
         $response = $this->from(route('customer.bookings.create', $this->room))
             ->post(route('customer.bookings.store', $this->room), $this->payload());
         if ($change === 'account') {
-            $response->assertForbidden();
+            $response->assertRedirect(route('login'));
+            $this->assertGuest();
         } else {
             $response->assertRedirect(route('customer.bookings.create', $this->room))->assertSessionHasErrors($error);
         }
@@ -209,7 +210,7 @@ class CustomerBookingFlowTest extends TestCase
             'availability', 'store' => 'POST', 'cancel' => 'PATCH', default => 'GET',
         };
         $response = $this->call($method, $url, $this->payload());
-        if ($actor === 'guest') {
+        if (in_array($actor, ['guest', 'inactive'], true)) {
             $response->assertRedirect(route('login'));
         } else {
             $response->assertForbidden();

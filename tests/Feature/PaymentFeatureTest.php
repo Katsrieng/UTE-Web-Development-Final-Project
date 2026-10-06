@@ -15,7 +15,7 @@ class PaymentFeatureTest extends TestCase
 
     public function test_guest_cannot_access_payments(): void
     {
-        $this->get(route('payments.index'))->assertRedirect(route('login'));
+        $this->get(route('payments.index'))->assertRedirect(route('staff.login'));
     }
 
     public function test_customer_cannot_access_payment_management(): void

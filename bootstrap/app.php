@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RoleMiddleware;
+use App\Support\PortalRedirect;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Logged-in users who open /login or /register get sent to /home,
         // which then forwards them to the right place for their role.
         $middleware->redirectUsersTo(fn () => route('home'));
+        $middleware->redirectGuestsTo(fn (Request $request) => PortalRedirect::loginFor($request));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

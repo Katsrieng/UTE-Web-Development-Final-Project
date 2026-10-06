@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Support\PortalRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,8 +28,7 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()
-            ->route($user->homeRoute())
+        return PortalRedirect::afterLogin($request, $user)
             ->with('success', 'Welcome! Your account has been created.');
     }
 }

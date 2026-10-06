@@ -187,7 +187,7 @@ class BookingLifecycleTest extends TestCase
     {
         $booking = $this->makeBooking($status);
         $this->app['auth']->forgetGuards();
-        $this->patch(route('bookings.'.$action, $booking))->assertRedirect(route('login'));
+        $this->patch(route('bookings.'.$action, $booking))->assertRedirect(route('staff.login'));
         $this->actingAs($this->customer)->patch(route('bookings.'.$action, $booking))->assertForbidden();
 
         $this->assertSame($status, $booking->fresh()->status);

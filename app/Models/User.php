@@ -19,7 +19,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
+
     public const ROLE_STAFF = 'staff';
+
     public const ROLE_CUSTOMER = 'customer';
 
     public const ROLES = [
@@ -78,12 +80,12 @@ class User extends Authenticatable
 
     /**
      * Name of the route this user should land on after logging in.
-     * Teammates: change 'profile.edit' to the customer home page once it exists.
+     * Customers use My Bookings; hotel staff use the management Dashboard.
      */
     public function homeRoute(): string
     {
         return $this->hasRole(self::ROLE_ADMIN, self::ROLE_STAFF)
             ? 'dashboard'
-            : 'profile.edit';
+            : 'customer.bookings.index';
     }
 }

@@ -18,8 +18,8 @@ class AuthTest extends TestCase
 
     public function test_guest_is_redirected_to_login(): void
     {
-        $this->get('/dashboard')->assertRedirect('/login');
-        $this->get('/payments')->assertRedirect('/login');
+        $this->get('/dashboard')->assertRedirect('/staff/login');
+        $this->get('/payments')->assertRedirect('/staff/login');
     }
 
     public function test_customer_can_register(): void
@@ -32,7 +32,7 @@ class AuthTest extends TestCase
             'password_confirmation' => 'Password123',
         ]);
 
-        $response->assertRedirect(route('profile.edit'));
+        $response->assertRedirect(route('customer.bookings.index'));
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', ['email' => 'guest@example.com', 'role' => 'customer']);
     }
@@ -55,7 +55,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
 
         $this->post('/login', ['email' => $user->email, 'password' => 'password'])
-            ->assertRedirect(route('profile.edit'));
+            ->assertRedirect(route('customer.bookings.index'));
         $this->assertAuthenticatedAs($user);
 
         $this->post('/logout')->assertRedirect('/login');

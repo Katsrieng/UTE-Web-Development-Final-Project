@@ -18,7 +18,7 @@
                 <h2 class="footer-title">Your account</h2>
                 @auth
                     <a href="{{ route('profile.edit') }}">My profile</a>
-                    <a href="{{ route('home') }}">My dashboard</a>
+                    <a href="{{ route(auth()->user()->isCustomer() ? 'customer.bookings.index' : 'dashboard') }}">{{ auth()->user()->isCustomer() ? 'My Bookings' : 'Management Dashboard' }}</a>
                 @else
                     <a href="{{ route('login') }}">Sign in</a>
                     <a href="{{ route('register') }}">Create an account</a>
@@ -28,6 +28,7 @@
         <div class="footer-bottom">
             <span>&copy; {{ now()->year }} Hotel &amp; Hospitality Management System</span>
             <span>Design inspired by <a href="https://colorlib.com/wp/template/sona/" target="_blank" rel="noopener">Sona by Colorlib</a>, distributed by ThemeWagon.</span>
+            <a href="{{ route('staff.login') }}" class="footer-staff-access"><i class="bi bi-buildings" aria-hidden="true"></i><span>Staff Access</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
         </div>
     </div>
 </footer>

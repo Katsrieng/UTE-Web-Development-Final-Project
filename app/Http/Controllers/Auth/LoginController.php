@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Support\PortalRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,25 @@ class LoginController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        if (! Auth::attempt($request->validated(), $request->boolean('remember'))) {
+        return $this->authenticate($request, ['customer']);
+    }
+
+    public function staffCreate()
+    {
+        return view('auth.staff-login');
+    }
+
+    public function staffStore(LoginRequest $request): RedirectResponse
+    {
+        return $this->authenticate($request, ['admin', 'staff']);
+    }
+
+    private function authenticate(LoginRequest $request, array $roles): RedirectResponse
+    {
+        $credentials = $request->validated();
+        $credentials['role'] = $roles;
+        $credentials['is_active'] = true;
+        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
                 ->withErrors(['email' => 'These credentials do not match our records.'])
                 ->onlyInput('email');
@@ -38,18 +57,19 @@ class LoginController extends Controller
 
         $request->session()->regenerate(); // protects against session fixation
 
-        return redirect()->intended(route($user->homeRoute()));
+        return PortalRedirect::afterLogin($request, $user);
     }
 
     public function destroy(Request $request): RedirectResponse
     {
+        $portal = $request->user()?->hasRole('admin', 'staff') ? 'staff.login' : 'login';
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()
-            ->route('login')
+            ->route($portal)
             ->with('success', 'You have been logged out.');
     }
 }

@@ -1432,3 +1432,32 @@ textarea.form-control {
 .room-facilities h2 { flex-basis: 100%; }
 @media (max-width: 991px) { .room-photos .room-photo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 575px) { .room-photos .room-photo-grid { grid-template-columns: minmax(0, 1fr); } }
+.footer-bottom a.footer-staff-access {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding: .5rem .75rem;
+    border: 1px solid rgba(223, 169, 116, .35);
+    border-radius: var(--hotel-radius);
+    background: var(--hotel-navy);
+    color: #f4eadf;
+    font-size: .75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-decoration: none;
+}
+.footer-bottom a.footer-staff-access:hover {
+    background: var(--hotel-gold);
+    border-color: var(--hotel-gold);
+    color: var(--hotel-navy);
+}
+.footer-bottom a.footer-staff-access:focus-visible {
+    outline: 2px solid var(--hotel-gold);
+    outline-offset: 3px;
+}
+@media (max-width: 767.98px) {
+    .footer-bottom a.footer-staff-access { margin-left: 0; align-self: flex-start; }
+}

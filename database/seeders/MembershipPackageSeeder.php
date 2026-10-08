@@ -13,7 +13,7 @@ class MembershipPackageSeeder extends Seeder
         MembershipType::insert([
             [
                 'name' => 'Silver',
-                'price' => 20,
+                'price' => 30,
                 'loyalty_upgrade_points' => 300,
                 'description' => 'Entry-level membership with a small booking discount.',
                 'discount_percentage' => 5,
@@ -24,7 +24,7 @@ class MembershipPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Gold',
-                'price' => 40,
+                'price' => 60,
                 'loyalty_upgrade_points' => 700,
                 'description' => 'Mid-tier membership with a solid discount on stays.',
                 'discount_percentage' => 10,
@@ -35,7 +35,7 @@ class MembershipPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Platinum',
-                'price' => 70,
+                'price' => 100,
                 'loyalty_upgrade_points' => null,
                 'description' => 'Top-tier membership with the best resort discount.',
                 'discount_percentage' => 15,
@@ -45,6 +45,10 @@ class MembershipPackageSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        foreach (['Silver' => 'Gold', 'Gold' => 'Platinum', 'Platinum' => null] as $name => $next) {
+            MembershipType::where('name', $name)->update(['next_membership_type_id' => $next ? MembershipType::where('name', $next)->orderBy('id')->value('id') : null]);
+        }
 
         Package::insert([
             [

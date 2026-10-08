@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentService
 {
-    public function __construct(private BookingService $bookings) {}
+    public function __construct(private BookingService $bookings, private LoyaltyService $loyalty) {}
 
     private function error(string $field, string $message): never
     {
@@ -61,6 +61,7 @@ class PaymentService
     public function payBooking(User $customer, int $bookingId, array $selection): Payment
     {
         return DB::transaction(function () use ($customer, $bookingId, $selection) {
+            User::whereKey($customer->id)->lockForUpdate()->firstOrFail();
             $booking = Booking::where('user_id', $customer->id)->lockForUpdate()->findOrFail($bookingId);
             $this->checkBooking($booking);
             $existing = $booking->payments()->orderBy('id')->lockForUpdate()->first();
@@ -94,11 +95,13 @@ class PaymentService
         });
     }
 
-    /** Lock parents before payment to serialize customer submits, staff verification and refunds. */
+    /** Eligible customer spending locks User, then payment parents, then Payment. Event locking stays unchanged. */
     public function lockPayment(Payment $payment): Payment
     {
-        if ($payment->membership_purchase_id) {
+        if ($payment->booking_id || $payment->membership_purchase_id) {
             User::whereKey($payment->user_id)->lockForUpdate()->firstOrFail();
+        }
+        if ($payment->membership_purchase_id) {
             MembershipPurchase::whereKey($payment->membership_purchase_id)->lockForUpdate()->firstOrFail();
         }
         if ($payment->booking_id) { Booking::whereKey($payment->booking_id)->lockForUpdate()->firstOrFail(); }
@@ -112,6 +115,7 @@ class PaymentService
             $this->checkBooking($booking);
             if ((int) $payment->user_id !== (int) $booking->user_id) { $this->error('payment', 'Payment customer does not match the booking.'); }
             $this->bookings->confirmPaidBooking($booking, $actor);
+            $this->loyalty->earn($payment);
         }
         if ($payment->membership_purchase_id) {
             $purchase = MembershipPurchase::findOrFail($payment->membership_purchase_id);
@@ -140,6 +144,8 @@ class PaymentService
             return $payment;
         });
     }
+
+    public function reverseLoyalty(Payment $payment): void { $this->loyalty->reverse($payment); }
 
     public function refundMembership(Payment $payment): void
     {

@@ -91,10 +91,16 @@ class UserController extends Controller
             return back()->with('error', 'You cannot delete your own account.');
         }
 
-        $user->delete();
+        return DB::transaction(function () use ($user) {
+            $user = User::lockForUpdate()->findOrFail($user->id);
+            if ($user->loyaltyAccount()->exists()) {
+                return back()->with('error', 'This customer has an audited loyalty account and cannot be deleted.');
+            }
+            $user->delete();
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'User deleted successfully.');
+            return redirect()
+                ->route('admin.users.index')
+                ->with('success', 'User deleted successfully.');
+        });
     }
 }

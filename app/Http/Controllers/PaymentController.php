@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\MembershipPurchase;
 use App\Services\PaymentService;
+use App\Services\LoyaltyService;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,7 @@ class PaymentController extends Controller
                 throw ValidationException::withMessages(['membership_purchase_id' => 'Membership payments must originate from a customer purchase.']);
             }
             if (! empty($data['booking_id'])) {
+                User::whereKey($data['user_id'])->lockForUpdate()->firstOrFail();
                 $booking = Booking::lockForUpdate()->findOrFail($data['booking_id']);
                 if ((int) $booking->user_id !== (int) $data['user_id']) {
                     throw ValidationException::withMessages(['user_id' => 'Payment customer must match the booking.']);
@@ -70,7 +72,8 @@ class PaymentController extends Controller
     {
         $payment->load(['user', 'eventBooking.user', 'eventBooking.venue', 'booking.room', 'membershipPurchase']);
 
-        return view('payments.show', compact('payment'));
+        $loyalty = $payment->user?->isCustomer() ? app(LoyaltyService::class)->summary($payment->user) : null;
+        return view('payments.show', compact('payment', 'loyalty'));
     }
 
     public function edit(Payment $payment)
@@ -158,6 +161,7 @@ class PaymentController extends Controller
 
             $payment->update(['status' => 'Refunded']);
             $this->payments->refundMembership($payment);
+            $this->payments->reverseLoyalty($payment);
 
             return back()->with('success', 'Payment marked as refunded.');
         });

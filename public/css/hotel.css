@@ -1572,3 +1572,13 @@ textarea.form-control {
 @keyframes payment-reveal { from { opacity: .5; } to { opacity: 1; } }
 @media (max-width: 767px) { .payment-checkout .payment-method-grid { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .payment-method-tile { transition: none; } .payment-checkout #demoCardFields, .payment-checkout #manualPaymentFields, .payment-checkout #cashPaymentFields { animation: none; } }
+
+.loyalty-panel { border-top: 3px solid var(--hotel-gold); }
+.loyalty-balance { color: var(--hotel-navy); font-size: 1.6rem; }
+.loyalty-balance span { font-size: .875rem; font-weight: 500; }
+.loyalty-progress { height: .5rem; background: #eee7df; }
+.loyalty-progress .progress-bar { background: var(--hotel-gold-dark); }
+.loyalty-adjustment { color: #795128; }
+.loyalty-entry + .loyalty-entry { border-top: 1px solid var(--hotel-border); }
+.loyalty-entry > div { min-width: 0; overflow-wrap: anywhere; }
+.loyalty-panel a:focus-visible { outline: 2px solid var(--hotel-navy); outline-offset: 2px; }

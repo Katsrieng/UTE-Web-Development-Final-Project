@@ -15,4 +15,7 @@
         <form action="{{ route('payments.refund',$payment) }}" method="POST">@csrf<button class="btn btn-outline-warning w-100" data-confirm="Mark payment {{ $payment->reference_number }} as refunded?" type="submit">Mark as Refunded</button></form>
     @endif
 </div></div></div></div></div>
+@if($loyalty)
+    <div class="mt-4">@include('loyalty._panel', ['staffContext' => true])</div>
+@endif
 @endsection

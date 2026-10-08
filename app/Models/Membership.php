@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Membership extends Model
 {
@@ -29,6 +30,17 @@ class Membership extends Model
     public function membershipType(): BelongsTo
     {
         return $this->belongsTo(MembershipType::class);
+    }
+
+    public function purchases(): HasMany { return $this->hasMany(MembershipPurchase::class); }
+    public function loyaltyTransactions(): HasMany { return $this->hasMany(LoyaltyTransaction::class); }
+
+    public function scopeLoyaltyPaid(Builder $query): Builder
+    {
+        return $query->whereHas('purchases', fn (Builder $purchases) => $purchases
+            ->where('status', 'completed')->whereColumn('membership_purchases.user_id', 'memberships.user_id')
+            ->whereHas('payment', fn (Builder $payments) => $payments->where('status', 'Paid')
+                ->whereColumn('payments.user_id', 'membership_purchases.user_id')));
     }
 
     /**

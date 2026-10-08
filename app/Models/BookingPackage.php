@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BookingPackage extends Model
 {
+    protected function casts(): array
+    {
+        return ['quantity' => 'integer', 'price' => 'decimal:2'];
+    }
+
     protected $fillable = [
         'booking_id',
         'package_id',

@@ -4,9 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
+    public function bookingPackages(): HasMany
+    {
+        return $this->hasMany(BookingPackage::class);
+    }
+
+    public function packages(): BelongsToMany
+    {
+        return $this->belongsToMany(Package::class, 'booking_packages')->withPivot('quantity', 'price')->withTimestamps();
+    }
+
+    public function packageTotalCents(): int
+    {
+        return $this->bookingPackages->sum(fn ($line) => (int) round((float) $line->price * 100) * $line->quantity);
+    }
+
     public const ACTIVE_STATUSES = ['Pending', 'Confirmed', 'Checked In'];
 
     public const STATUS_TRANSITIONS = [
@@ -18,15 +35,16 @@ class Booking extends Model
     ];
 
     protected $fillable = [
-    'user_id',
-    'room_id',
-    'check_in_date',
-    'check_out_date',
-    'number_of_guests',
-    'total_amount',
-    'status',
-    'special_request',
-];
+        'user_id',
+        'room_id',
+        'check_in_date',
+        'check_out_date',
+        'number_of_guests',
+        'total_amount',
+        'status',
+        'special_request',
+    ];
+
     public function canTransitionTo(string $status): bool
     {
         return in_array($status, self::STATUS_TRANSITIONS[$this->status] ?? [], true);

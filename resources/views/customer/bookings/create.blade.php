@@ -14,12 +14,13 @@
                 <div><strong>Please correct the following:</strong><ul class="mb-0 mt-1">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
             </div>
         @endif
-        <div class="row g-4 align-items-start">
-            <div class="col-lg-8">
-                <form method="POST" action="{{ route('customer.bookings.store', $room) }}" id="reservationForm" class="card shadow-sm border-0">
-                    @csrf
-                    <div class="card-body p-4 p-lg-5">
-                        <div class="row g-4">
+        <form method="POST" action="{{ route('customer.bookings.store', $room) }}" id="reservationForm" class="reservation-checkout">
+            @csrf
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <section class="checkout-inputs" aria-labelledby="stay-details-heading">
+                        <h2 id="stay-details-heading" class="h5 mb-3">Your stay</h2>
+                        <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="check_in_date" class="form-label">Check-in date</label>
                                 <input id="check_in_date" type="date" name="check_in_date" min="{{ now()->toDateString() }}" value="{{ old('check_in_date', $reservation['check_in_date'] ?? '') }}" class="form-control @error('check_in_date') is-invalid @enderror" required>
@@ -35,43 +36,124 @@
                             </div>
                             <div class="col-12">
                                 <label for="special_request" class="form-label">Special request <span class="text-muted">(optional)</span></label>
-                                <textarea id="special_request" name="special_request" rows="4" class="form-control @error('special_request') is-invalid @enderror">{{ old('special_request', $reservation['special_request'] ?? '') }}</textarea>
+                                <textarea id="special_request" name="special_request" rows="3" class="form-control @error('special_request') is-invalid @enderror">{{ old('special_request', $reservation['special_request'] ?? '') }}</textarea>
                             </div>
                         </div>
+                        @if(isset($totalAmount) || old('packages'))@include('customer.bookings._packages')@endif
+                    </section>
+                </div>
+                <div class="col-lg-4">
+                    <aside id="bookingSummary" class="checkout-summary" aria-labelledby="booking-summary-heading">
+                        <h2 id="booking-summary-heading" class="h5 mb-3">Your Booking</h2>
+                        <p class="fw-semibold mb-1">Room {{ $room->room_number }} · {{ $room->roomType->name }}</p>
+                        <p class="small text-muted mb-3">${{ number_format($room->price_per_night, 2) }} / night · Up to {{ $room->roomType->capacity }} guests</p>
                         @isset($totalAmount)
-                            <div id="availabilityResult" class="alert alert-success mt-4 mb-0" role="status">
-                                <strong class="d-block">Available for your selected dates</strong>
-                                <span>{{ $numberOfNights }} nights · {{ $reservation['number_of_guests'] }} guests · ${{ number_format($totalAmount, 2) }} total</span>
-                                <p class="small mb-0 mt-2">Your booking will start as Pending, awaiting hotel confirmation.</p>
+                            <div id="availabilityResult" class="checkout-availability" role="status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Available for your selected dates</div>
+                            <div id="previewStay" class="small mt-2 mb-3"><p class="mb-1">{{ Carbon\Carbon::parse($reservation['check_in_date'])->format('M j') }} → {{ Carbon\Carbon::parse($reservation['check_out_date'])->format('M j, Y') }}</p><span class="text-muted">{{ $numberOfNights }} nights · {{ $reservation['number_of_guests'] }} guests</span></div>
+                            <div id="bookingPricePreview" class="checkout-prices" data-room-total-cents="{{ (int) round($roomTotal * 100) }}">
+                                <div class="checkout-price-line"><span>Room stay</span><span>${{ number_format($roomTotal, 2) }}</span></div>
+                                <div id="livePackageLines">@foreach($packageLines as $line)<div class="checkout-price-line"><span>{{ $line['name'] }} × {{ $line['quantity'] }}</span><span>${{ number_format($line['line_total'], 2) }}</span></div>@endforeach</div>
+                                <div id="livePackageTotalRow" @if(!$packageLines) hidden @endif><div class="checkout-price-line small text-muted"><span>Package total</span><span id="livePackageTotal">${{ number_format($packageTotal, 2) }}</span></div></div>
+                                <div class="checkout-total"><span>Total</span><strong id="liveBookingTotal">${{ number_format($totalAmount, 2) }}</strong></div>
                             </div>
+                            <p id="staleTotalNotice" class="checkout-stale small" role="status" hidden>Your dates or guests changed. Check availability again before booking.</p>
+                            <button type="submit" id="bookRoomButton" class="btn btn-hotel w-100 mt-3">Book Room</button>
+                        @else
+                            <p class="small text-muted py-3 border-top">Choose your dates and guests, then check availability to review your total.</p>
                         @endisset
-                    </div>
-                    <div class="card-footer bg-white p-4 d-flex flex-wrap gap-2">
-                        <button type="submit" formaction="{{ route('customer.bookings.availability', $room) }}" class="btn btn-hotel-outline">Check Availability</button>
-                        @isset($totalAmount)<button type="submit" id="bookRoomButton" class="btn btn-hotel">Book Room</button>@endisset
-                    </div>
-                </form>
+                        <button id="checkAvailabilityButton" @isset($totalAmount) hidden @endisset type="submit" formaction="{{ route('customer.bookings.availability', $room) }}" class="btn {{ isset($totalAmount) ? 'btn-outline-secondary' : 'btn-hotel' }} w-100 mt-2">Check Availability</button>
+                        @isset($totalAmount)<p class="checkout-confirmation small text-muted mt-3 mb-0">Your booking starts as Pending, awaiting hotel confirmation.</p>@endisset
+                    </aside>
+                </div>
             </div>
-            <div class="col-lg-4">
-                <aside class="detail-panel">
-                    <p class="section-kicker">{{ $room->roomType->name }}</p><h2 class="h3">Room {{ $room->room_number }}</h2>
-                    <dl class="detail-list"><div><dt>Nightly rate</dt><dd>${{ number_format($room->price_per_night, 2) }}</dd></div><div><dt>Capacity</dt><dd>{{ $room->roomType->capacity }} guests</dd></div></dl>
-                    <p class="text-muted small mb-0">Your reservation is created when you choose Book Room. Availability and the total are checked again at that time.</p>
-                </aside>
-            </div>
-        </div>
+        </form>
     </div>
 </section>
 @endsection
-@isset($totalAmount)
-    @push('scripts')
-        <script>
-            ['check_in_date', 'check_out_date', 'number_of_guests'].forEach(function (id) {
-                document.getElementById(id).addEventListener('input', function () {
-                    document.getElementById('availabilityResult').hidden = true;
-                    document.getElementById('bookRoomButton').hidden = true;
-                });
+@push('scripts')
+<script>
+    const pricePreview = document.getElementById('bookingPricePreview');
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    function invalidateBookingPreview() {
+        ['availabilityResult', 'bookRoomButton', 'bookingPricePreview', 'previewStay'].forEach(function (id) {
+            const element = document.getElementById(id);
+            if (element) element.hidden = true;
+        });
+        const bookButton = document.getElementById('bookRoomButton');
+        if (bookButton) bookButton.disabled = true;
+        const notice = document.getElementById('staleTotalNotice');
+        if (notice) notice.hidden = false;
+        document.getElementById('checkAvailabilityButton').hidden = false;
+        syncQuantityLimits();
+    }
+    function syncQuantityLimits() {
+        const guests = Math.max(1, Number(document.getElementById('number_of_guests').value) || 1);
+        document.querySelectorAll('[data-package-selection]').forEach(function (checkbox) {
+            const quantity = document.getElementById(checkbox.dataset.quantityTarget);
+            if (checkbox.dataset.packageType === 'buffet') {
+                quantity.max = guests;
+                if (Number(quantity.value) > guests) quantity.value = guests;
+            }
+            const wrap = quantity.closest('[data-quantity-wrap]');
+            if (wrap) wrap.querySelectorAll('[data-quantity-step]').forEach(function (button) {
+                button.disabled = quantity.disabled || (Number(button.dataset.quantityStep) < 0 ? Number(quantity.value) <= 1 : Number(quantity.value) >= Number(quantity.max));
             });
-        </script>
-    @endpush
-@endisset
+        });
+    }
+    function updatePackageTotals() {
+        syncQuantityLimits();
+        if (!pricePreview) return;
+        const invalidQuantity = Array.from(document.querySelectorAll('[data-package-quantity]')).some(function (quantity) {
+            return !quantity.disabled && (!quantity.validity.valid || quantity.value === '');
+        });
+        document.getElementById('bookRoomButton').disabled = pricePreview.hidden || invalidQuantity;
+        if (invalidQuantity) return;
+        const lines = document.getElementById('livePackageLines');
+        lines.replaceChildren();
+        let packageCents = 0;
+        document.querySelectorAll('[data-package-selection]').forEach(function (checkbox) {
+            if (!checkbox.checked) return;
+            const quantity = document.getElementById(checkbox.dataset.quantityTarget);
+            if (!quantity.validity.valid || quantity.value === '') return;
+            const lineCents = Number(checkbox.dataset.unitCents) * Number(quantity.value);
+            packageCents += lineCents;
+            const line = document.createElement('div');
+            line.className = 'checkout-price-line';
+            const label = document.createElement('span');
+            label.textContent = checkbox.dataset.packageName + ' × ' + quantity.value;
+            const amount = document.createElement('span');
+            amount.textContent = money.format(lineCents / 100);
+            line.append(label, amount);
+            lines.append(line);
+        });
+        document.getElementById('livePackageTotalRow').hidden = packageCents === 0;
+        document.getElementById('livePackageTotal').textContent = money.format(packageCents / 100);
+        document.getElementById('liveBookingTotal').textContent = money.format((Number(pricePreview.dataset.roomTotalCents) + packageCents) / 100);
+    }
+    ['check_in_date', 'check_out_date', 'number_of_guests'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', invalidateBookingPreview);
+        document.getElementById(id).addEventListener('change', invalidateBookingPreview);
+    });
+    document.querySelectorAll('[data-package-selection]').forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            const quantity = document.getElementById(checkbox.dataset.quantityTarget);
+            quantity.disabled = !checkbox.checked;
+            const wrap = quantity.closest('[data-quantity-wrap]');
+            if (wrap) wrap.hidden = !checkbox.checked;
+            updatePackageTotals();
+        });
+    });
+    document.querySelectorAll('[data-package-quantity]').forEach(function (quantity) {
+        quantity.addEventListener('input', updatePackageTotals);
+    });
+    document.querySelectorAll('[data-quantity-step]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const quantity = document.getElementById(button.dataset.quantityTarget);
+            if (quantity.disabled) return;
+            quantity.value = Math.min(Number(quantity.max), Math.max(1, (Number(quantity.value) || 1) + Number(button.dataset.quantityStep)));
+            quantity.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    });
+    syncQuantityLimits();
+</script>
+@endpush

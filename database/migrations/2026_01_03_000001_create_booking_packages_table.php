@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-// NOTE: depends on the `bookings` table already existing (Katsrieng's module).
-// Build this one last — rename the date prefix to run after bookings once merged.
+// The booking FK is installed by the later deferred-FK migration.
 
 return new class extends Migration
 {
@@ -13,7 +12,7 @@ return new class extends Migration
     {
         Schema::create('booking_packages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('booking_id')->constrained()->onDelete('cascade');
+            $table->foreignId('booking_id')->index();
             $table->foreignId('package_id')->constrained()->onDelete('restrict');
             $table->unsignedInteger('quantity')->default(1);
             $table->decimal('price', 10, 2); // snapshot of package price at time of booking

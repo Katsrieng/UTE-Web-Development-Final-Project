@@ -16,6 +16,15 @@ class Package extends Model
         'status',
     ];
 
+    public function bookingQuantityLimit(int $guests): int
+    {
+        return match ($this->type) {
+            'buffet' => max(1, $guests),
+            'romantic', 'family', 'accommodation' => 1,
+            default => 10,
+        };
+    }
+
     public function bookingPackages(): HasMany
     {
         return $this->hasMany(BookingPackage::class);

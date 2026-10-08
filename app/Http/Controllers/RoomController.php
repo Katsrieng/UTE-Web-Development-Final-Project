@@ -11,9 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class RoomController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rooms = Room::with(['roomType', 'facilities', 'images'])->latest()->paginate(10);
+        $rooms = Room::with(['roomType', 'facilities', 'images'])
+            ->when($request->routeIs('management.rooms.index') && in_array($request->query('status'), ['available', 'occupied', 'cleaning', 'booked', 'maintenance'], true), fn ($query) => $query->where('status', $request->query('status')))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('rooms.index', compact('rooms'));
     }

@@ -7,16 +7,17 @@
     <div class="table-card">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead><tr><th class="ps-4">Booking</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Status</th><th class="pe-4">Details</th></tr></thead>
+                <thead><tr><th class="ps-4">Booking</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Booking / Payment</th><th class="pe-4">Details</th></tr></thead>
                 <tbody>
                     @forelse($bookings as $booking)
+                        @php($state = App\View\BookingStatusPresenter::forBooking($booking))
                         <tr>
                             <td class="ps-4">#{{ $booking->id }}</td>
                             <td><strong>Room {{ $booking->room->room_number }}</strong><small class="d-block text-muted">{{ $booking->room->roomType->name }}</small></td>
                             <td>{{ $booking->check_in_date }}</td><td>{{ $booking->check_out_date }}</td>
                             <td>${{ number_format($booking->total_amount, 2) }}</td>
-                            <td><x-status-badge :status="$booking->status" /></td>
-                            <td class="pe-4"><a href="{{ route('customer.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">View details</a>@if(!$booking->payments->count() && in_array($booking->status, App\Models\Booking::ACTIVE_STATUSES, true)) <a class="btn btn-sm btn-hotel" href="{{ route('customer.payments.booking', $booking) }}">Pay Now</a>@endif</td>
+                            <td><x-status-badge :status="$booking->status" /><small class="d-block mt-1">{{ $state['message'] }}</small><div class="mt-2">@include('customer.bookings._payment-status')</div></td>
+                            <td class="pe-4"><a href="{{ route('customer.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">View details</a><div class="d-flex flex-wrap gap-2 mt-2">@include('customer.bookings._payment-actions')</div></td>
                         </tr>
                     @empty
                         <tr><td colspan="7"><x-empty-state icon="bi-calendar-check" title="No bookings yet" message="Browse our rooms to plan your first stay." /></td></tr>

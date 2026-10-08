@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', 'Booking #'.$booking->id)
 @section('content')
+@php($state = App\View\BookingStatusPresenter::forBooking($booking))
 <div class="breadcrumb-bar"><div class="container"><a href="{{ route('customer.bookings.index') }}"><i class="bi bi-arrow-left me-1"></i> My Bookings</a></div></div>
 <section class="content-section compact"><div class="container"><div class="row justify-content-center"><div class="col-xl-9">
     @if($errors->any())
@@ -12,7 +13,7 @@
             <x-status-badge :status="$booking->status" class="fs-6 px-3 py-2" />
         </div>
         <div class="card-body p-4 p-lg-5">
-            @if($booking->status === 'Pending')<p class="text-muted mb-4">Your request is awaiting hotel confirmation.</p>@endif
+            <p class="booking-state-message mb-4">{{ $state['message'] }}</p>
             @include('bookings._package-summary')
             <div class="row g-4">
                 <div class="col-md-6"><small class="text-muted d-block">Check-in</small><strong>{{ $booking->check_in_date }}</strong></div>
@@ -24,12 +25,8 @@
             </div>
         </div>
         <div class="px-4 pb-4">
-            @if($payment = $booking->payments->sortBy('id')->first())
-                <span class="small text-muted me-3">Payment: {{ $payment->status }}</span>
-                <a class="btn btn-hotel" href="{{ $payment->status === 'Pending' && $payment->payment_method === 'ABA / KHQR' ? route('customer.payments.booking', $booking) : route('customer.payments.show', $payment) }}">{{ $payment->status === 'Pending' && $payment->payment_method === 'ABA / KHQR' ? 'Pay Now' : 'View Payment' }}</a>
-            @elseif(in_array($booking->status, App\Models\Booking::ACTIVE_STATUSES, true))
-                <a class="btn btn-hotel" href="{{ route('customer.payments.booking', $booking) }}">Pay Now</a>
-            @endif
+            @include('customer.bookings._payment-status')
+            <div class="d-flex flex-wrap gap-2 mt-3">@include('customer.bookings._payment-actions')</div>
         </div>
         @if($booking->canTransitionTo('Cancelled'))
             <div class="card-footer bg-white p-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
@@ -42,5 +39,11 @@
         @endif
     </div>
 
+    <section class="booking-history mt-4" aria-label="Booking timeline"><h2 class="h5">Booking timeline</h2><ol><li><strong>Created</strong><time>{{ $booking->created_at->format('M j, Y · H:i') }}</time></li>
+    @foreach($booking->statusLogs->sortBy([['created_at','asc'],['id','asc']]) as $log)
+        <li><strong>{{ $log->new_status }}</strong><time>{{ $log->created_at->format('M j, Y · H:i') }}</time></li>
+        @if($log->new_status === 'Cancelled') @break @endif
+    @endforeach
+    </ol></section>
 </div></div></div></section>
 @endsection

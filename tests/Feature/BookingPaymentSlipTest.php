@@ -22,7 +22,9 @@ class BookingPaymentSlipTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
+        \App\Models\PaymentSetting::create(['account_name' => 'Beach Resort Management', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
 
         $this->customer = User::factory()->create();
         $roomType = RoomType::create([
@@ -49,7 +51,7 @@ class BookingPaymentSlipTest extends TestCase
         $response->assertDontSeeText('Submit Payment Slip');
     }
 
-    public function test_qr_payment_section_is_visible_for_confirmed_booking(): void
+    public function test_qr_payment_section_is_accessible_from_checkout_for_confirmed_booking(): void
     {
         $booking = $this->createBooking($this->customer, 'Confirmed');
 
@@ -57,10 +59,10 @@ class BookingPaymentSlipTest extends TestCase
             ->get(route('customer.bookings.show', $booking));
 
         $response->assertOk();
-        $response->assertSeeText('Pay by QR Code (Cambodia KHQR & ABA)');
-        $response->assertSeeText('KHQR');
-        $response->assertSeeText('ABA PAY');
-        $response->assertSeeText('Upload Payment Slip / Screenshot');
+        $response->assertDontSeeText('Pay by QR Code (Cambodia KHQR & ABA)');
+        $response->assertSeeText('Pay Now');
+        $this->get(route('customer.payments.booking', $booking))->assertOk()
+            ->assertSeeText('Pay with ABA / KHQR')->assertSee('payment-settings/test-qr.png');
     }
 
     public function test_customer_can_upload_valid_payment_slip(): void
@@ -73,7 +75,7 @@ class BookingPaymentSlipTest extends TestCase
                 'payment_slip' => $file,
             ]);
 
-        $response->assertRedirect(route('customer.bookings.show', $booking));
+        $response->assertRedirect(route('customer.payments.booking', $booking));
         $response->assertSessionHas('success', 'Payment slip uploaded. Our staff will verify it shortly.');
 
         $this->assertDatabaseHas('booking_payment_slips', [
@@ -152,7 +154,7 @@ class BookingPaymentSlipTest extends TestCase
                 'payment_slip' => $secondFile,
             ]);
 
-        $response->assertRedirect(route('customer.bookings.show', $booking));
+        $response->assertRedirect(route('customer.payments.booking', $booking));
         $this->assertDatabaseCount('booking_payment_slips', 1);
         $this->assertDatabaseHas('booking_payment_slips', [
             'booking_id' => $booking->id,
@@ -181,7 +183,7 @@ class BookingPaymentSlipTest extends TestCase
         $response = $this->actingAs($this->customer)
             ->delete(route('customer.bookings.payment-slip.destroy', $booking));
 
-        $response->assertRedirect(route('customer.bookings.show', $booking));
+        $response->assertRedirect(route('customer.payments.booking', $booking));
         $response->assertSessionHas('success', 'Payment slip removed. You can now upload a new one.');
 
         $this->assertDatabaseEmpty('booking_payment_slips');

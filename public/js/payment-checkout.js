@@ -11,17 +11,20 @@
     const holder = document.getElementById('demoCardholder');
     const digits = value => value.replace(/\D/g, '');
     function selectMethod() {
-        const method = form.querySelector('[name="payment_method"]:checked').value;
+        const method = form.querySelector('[name="payment_method"]:checked')?.value;
+        document.getElementById('cashPaymentFields').hidden = method !== 'Cash at Hotel';
         card.hidden = method !== 'Card';
         card.disabled = method !== 'Card';
         manual.hidden = method !== 'ABA / KHQR';
         reference.disabled = manual.hidden;
-        reference.required = !manual.hidden;
+        reference.required = !manual.hidden && reference.dataset.required === 'true';
+        const slip = document.getElementById('payment_slip');
+        if (slip) { slip.disabled = manual.hidden; slip.required = !manual.hidden; }
         form.querySelectorAll('.payment-method-tile').forEach(tile => tile.classList.toggle('is-selected', tile.querySelector('input').checked));
         document.getElementById('paymentNextStep').textContent = method === 'Card'
-            ? 'Demo only: submitting records Paid without charging a real card.'
-            : method === 'Cash at Hotel' ? 'Payment pending — pay at hotel. Staff will record collection.' : 'Payment stays Pending until hotel staff manually verify your transaction.';
-        submit.textContent = method === 'Card' ? `Pay ${submit.dataset.amount} · Demo` : method === 'Cash at Hotel' ? 'Choose Pay at Hotel' : 'Submit for Verification';
+            ? 'Demo card payment. No real card charge.'
+            : method === 'Cash at Hotel' ? 'Hotel staff will record your payment when collected.' : 'Submit your payment details for hotel verification.';
+        submit.textContent = method === 'Card' ? `Pay ${submit.dataset.amount}` : method === 'Cash at Hotel' ? 'Confirm Pay at Hotel' : 'Submit for Verification';
     }
     form.querySelectorAll('[name="payment_method"]').forEach(input => input.addEventListener('change', selectMethod));
     number.addEventListener('input', () => {

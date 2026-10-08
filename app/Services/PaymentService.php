@@ -7,6 +7,7 @@ use App\Models\Membership;
 use App\Models\MembershipPurchase;
 use App\Models\MembershipType;
 use App\Models\Payment;
+use App\Models\PaymentSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -44,13 +45,16 @@ class PaymentService
 
     private function createPayment(array $attributes, array $selection): Payment
     {
+        if ($selection['payment_method'] === 'ABA / KHQR' && ! PaymentSetting::current()->khqrAvailable()) {
+            $this->error('payment_method', 'ABA/KHQR payment is temporarily unavailable. Please choose another payment method.');
+        }
         // Demo Card is deliberately simulated; no card data is received or persisted.
         return Payment::create(array_merge($attributes, [
             'payment_method' => $selection['payment_method'],
             'status' => $selection['payment_method'] === 'Card' ? 'Paid' : 'Pending',
             'payment_date' => today()->toDateString(),
             'reference_number' => 'PAY-'.strtoupper((string) Str::ulid()),
-            'transaction_reference' => $selection['payment_method'] === 'ABA / KHQR' ? $selection['transaction_reference'] : null,
+            'transaction_reference' => $selection['payment_method'] === 'ABA / KHQR' ? ($selection['transaction_reference'] ?? null) : null,
         ]));
     }
 

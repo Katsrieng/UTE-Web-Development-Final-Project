@@ -14,6 +14,7 @@ use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomImageController;
@@ -139,6 +140,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('bookings', BookingController::class);
 
         // Payments
+        Route::get('/payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
+        Route::put('/payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
+        Route::delete('/payment-settings/qr', [PaymentSettingsController::class, 'removeQr'])->name('payment-settings.remove-qr');
         Route::get(
             '/payments/{payment}/receipt',
             [PaymentController::class, 'receipt']

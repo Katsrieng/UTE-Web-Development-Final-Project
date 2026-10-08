@@ -8,12 +8,15 @@ use App\Models\Booking;
 use App\Models\MembershipPurchase;
 use App\Models\MembershipType;
 use App\Models\Payment;
+use App\Models\PaymentSetting;
 use App\Services\PaymentService;
+use App\Services\BookingPaymentSlipService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    public function __construct(private PaymentService $payments) {}
+    public function __construct(private PaymentService $payments, private BookingPaymentSlipService $slips) {}
 
     public function booking(Request $request, Booking $booking)
     {
@@ -21,17 +24,25 @@ class PaymentController extends Controller
         $this->payments->checkBooking($booking);
         if ($payment = $booking->payments()->orderBy('id')->first()) {
             abort_unless($payment->user_id === $request->user()->id, 404);
-            return redirect()->route('customer.payments.show', $payment);
+            if ($payment->status !== 'Pending' || $payment->payment_method !== 'ABA / KHQR' || ! PaymentSetting::current()->khqrAvailable()) {
+                return redirect()->route('customer.payments.show', $payment);
+            }
         }
-        $booking->load(['room.roomType', 'bookingPackages.package']);
-        return view('customer.payments.checkout', ['booking' => $booking, 'plan' => null, 'amount' => $booking->total_amount,
-            'action' => route('customer.payments.booking.store', $booking)]);
+        $booking->load(['room.roomType', 'bookingPackages.package', 'paymentSlip']);
+        return view('customer.payments.checkout', ['booking' => $booking, 'plan' => null, 'paymentSettings' => PaymentSetting::current(), 'amount' => $booking->total_amount,
+            'action' => route('customer.payments.booking.store', $booking), 'existingPayment' => $payment ?? null]);
     }
 
     public function storeBooking(CustomerPaymentRequest $request, Booking $booking)
     {
         abort_unless($booking->user_id === $request->user()->id, 404);
-        $payment = $this->payments->payBooking($request->user(), $booking->id, $request->validated());
+        $payment = DB::transaction(function () use ($request, $booking) {
+            $payment = $this->payments->payBooking($request->user(), $booking->id, $request->validated());
+            if ($payment->status === 'Pending' && $payment->payment_method === 'ABA / KHQR' && $request->input('payment_method') === 'ABA / KHQR') {
+                $this->slips->replace($booking, $request->file('payment_slip'));
+            }
+            return $payment;
+        });
         return redirect()->route('customer.payments.show', $payment);
     }
 
@@ -40,7 +51,7 @@ class PaymentController extends Controller
         $this->payments->checkPlan($membershipType);
         $pending = MembershipPurchase::where('user_id', $request->user()->id)->where('status', 'pending')->first();
         if ($pending?->payment) { return redirect()->route('customer.payments.show', $pending->payment); }
-        return view('customer.payments.checkout', ['booking' => null, 'plan' => $membershipType, 'amount' => $membershipType->price,
+        return view('customer.payments.checkout', ['booking' => null, 'plan' => $membershipType, 'paymentSettings' => PaymentSetting::current(), 'amount' => $membershipType->price,
             'action' => route('customer.payments.membership.store', $membershipType)]);
     }
 

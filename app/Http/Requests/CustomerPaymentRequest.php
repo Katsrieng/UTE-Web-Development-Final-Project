@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Payment;
+use App\Models\PaymentSetting;
+use App\Services\BookingPaymentSlipService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +26,9 @@ class CustomerPaymentRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['payment_method' => ['required', Rule::in(Payment::CUSTOMER_METHODS)],
-            'transaction_reference' => ['nullable', 'required_if:payment_method,ABA / KHQR', 'string', 'max:191']];
+        return ['payment_method' => ['required', Rule::in(PaymentSetting::current()->khqrAvailable() ? Payment::CUSTOMER_METHODS : ['Card', 'Cash at Hotel'])],
+            'transaction_reference' => ['nullable', Rule::requiredIf(! $this->route('booking') && $this->input('payment_method') === 'ABA / KHQR'), 'string', 'max:191'],
+            'payment_slip' => $this->route('booking') && $this->input('payment_method') === 'ABA / KHQR'
+                ? BookingPaymentSlipService::rules() : ['exclude']];
     }
 }

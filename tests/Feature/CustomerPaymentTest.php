@@ -21,6 +21,9 @@ class CustomerPaymentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
+        \App\Models\PaymentSetting::create(['account_name' => 'Beach Resort Management', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
         $this->customer = User::factory()->create();
         $type = RoomType::create(['name' => 'Suite', 'capacity' => 2, 'base_price' => 75]);
         $room = Room::create(['room_type_id' => $type->id, 'room_number' => '101', 'floor' => 1, 'price_per_night' => 75, 'status' => 'available']);
@@ -33,11 +36,60 @@ class CustomerPaymentTest extends TestCase
         return [['Cash at Hotel', 'Pending'], ['ABA / KHQR', 'Pending'], ['Card', 'Paid']];
     }
 
+    public function test_customer_checkout_and_payment_results_render_clear_method_states(): void
+    {
+        $this->get(route('customer.payments.booking', $this->booking))->assertOk()
+            ->assertSee('Room stay')->assertSee('Final total')->assertSee('$274.50')->assertSee('Payment Summary')
+            ->assertSee('Demo card payment')->assertSee('Pay at the hotel')->assertSee('Confirm Pay at Hotel')
+            ->assertSee('Pay with ABA / KHQR')->assertSee('payment-settings/test-qr.png');
+        $plan = \App\Models\MembershipType::create(['name' => 'Gold', 'price' => 60, 'discount_percentage' => 10,
+            'duration_months' => 12, 'loyalty_upgrade_points' => 700, 'status' => 'active']);
+        $this->get(route('customer.payments.membership', $plan))->assertOk()->assertSee('Gold Membership')->assertSee('$60.00')->assertSee('700');
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
+            'payment_slip' => \Illuminate\Http\UploadedFile::fake()->image('submitted.png')])->assertSessionHasNoErrors();
+        $payment = Payment::sole();
+        $this->get(route('customer.payments.show', $payment))->assertOk()->assertSee('Payment Submitted')->assertSee('Awaiting hotel verification')->assertSee('submitted.png');
+        $this->actingAs(User::factory()->staff()->create())->post(route('payments.verify', $payment))->assertSessionHasNoErrors();
+        $this->actingAs($this->customer)->get(route('customer.payments.show', $payment))->assertOk()->assertSee('Payment Successful')->assertSee('Your booking is now confirmed.');
+    }
+
+    public function test_khqr_checkout_reuses_slips_and_confirms_only_after_staff_verification(): void
+    {
+        $this->get(route('customer.bookings.show', $this->booking))->assertOk()->assertSee('Pay Now')->assertDontSee('images/qr-khqr.png');
+        $this->get(route('customer.payments.booking', $this->booking))->assertOk()->assertSee('payment-settings/test-qr.png')->assertSee('payment_slip');
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
+            'payment_slip' => \Illuminate\Http\UploadedFile::fake()->create('bad.pdf', 20, 'application/pdf')])->assertSessionHasErrors('payment_slip');
+        $this->assertDatabaseCount('payments', 0);
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
+            'payment_slip' => \Illuminate\Http\UploadedFile::fake()->image('slip.png')])->assertSessionHasNoErrors();
+        $payment = Payment::sole();
+        $slip = $this->booking->paymentSlip()->firstOrFail();
+        $this->assertSame('Pending', $payment->status);
+        $this->assertSame('Pending', $this->booking->fresh()->status);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($slip->file_path);
+        $this->get(route('customer.payments.booking', $this->booking))->assertOk()->assertSee('slip.png');
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
+            'payment_slip' => \Illuminate\Http\UploadedFile::fake()->image('replacement.jpg')])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('payments', 1);
+        $this->assertDatabaseCount('booking_payment_slips', 1);
+        $this->assertSame('replacement.jpg', $this->booking->paymentSlip()->first()->original_filename);
+        $this->delete(route('customer.bookings.payment-slip.destroy', $this->booking))->assertRedirect(route('customer.payments.booking', $this->booking));
+        $this->assertDatabaseCount('booking_payment_slips', 0);
+        $this->actingAs(User::factory()->create());
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
+            'payment_slip' => \Illuminate\Http\UploadedFile::fake()->image('forged.png')])->assertNotFound();
+        $this->actingAs(User::factory()->staff()->create());
+        $this->post(route('payments.verify', $payment))->assertSessionHasNoErrors();
+        $this->assertSame('Paid', $payment->fresh()->status);
+        $this->assertSame('Confirmed', $this->booking->fresh()->status);
+        $this->assertDatabaseCount('booking_status_logs', 1);
+    }
+
     #[DataProvider('methods')]
     public function test_customer_method_and_authoritative_amount(string $method, string $status): void
     {
-        $this->get(route('customer.payments.booking', $this->booking))->assertOk()->assertSee('$274.50')->assertSee('Demo Card Payment');
-        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => $method, 'transaction_reference' => 'DEMO-TRANSFER', 'amount' => 1, 'user_id' => 999, 'status' => 'Paid', 'booking_id' => 999])->assertSessionHasNoErrors()->assertRedirect();
+        $this->get(route('customer.payments.booking', $this->booking))->assertOk()->assertSee('$274.50')->assertSee('Demo card payment');
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => $method, 'transaction_reference' => 'DEMO-TRANSFER', 'amount' => 1, 'user_id' => 999, 'status' => 'Paid', 'booking_id' => 999, 'payment_slip' => $method === 'ABA / KHQR' ? \Illuminate\Http\UploadedFile::fake()->image('slip.png') : null])->assertSessionHasNoErrors()->assertRedirect();
         $payment = Payment::sole();
         $this->assertSame('274.50', $payment->amount);
         $this->assertSame($this->customer->id, $payment->user_id);
@@ -70,7 +122,7 @@ class CustomerPaymentTest extends TestCase
 
     public function test_transfer_requires_reference_and_invalid_method_is_rejected(): void
     {
-        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR'])->assertSessionHasErrors('transaction_reference');
+        $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR'])->assertSessionHasErrors('payment_slip');
         $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'Bank Transfer', 'transaction_reference' => 'OLD-METHOD'])->assertSessionHasErrors('payment_method');
         $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'Stripe'])->assertSessionHasErrors('payment_method');
         $this->assertDatabaseCount('payments', 0);

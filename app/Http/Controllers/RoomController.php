@@ -13,13 +13,33 @@ class RoomController extends Controller
 {
     public function index(Request $request)
     {
-        $rooms = Room::with(['roomType', 'facilities', 'images'])
-            ->when($request->routeIs('management.rooms.index') && in_array($request->query('status'), ['available', 'occupied', 'cleaning', 'booked', 'maintenance'], true), fn ($query) => $query->where('status', $request->query('status')))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $query = Room::with(['roomType', 'facilities', 'images']);
+        $roomTypes = $filterFacilities = collect();
+        if ($request->routeIs('management.rooms.index')) {
+            if (in_array($request->query('status'), ['available', 'occupied', 'cleaning', 'booked', 'maintenance'], true)) {
+                $query->where('status', $request->query('status'));
+            }
+        } else {
+            $request->validate([
+                'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
+                'guests' => ['nullable', 'integer', 'min:1', 'max:100000'],
+                'facility_id' => ['nullable', 'integer', 'exists:facilities,id'],
+                'min_price' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
+                'max_price' => ['nullable', 'numeric', 'min:0', 'max:100000000', ...($request->filled('min_price') ? ['gte:min_price'] : [])],
+            ]);
+            $term = \App\Support\ListFilters::term($request);
+            $query->when($term !== '', fn ($query) => $query->whereHas('roomType', fn ($types) => $types->where('name', 'like', "%{$term}%")))
+                ->when($request->filled('room_type_id'), fn ($query) => $query->where('room_type_id', $request->integer('room_type_id')))
+                ->when($request->filled('guests'), fn ($query) => $query->whereHas('roomType', fn ($types) => $types->where('capacity', '>=', $request->integer('guests'))))
+                ->when($request->filled('facility_id'), fn ($query) => $query->whereHas('facilities', fn ($facilities) => $facilities->where('facilities.id', $request->integer('facility_id'))))
+                ->when($request->filled('min_price'), fn ($query) => $query->where('price_per_night', '>=', $request->query('min_price')))
+                ->when($request->filled('max_price'), fn ($query) => $query->where('price_per_night', '<=', $request->query('max_price')));
+            $roomTypes = RoomType::orderBy('name')->get(['id', 'name']);
+            $filterFacilities = Facility::whereHas('rooms')->orderBy('name')->get(['id', 'name']);
+        }
+        $rooms = $query->latest()->paginate(10)->withQueryString();
 
-        return view('rooms.index', compact('rooms'));
+        return view('rooms.index', compact('rooms', 'roomTypes', 'filterFacilities'));
     }
 
     public function create()

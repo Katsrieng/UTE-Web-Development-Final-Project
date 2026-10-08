@@ -14,19 +14,14 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
+        $term = \App\Support\ListFilters::term($request);
         $users = User::query()
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $term = trim($request->query('search'));
-
-                $query->where(function ($q) use ($term) {
-                    $q->where('name', 'like', "%{$term}%")
-                      ->orWhere('email', 'like', "%{$term}%");
-                });
-            })
-            ->when($request->filled('role'), fn ($query) => $query->where('role', $request->query('role')))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->when($term !== '', fn ($query) => $query->where(fn ($search) => $search
+                ->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%")
+                ->orWhere('phone', 'like', "%{$term}%")))
+            ->when(in_array($request->query('role'), User::ROLES, true), fn ($query) => $query->where('role', $request->query('role')))
+            ->when(in_array($request->query('active'), ['1', '0'], true), fn ($query) => $query->where('is_active', $request->query('active')))
+            ->latest()->paginate(10)->withQueryString();
 
         return view('admin.users.index', compact('users'));
     }

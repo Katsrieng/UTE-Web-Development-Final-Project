@@ -23,6 +23,16 @@ class EventBookingPolicy
         return $user->isCustomer();
     }
 
+    public function update(User $user, EventBooking $eventBooking): bool
+    {
+        return $user->hasRole(User::ROLE_ADMIN, User::ROLE_STAFF);
+    }
+
+    public function delete(User $user, EventBooking $eventBooking): bool
+    {
+        return $user->hasRole(User::ROLE_ADMIN, User::ROLE_STAFF);
+    }
+
     public function approve(User $user, EventBooking $eventBooking): bool
     {
         return $user->hasRole(User::ROLE_ADMIN, User::ROLE_STAFF)

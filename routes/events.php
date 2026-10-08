@@ -30,6 +30,12 @@ Route::middleware(['auth', 'role:admin,staff'])
 
         Route::get('/event-reservations', [ManagementEventReservationController::class, 'index'])
             ->name('event-reservations.index');
+        Route::get('/event-reservations/{eventBooking}/edit', [ManagementEventReservationController::class, 'edit'])
+            ->name('event-reservations.edit');
+        Route::patch('/event-reservations/{eventBooking}', [ManagementEventReservationController::class, 'update'])
+            ->name('event-reservations.update');
+        Route::delete('/event-reservations/{eventBooking}', [ManagementEventReservationController::class, 'destroy'])
+            ->name('event-reservations.destroy');
         Route::get('/event-reservations/{eventBooking}', [ManagementEventReservationController::class, 'show'])
             ->name('event-reservations.show');
         Route::patch('/event-reservations/{eventBooking}/approve', [ManagementEventReservationController::class, 'approve'])

@@ -15,6 +15,7 @@
     </a>
 </div>
 
+<x-list-toolbar :action="route('bookings.index')" placeholder="Customer, email, booking ID or room" :fields="['status'=>['label'=>'Booking status', 'all'=>'All bookings', 'options'=>array_combine(array_keys(App\Models\Booking::STATUS_TRANSITIONS), array_keys(App\Models\Booking::STATUS_TRANSITIONS))], 'payment_status'=>['label'=>'Payment status', 'all'=>'All payments', 'options'=>['Pending'=>'Pending','Paid'=>'Paid','Refunded'=>'Refunded']], 'arrival_date'=>['label'=>'Arrival date', 'type'=>'date'], 'departure_date'=>['label'=>'Departure date', 'type'=>'date']]" />
 <div class="table-card">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -95,9 +96,7 @@
                 @empty
                     <tr>
                         <td colspan="8">
-                            <x-empty-state icon="bi-calendar-x" title="No bookings found" message="Create your first booking to start managing reservations.">
-                                <a href="{{ route('bookings.create') }}" class="btn btn-hotel">Add Booking</a>
-                            </x-empty-state>
+                            <x-list-no-results module="bookings" :clear="route('bookings.index')" />
                         </td>
                     </tr>
                 @endforelse

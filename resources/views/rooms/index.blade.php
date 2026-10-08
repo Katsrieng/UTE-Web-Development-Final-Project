@@ -33,6 +33,11 @@
             @endif
         </div>
 
+        @unless($managing)
+        <x-list-toolbar :action="route('rooms.index')" placeholder="Room type or name" :fields="['room_type_id'=>['label'=>'Room type','all'=>'All room types','options'=>$roomTypes->pluck('name','id')->all()], 'guests'=>['label'=>'Guests','type'=>'number','min'=>1,'step'=>1], 'min_price'=>['label'=>'Min / night ($)','type'=>'number','min'=>0,'step'=>'0.01'], 'max_price'=>['label'=>'Max / night ($)','type'=>'number','min'=>0,'step'=>'0.01'], 'facility_id'=>['label'=>'Facility','all'=>'All facilities','options'=>$filterFacilities->pluck('name','id')->all()]]" />
+        <p class="small text-muted mb-3">Rates are per night. Check date availability when reserving a room.</p>
+        @endunless
+
         @if($managing)
             <div class="table-card">
                 <div class="table-responsive">
@@ -83,7 +88,7 @@
                         </article>
                     </div>
                 @empty
-                    <div class="col-12"><x-empty-state icon="bi-door-closed" title="No rooms available" message="Our room catalogue is being prepared. Please check back soon." /></div>
+                    <div class="col-12"><x-list-no-results module="rooms" :clear="route('rooms.index')" /></div>
                 @endforelse
             </div>
         @endif

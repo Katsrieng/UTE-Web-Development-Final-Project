@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Management;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateEventReservationStatusRequest;
+use App\Http\Requests\UpdateEventReservationRequest;
 use App\Models\EventBooking;
 use App\Models\Venue;
 use DomainException;
@@ -18,18 +19,9 @@ class EventReservationController extends Controller
     {
         Gate::authorize('viewAny', EventBooking::class);
 
-        $status = $request->string('status')->toString();
-
         $eventBookings = EventBooking::query()
-            ->with(['user', 'venue'])
-            ->when(
-                in_array($status, EventBooking::STATUSES, true),
-                fn ($query) => $query->where('status', $status),
-            )
-            ->when(
-                $request->filled('venue_id'),
-                fn ($query) => $query->where('venue_id', $request->integer('venue_id')),
-            )
+            ->with(['user', 'venue'])->withExists('payments')
+            ->tap(fn ($query) => \App\Support\ListFilters::events($query, $request, true))
             ->when(
                 $request->filled('event_date'),
                 fn ($query) => $query->whereDate('starts_at', $request->string('event_date')->toString()),
@@ -50,9 +42,44 @@ class EventReservationController extends Controller
     {
         Gate::authorize('view', $eventBooking);
 
-        $eventBooking->load(['user', 'venue', 'processedBy']);
+        $eventBooking->load(['user', 'venue', 'processedBy'])->loadExists('payments');
 
         return view('management.event-reservations.show', ['eventBooking' => $eventBooking]);
+    }
+
+    public function edit(EventBooking $eventBooking): View|RedirectResponse
+    {
+        Gate::authorize('update', $eventBooking);
+        if ($reason = $eventBooking->staffEditBlockReason()) {
+            return redirect()->route('management.event-reservations.show', $eventBooking)->with('error', $reason);
+        }
+        return view('management.event-reservations.edit', [
+            'eventBooking' => $eventBooking,
+            'venues' => Venue::where(fn ($query) => $query->where('is_active', true)->orWhere('id', $eventBooking->venue_id))->orderBy('name')->get(),
+            'eventTypes' => Venue::EVENT_TYPES,
+        ]);
+    }
+
+    public function update(UpdateEventReservationRequest $request, EventBooking $eventBooking): RedirectResponse
+    {
+        Gate::authorize('update', $eventBooking);
+        try {
+            $eventBooking->updateByStaff(Venue::findOrFail($request->integer('venue_id')), $request->bookingData());
+        } catch (DomainException $exception) {
+            return back()->withErrors(['reservation' => $exception->getMessage()])->with('error', $exception->getMessage())->withInput();
+        }
+        return redirect()->route('management.event-reservations.show', $eventBooking)->with('success', 'Event reservation updated.');
+    }
+
+    public function destroy(EventBooking $eventBooking): RedirectResponse
+    {
+        Gate::authorize('delete', $eventBooking);
+        try {
+            $eventBooking->deleteByStaff();
+        } catch (DomainException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+        return redirect()->route('management.event-reservations.index')->with('success', 'Event reservation deleted.');
     }
 
     public function approve(

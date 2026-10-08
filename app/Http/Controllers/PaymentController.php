@@ -21,7 +21,7 @@ class PaymentController extends Controller
     public function index(Request $request)
     {
         $payments = Payment::with(['user', 'eventBooking.user', 'eventBooking.venue', 'booking.room', 'membershipPurchase'])
-            ->when(in_array($request->query('status'), ['Pending', 'Paid', 'Refunded'], true), fn ($query) => $query->where('status', $request->query('status')))
+            ->tap(fn ($query) => \App\Support\ListFilters::payments($query, $request))
             ->latest()
             ->paginate(10)
             ->withQueryString();

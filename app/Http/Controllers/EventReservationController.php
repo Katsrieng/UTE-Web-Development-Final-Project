@@ -21,11 +21,12 @@ class EventReservationController extends Controller
         $eventBookings = EventBooking::query()
             ->whereBelongsTo($request->user())
             ->with('venue')
+            ->tap(fn ($query) => \App\Support\ListFilters::events($query, $request))
             ->orderByDesc('starts_at')
             ->orderByDesc('id')
-            ->paginate(10);
+            ->paginate(10)->withQueryString();
 
-        return view('event-reservations.index', ['eventBookings' => $eventBookings]);
+        return view('event-reservations.index', ['eventBookings' => $eventBookings, 'venues' => Venue::whereHas('eventBookings', fn ($query) => $query->where('user_id', $request->user()->id))->orderBy('name')->get(['id', 'name'])]);
     }
 
     public function create(Request $request): View

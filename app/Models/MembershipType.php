@@ -13,10 +13,14 @@ class MembershipType extends Model
         'discount_percentage',
         'duration_months',
         'status',
+        'price',
+        'loyalty_upgrade_points',
     ];
 
     protected $casts = [
         'discount_percentage' => 'decimal:2',
+        'price' => 'decimal:2',
+        'loyalty_upgrade_points' => 'integer',
     ];
 
     public function memberships(): HasMany

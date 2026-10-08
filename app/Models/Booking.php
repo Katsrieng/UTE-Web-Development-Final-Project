@@ -24,6 +24,17 @@ class Booking extends Model
         return $this->bookingPackages->sum(fn ($line) => (int) round((float) $line->price * 100) * $line->quantity);
     }
 
+    protected function casts(): array
+    {
+        return ['membership_discount_percentage' => 'decimal:2', 'membership_discount_amount' => 'decimal:2'];
+    }
+
+    public function subtotalCents(): int
+    {
+        return (int) round((float) $this->total_amount * 100)
+            + (int) round((float) ($this->membership_discount_amount ?? 0) * 100);
+    }
+
     public const ACTIVE_STATUSES = ['Pending', 'Confirmed', 'Checked In'];
 
     public const STATUS_TRANSITIONS = [
@@ -43,6 +54,10 @@ class Booking extends Model
         'total_amount',
         'status',
         'special_request',
+        'membership_id',
+        'membership_name',
+        'membership_discount_percentage',
+        'membership_discount_amount',
     ];
 
     public function canTransitionTo(string $status): bool

@@ -13,6 +13,8 @@ class MembershipPackageSeeder extends Seeder
         MembershipType::insert([
             [
                 'name' => 'Silver',
+                'price' => 20,
+                'loyalty_upgrade_points' => 300,
                 'description' => 'Entry-level membership with a small booking discount.',
                 'discount_percentage' => 5,
                 'duration_months' => 12,
@@ -22,6 +24,8 @@ class MembershipPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Gold',
+                'price' => 40,
+                'loyalty_upgrade_points' => 700,
                 'description' => 'Mid-tier membership with a solid discount on stays.',
                 'discount_percentage' => 10,
                 'duration_months' => 12,
@@ -31,6 +35,8 @@ class MembershipPackageSeeder extends Seeder
             ],
             [
                 'name' => 'Platinum',
+                'price' => 70,
+                'loyalty_upgrade_points' => null,
                 'description' => 'Top-tier membership with the best resort discount.',
                 'discount_percentage' => 15,
                 'duration_months' => 12,

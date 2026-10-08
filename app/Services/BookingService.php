@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\BookingStatusLog;
+use App\Models\Membership;
+use App\Models\MembershipType;
 use App\Models\Package;
 use App\Models\Room;
 use App\Models\User;
@@ -19,9 +21,10 @@ class BookingService
             Room::whereKey($validated['room_id'])->lockForUpdate()->firstOrFail();
             $room = $this->validateRoom($validated);
             $quote = $this->quotePackages($validated['packages'] ?? [], (int) $validated['number_of_guests'], true);
+            $subtotal = $this->combineTotal($this->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $quote['total_cents']);
+            $membershipPricing = $this->quoteMembershipDiscount((int) $validated['user_id'], $subtotal, true);
             unset($validated['packages']);
-            $booking = Booking::create(array_merge($validated, [
-                'total_amount' => $this->combineTotal($this->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $quote['total_cents']),
+            $booking = Booking::create(array_merge($validated, $membershipPricing, [
                 'status' => 'Pending',
             ]));
             foreach ($quote['lines'] as $line) {
@@ -30,6 +33,47 @@ class BookingService
 
             return $booking;
         });
+    }
+
+    public function quoteMembershipDiscount(int $customerId, float $subtotal, bool $lock = false): array
+    {
+        $query = Membership::where('user_id', $customerId)->discountEligible()->orderByDesc('start_date')->orderByDesc('id');
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+        $membership = $query->first();
+        $type = null;
+        if ($membership) {
+            $types = MembershipType::whereKey($membership->membership_type_id);
+            if ($lock) {
+                $types->lockForUpdate();
+            }
+            $type = $types->first();
+            $membership->setRelation('membershipType', $type);
+            if (! $membership->isActive() || ! $type || $type->status !== 'active'
+                || (float) $type->discount_percentage < 0 || (float) $type->discount_percentage > 100) {
+                $membership = null;
+            }
+        }
+
+        return array_merge($this->applyMembershipDiscount($subtotal, $membership ? $type->discount_percentage : '0.00'), [
+            'membership_id' => $membership?->id,
+            'membership_name' => $membership ? $type->name : null,
+            'membership_discount_percentage' => $membership ? $type->discount_percentage : '0.00',
+        ]);
+    }
+
+    public function applyMembershipDiscount(float $subtotal, string $percentage): array
+    {
+        // Round once, half up, using integer cents and hundredths of a percentage point.
+        $subtotalCents = (int) round($subtotal * 100);
+        $basisPoints = (int) round((float) $percentage * 100);
+        if ($basisPoints < 0 || $basisPoints > 10000) {
+            throw ValidationException::withMessages(['membership_discount_percentage' => 'The saved membership discount is invalid.']);
+        }
+        $discountCents = intdiv($subtotalCents * $basisPoints + 5000, 10000);
+
+        return ['membership_discount_amount' => $discountCents / 100, 'total_amount' => ($subtotalCents - $discountCents) / 100];
     }
 
     public function quotePackages(array $selection, int $guests, bool $lock = false): array

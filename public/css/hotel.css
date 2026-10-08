@@ -1494,3 +1494,46 @@ textarea.form-control {
     .checkout-add-on { flex-wrap: wrap; }
     .checkout-add-on-actions { margin-left: auto; }
 }
+
+.page-hero.membership-hero { min-height: 232px; padding: 40px 0; display: flex; align-items: center; }
+.page-hero.membership-hero h1 { max-width: none; margin: 8px auto 10px; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.15; }
+.page-hero.membership-hero p { max-width: 620px; margin-left: auto; margin-right: auto; font-size: 1rem; line-height: 1.5; }
+.page-hero.membership-hero .section-kicker { font-size: .75rem; }
+.content-section.membership-plans { padding-top: 28px; padding-bottom: 40px; }
+.membership-current { border-left: 3px solid var(--hotel-gold); }
+.membership-plan { border-top: 3px solid #a4abb3; transition: transform .2s ease, box-shadow .2s ease; }
+.membership-plan-gold { border-top-color: var(--hotel-gold); }
+.membership-plan-platinum { border-top-color: var(--hotel-navy); }
+.membership-plan-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #eef0f2; color: var(--hotel-navy); font-size: 1.3rem; }
+.membership-plan-gold .membership-plan-icon { background: var(--hotel-cream); color: #8f6138; }
+.membership-plan-platinum .membership-plan-icon { background: var(--hotel-navy); color: #fff; }
+.membership-premium-label { padding: .3rem .55rem; border-radius: var(--hotel-radius); background: var(--hotel-cream); color: var(--hotel-navy); font-size: .7rem; font-weight: 600; }
+.membership-plan-price { font-size: clamp(2.25rem, 3vw, 2.75rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.15; color: var(--hotel-navy); }
+.membership-plan-discount { padding: .7rem 0; border-top: 1px solid var(--hotel-border); border-bottom: 1px solid var(--hotel-border); }
+.membership-plan-discount strong { display: block; font-size: 1.5rem; color: #8f6138; }
+.membership-plan-discount > span { font-size: .85rem; color: var(--hotel-muted); }
+.membership-plan-benefits li { display: flex; gap: .65rem; align-items: flex-start; margin-bottom: .6rem; font-size: .875rem; }
+.membership-plan-benefits i { color: var(--hotel-success); flex-shrink: 0; }
+.membership-loyalty { background: var(--hotel-cream); border-radius: var(--hotel-radius); }
+.membership-loyalty-step { flex-shrink: 0; display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--hotel-border); background: white; color: var(--hotel-navy); font-weight: 600; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .membership-plan:hover { transform: translateY(-2px); box-shadow: var(--hotel-shadow); } }
+@media (prefers-reduced-motion: reduce) { .membership-plan { transition: none; } }
+
+.membership-plan h2 { font-size: 1.75rem; overflow-wrap: anywhere; }
+.membership-plan-description { height: 2.8em; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.membership-plan-benefits { line-height: 1.4; }
+.membership-plan-price { overflow-wrap: anywhere; }
+.membership-loyalty h3 { font-family: inherit; font-weight: 600; }
+@media (max-width: 575px) { .page-hero.membership-hero { min-height: 0; padding: 30px 0; } .content-section.membership-plans { padding-top: 24px; } }
+
+.membership-popular-label { background: #f3e5d6; color: #654629; }
+.membership-plan .membership-price-pending { display: flex; align-items: center; min-height: 1.15em; font-size: 1.15rem; height: clamp(2.59rem, 3.45vw, 3.16rem); letter-spacing: normal; }
+.membership-plan .membership-purchase:disabled { opacity: 1; background: #efdfcf; border-color: #d4b695; color: #654629; cursor: not-allowed; pointer-events: auto; }
+.membership-plans .btn:focus-visible { outline: 3px solid var(--hotel-navy); outline-offset: 3px; }
+.membership-purchase-note { display: flex; align-items: flex-start; justify-content: center; gap: .5rem; max-width: 680px; margin-left: auto; margin-right: auto; color: #59616b; line-height: 1.5; }
+.membership-purchase-note > i { flex-shrink: 0; margin-top: .1rem; color: #8f6138; }
+.membership-current .metric-icon { flex-shrink: 0; }
+.membership-current h2 { overflow-wrap: anywhere; }
+.membership-loyalty-step { font-size: .875rem; }
+.membership-loyalty li > div { min-width: 0; }
+@media (max-width: 575px) { .membership-purchase-note { justify-content: flex-start; } }

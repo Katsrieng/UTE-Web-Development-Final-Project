@@ -46,6 +46,11 @@ class User extends Authenticatable
 
     /* ---------- Relationships ---------- */
 
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(Membership::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);

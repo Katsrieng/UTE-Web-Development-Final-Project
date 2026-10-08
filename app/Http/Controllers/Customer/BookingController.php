@@ -33,6 +33,7 @@ class BookingController extends Controller
             $quote = $this->bookings->quotePackages($reservation['packages'] ?? [], (int) $reservation['number_of_guests']);
             $roomTotal = $this->bookings->calculateTotal($room, $reservation['check_in_date'], $reservation['check_out_date']);
             $total = $this->bookings->combineTotal($roomTotal, $quote['total_cents']);
+            $membershipPricing = $this->bookings->quoteMembershipDiscount($request->user()->id, $total);
         } catch (ValidationException $exception) {
             return redirect()->route('customer.bookings.create', $room)
                 ->withErrors($exception->errors())->withInput($request->only([
@@ -44,7 +45,9 @@ class BookingController extends Controller
             'room' => $room,
             'reservation' => $reservation,
             'numberOfNights' => Carbon::parse($reservation['check_in_date'])->diffInDays(Carbon::parse($reservation['check_out_date'])),
-            'totalAmount' => $total,
+            'totalAmount' => $membershipPricing['total_amount'],
+            'subtotal' => $total,
+            'membershipPricing' => $membershipPricing,
             'roomTotal' => $roomTotal,
             'packageLines' => $quote['lines'],
             'packageTotal' => $quote['total_cents'] / 100,

@@ -12,36 +12,7 @@
     <a href="{{ route('management.venues.index') }}" class="btn btn-outline-primary">Manage Venues</a>
 </div>
 
-<form method="GET" action="{{ route('management.event-reservations.index') }}" class="card card-body mb-4">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-4">
-            <label for="status" class="form-label">Status</label>
-            <select id="status" name="status" class="form-select">
-                <option value="">All statuses</option>
-                @foreach($statuses as $status)
-                    <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label for="venue_id" class="form-label">Venue</label>
-            <select id="venue_id" name="venue_id" class="form-select">
-                <option value="">All venues</option>
-                @foreach($venues as $venue)
-                    <option value="{{ $venue->id }}" @selected((int) request('venue_id') === $venue->id)>{{ $venue->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <label for="event_date" class="form-label">Event date</label>
-            <input id="event_date" type="date" name="event_date" value="{{ request('event_date') }}" class="form-control">
-        </div>
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-secondary flex-grow-1">Filter</button>
-            <a href="{{ route('management.event-reservations.index') }}" class="btn btn-outline-secondary">Reset</a>
-        </div>
-    </div>
-</form>
+<x-list-toolbar :action="route('management.event-reservations.index')" placeholder="Customer, email, ID, venue or event type" :fields="['status'=>['label'=>'Status','all'=>'All statuses','options'=>array_combine(App\Models\EventBooking::STATUSES, array_map('ucfirst',App\Models\EventBooking::STATUSES))], 'venue_id'=>['label'=>'Venue','all'=>'All venues','options'=>$venues->pluck('name','id')->all()], 'event_date'=>['label'=>'Event date', 'type'=>'date']]" />
 
 <div class="table-card">
     <div class="table-responsive">
@@ -79,12 +50,13 @@
                         <td><span class="badge text-bg-{{ $statusColor }}">{{ ucfirst($eventBooking->status) }}</span></td>
                         <td class="text-end pe-4">
                             <a href="{{ route('management.event-reservations.show', $eventBooking) }}"
-                               class="btn btn-sm btn-outline-primary">Review</a>
+                               class="btn btn-sm btn-outline-primary mb-2">View</a>
+                            @include('management.event-reservations._record-actions', ['compact'=>true])
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">No event reservations match the selected filters.</td>
+                        <td colspan="7" ><x-list-no-results module="event reservations" :clear="route('management.event-reservations.index')" /></td>
                     </tr>
                 @endforelse
             </tbody>

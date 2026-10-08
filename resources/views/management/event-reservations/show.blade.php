@@ -78,6 +78,9 @@
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <h2 class="h5">Reservation actions</h2>
+                <div class="mb-3">@include('management.event-reservations._record-actions')</div>
+                @if($reason = $eventBooking->staffEditBlockReason())<p class="small text-muted"><strong>Edit unavailable:</strong> {{ $reason }}</p>@endif
+                @if($reason = $eventBooking->staffDeleteBlockReason())<p class="small text-muted"><strong>Delete unavailable:</strong> {{ $reason }}</p>@endif
 
                 @can('approve', $eventBooking)
                     <form method="POST" action="{{ route('management.event-reservations.approve', $eventBooking) }}" class="mb-4">
@@ -112,11 +115,7 @@
                     </form>
                 @endcan
 
-                @cannot('approve', $eventBooking)
-                    @cannot('cancel', $eventBooking)
-                        <p class="text-muted mb-0">No actions are available for this reservation.</p>
-                    @endcannot
-                @endcannot
+
             </div>
         </div>
     </div>

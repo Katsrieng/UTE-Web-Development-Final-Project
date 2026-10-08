@@ -26,7 +26,7 @@ class BookingController extends Controller
             ->withCount('payments')
             ->when(is_string($request->query('arrival_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('arrival_date')), fn ($query) => $query->whereDate('check_in_date', $request->query('arrival_date')))
             ->when(is_string($request->query('departure_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('departure_date')), fn ($query) => $query->whereDate('check_out_date', $request->query('departure_date')))
-            ->when(in_array($request->query('status'), ['Pending', 'Confirmed', 'Checked In', 'Checked Out', 'Cancelled'], true), fn ($query) => $query->where('status', $request->query('status')))
+            ->tap(fn ($query) => \App\Support\ListFilters::bookings($query, $request, true))
             ->latest()
             ->paginate(10)
             ->withQueryString();

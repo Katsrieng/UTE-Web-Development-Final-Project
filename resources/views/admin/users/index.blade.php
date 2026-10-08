@@ -14,25 +14,7 @@
     <a href="{{ route('admin.users.create') }}" class="btn btn-hotel"><i class="bi bi-person-plus me-1"></i> Add User</a>
 </div>
 
-{{-- Search + filter --}}
-<form method="GET" action="{{ route('admin.users.index') }}" class="filter-panel row g-2 mb-4">
-    <div class="col-md-5">
-        <input type="text" name="search" value="{{ request('search') }}"
-               class="form-control" placeholder="Search by name or email">
-    </div>
-    <div class="col-md-3">
-        <select name="role" class="form-select">
-            <option value="">All roles</option>
-            @foreach(\App\Models\User::ROLES as $role)
-                <option value="{{ $role }}" @selected(request('role') === $role)>{{ ucfirst($role) }}</option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4">
-        <button type="submit" class="btn btn-secondary">Filter</button>
-        <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">Reset</a>
-    </div>
-</form>
+<x-list-toolbar :action="route('admin.users.index')" placeholder="Name, email or phone" :fields="['role'=>['label'=>'Role','all'=>'All roles','options'=>array_combine(App\Models\User::ROLES, array_map('ucfirst',App\Models\User::ROLES))], 'active'=>['label'=>'Account status','all'=>'All accounts','options'=>['1'=>'Active','0'=>'Inactive']]]" />
 
 <div class="table-card">
     <div class="card-body">
@@ -89,7 +71,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7"><x-empty-state icon="bi-people" title="No users found" message="Try different search filters or add a user account." /></td>
+                            <td colspan="7"><x-list-no-results module="users" :clear="route('admin.users.index')" /></td>
                         </tr>
                     @endforelse
                 </tbody>

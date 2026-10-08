@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class EventBooking extends Model
@@ -228,6 +229,109 @@ class EventBooking extends Model
         }, 5);
 
         $this->refresh();
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'event_booking_id');
+    }
+
+    private function hasProcessingHistory(): bool
+    {
+        return $this->processed_at !== null || $this->processed_by !== null
+            || $this->cancelled_at !== null || filled($this->status_note);
+    }
+
+    private function hasLinkedPayments(): bool
+    {
+        return array_key_exists('payments_exists', $this->getAttributes())
+            ? (bool) $this->payments_exists
+            : $this->payments()->exists();
+    }
+
+    public function staffEditBlockReason(): ?string
+    {
+        if ($this->hasLinkedPayments()) {
+            return 'This reservation has linked payments. Its details must be retained unchanged.';
+        }
+        if ($this->status !== self::STATUS_PENDING) {
+            return 'Only pending reservations can be edited. Rejected reservations cannot be reopened in the current workflow.';
+        }
+        if ($this->hasProcessingHistory()) {
+            return 'This reservation has processing history and cannot be edited.';
+        }
+        if (! $this->starts_at->isFuture()) {
+            return 'Reservations that have already started cannot be edited.';
+        }
+        return null;
+    }
+
+    public function staffDeleteBlockReason(): ?string
+    {
+        if ($this->hasLinkedPayments()) {
+            return 'This reservation has linked payments and cannot be deleted. Payment history must be preserved.';
+        }
+        if (! in_array($this->status, [self::STATUS_PENDING, self::STATUS_REJECTED, self::STATUS_CANCELLED], true)) {
+            return 'Approved reservations cannot be deleted.';
+        }
+        if ($this->hasProcessingHistory()) {
+            return 'This reservation has processing history and must be retained for audit purposes.';
+        }
+        return null;
+    }
+
+    /** Update only unprocessed, unpaid pending requests; preserve customer and workflow fields. */
+    public function updateByStaff(Venue $venue, array $attributes): void
+    {
+        DB::transaction(function () use ($venue, $attributes): void {
+            // Match the existing workflow: lock venues before the reservation.
+            $venues = Venue::whereIn('id', [$this->venue_id, $venue->id])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $booking = self::query()->lockForUpdate()->findOrFail($this->getKey());
+            if (! $venues->has($booking->venue_id)) {
+                throw new DomainException('The reservation changed. Reload it before editing.');
+            }
+            if ($reason = $booking->staffEditBlockReason()) {
+                throw new DomainException($reason);
+            }
+            $target = $venues->get($venue->id);
+            if (! $target?->is_active) {
+                throw new DomainException('The selected venue is not available for reservations.');
+            }
+            if (! $target->supportsEventType($attributes['event_type'])) {
+                throw new DomainException('The selected venue does not support this event type.');
+            }
+            if ($attributes['guest_count'] > $target->capacity) {
+                throw new DomainException('The guest count exceeds the selected venue capacity.');
+            }
+            if (! $attributes['starts_at']->isFuture() || $attributes['ends_at']->lessThanOrEqualTo($attributes['starts_at'])) {
+                throw new DomainException('Select a future start time and a later end time.');
+            }
+            if (self::where('venue_id', $target->id)->whereKeyNot($booking->id)->active()
+                ->overlapping($attributes['starts_at'], $attributes['ends_at'])->exists()) {
+                throw new DomainException('This venue already has an active reservation during the selected time.');
+            }
+            // A different venue receives its current quote; otherwise retain the agreed quote.
+            if ($booking->venue_id !== $target->id) {
+                $attributes['quoted_price'] = $target->price;
+            }
+            $booking->update([...$attributes, 'venue_id' => $target->id]);
+        }, 5);
+        $this->refresh();
+    }
+
+    public function deleteByStaff(): void
+    {
+        DB::transaction(function (): void {
+            Venue::query()->lockForUpdate()->findOrFail($this->venue_id);
+            $booking = self::query()->lockForUpdate()->findOrFail($this->getKey());
+            if ($booking->venue_id !== $this->venue_id) {
+                throw new DomainException('The reservation changed. Reload it before deleting.');
+            }
+            if ($reason = $booking->staffDeleteBlockReason()) {
+                throw new DomainException($reason);
+            }
+            $booking->delete();
+        }, 5);
     }
 
     public function canBeCancelled(): bool

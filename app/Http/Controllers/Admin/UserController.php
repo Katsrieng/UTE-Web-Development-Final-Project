@@ -15,11 +15,11 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $term = \App\Support\ListFilters::term($request);
-        $users = User::query()
+        $users = User::query()->whereIn('role', [User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_STAFF])
             ->when($term !== '', fn ($query) => $query->where(fn ($search) => $search
                 ->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%")
                 ->orWhere('phone', 'like', "%{$term}%")))
-            ->when(in_array($request->query('role'), User::ROLES, true), fn ($query) => $query->where('role', $request->query('role')))
+            ->when(in_array($request->query('role'), [User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_STAFF], true), fn ($query) => $query->where('role', $request->query('role')))
             ->when(in_array($request->query('active'), ['1', '0'], true), fn ($query) => $query->where('is_active', $request->query('active')))
             ->latest()->paginate(10)->withQueryString();
 
@@ -48,11 +48,13 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        abort_if($user->isCustomer(), 404);
         return view('admin.users.edit', compact('user'));
     }
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
+        abort_if($user->isCustomer(), 404);
         $data = $request->validated();
         $data['is_active'] = $request->boolean('is_active');
 
@@ -68,7 +70,15 @@ class UserController extends Controller
             $data['is_active'] = true;
         }
 
-        $user->update($data);
+        DB::transaction(function () use ($user, $data) {
+            $admins = User::where('role', User::ROLE_ADMIN)->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
+            $locked = User::lockForUpdate()->findOrFail($user->id);
+            if ($locked->isAdmin() && $locked->is_active && ($data['role'] !== User::ROLE_ADMIN || !$data['is_active']) && $admins->count() <= 1) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['role'=>'The last active administrator cannot be demoted or deactivated.']);
+            }
+            $locked->update($data);
+        });
+        $user->refresh();
 
         // If the account was just disabled, kick them out of any open sessions.
         if (! $user->is_active) {
@@ -82,12 +92,26 @@ class UserController extends Controller
 
     public function destroy(Request $request, User $user): RedirectResponse
     {
+        abort_if($user->isCustomer(), 404);
         if ($user->is($request->user())) {
             return back()->with('error', 'You cannot delete your own account.');
         }
 
         return DB::transaction(function () use ($user) {
+            $admins = User::where('role', User::ROLE_ADMIN)->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
             $user = User::lockForUpdate()->findOrFail($user->id);
+            if ($user->isAdmin() && $user->is_active && $admins->count() <= 1) {
+                return back()->with('error', 'The last active administrator cannot be deleted.');
+            }
+            if (DB::table('booking_status_logs')->where('changed_by', $user->id)->exists()
+                || DB::table('event_bookings')->where('processed_by', $user->id)->exists()) {
+                return back()->with('error', 'This staff account has historical activity and cannot be deleted. Deactivate the account instead.');
+            }
+            if (DB::table('bookings')->where('user_id', $user->id)->exists()
+                || $user->payments()->exists() || $user->eventBookings()->exists() || $user->memberships()->exists()
+                || \App\Models\MembershipPurchase::where('user_id', $user->id)->exists()) {
+                return back()->with('error', 'This account has linked business records and cannot be deleted. Deactivate the account instead.');
+            }
             if ($user->loyaltyAccount()->exists()) {
                 return back()->with('error', 'This customer has an audited loyalty account and cannot be deleted.');
             }

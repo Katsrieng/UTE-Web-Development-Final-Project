@@ -14,7 +14,11 @@
 @endphp
 
 <div class="mb-3">
-    <a href="{{ route('management.event-reservations.index') }}" class="text-decoration-none">&larr; Event reservations</a>
+
+@staffroute('management.event-reservations.index')
+<a href="{{ route('management.event-reservations.index') }}" class="text-decoration-none">&larr; Event reservations</a>
+@endstaffroute
+
 </div>
 
 <div class="row g-4">
@@ -83,17 +87,23 @@
                 @if($reason = $eventBooking->staffDeleteBlockReason())<p class="small text-muted"><strong>Delete unavailable:</strong> {{ $reason }}</p>@endif
 
                 @can('approve', $eventBooking)
-                    <form method="POST" action="{{ route('management.event-reservations.approve', $eventBooking) }}" class="mb-4">
+
+@staffroute('management.event-reservations.approve')
+<form method="POST" action="{{ route('management.event-reservations.approve', $eventBooking) }}" class="mb-4">
                         @csrf
                         @method('PATCH')
                         <label for="approve_note" class="form-label">Approval note <span class="text-muted">(optional)</span></label>
                         <textarea id="approve_note" name="status_note" rows="2" maxlength="1000" class="form-control mb-2">{{ old('status_note') }}</textarea>
                         <button type="submit" class="btn btn-success w-100">Approve Reservation</button>
                     </form>
+@endstaffroute
+
                 @endcan
 
                 @can('reject', $eventBooking)
-                    <form method="POST" action="{{ route('management.event-reservations.reject', $eventBooking) }}" class="mb-4">
+
+@staffroute('management.event-reservations.reject')
+<form method="POST" action="{{ route('management.event-reservations.reject', $eventBooking) }}" class="mb-4">
                         @csrf
                         @method('PATCH')
                         <label for="reject_note" class="form-label">Rejection reason</label>
@@ -102,10 +112,14 @@
                         @error('status_note')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         <button type="submit" class="btn btn-outline-danger w-100">Reject Reservation</button>
                     </form>
+@endstaffroute
+
                 @endcan
 
                 @can('cancel', $eventBooking)
-                    <form method="POST" action="{{ route('management.event-reservations.cancel', $eventBooking) }}"
+
+@staffroute('management.event-reservations.cancel')
+<form method="POST" action="{{ route('management.event-reservations.cancel', $eventBooking) }}"
                           onsubmit="return confirm('Cancel this event reservation?');">
                         @csrf
                         @method('PATCH')
@@ -113,6 +127,8 @@
                         <textarea id="cancel_note" name="status_note" rows="2" maxlength="1000" class="form-control mb-2"></textarea>
                         <button type="submit" class="btn btn-outline-danger w-100">Cancel Reservation</button>
                     </form>
+@endstaffroute
+
                 @endcan
 
 

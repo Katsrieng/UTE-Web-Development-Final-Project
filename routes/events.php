@@ -22,7 +22,7 @@ Route::middleware(['auth', 'role:customer'])
         Route::patch('/{eventBooking}/cancel', [EventReservationController::class, 'cancel'])->name('cancel');
     });
 
-Route::middleware(['auth', 'role:admin,staff'])
+Route::middleware(['auth', 'role:admin,manager,staff', \App\Http\Middleware\EnsureStaffPermission::class])
     ->prefix('management')
     ->name('management.')
     ->group(function (): void {

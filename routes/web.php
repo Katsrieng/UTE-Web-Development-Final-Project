@@ -118,11 +118,13 @@ Route::middleware('auth')->group(function () {
     // ADMIN & STAFF ONLY
     // ======================================
 
-    Route::middleware('role:admin,staff')->group(function () {
+    Route::middleware(['role:admin,manager,staff', \App\Http\Middleware\EnsureStaffPermission::class])->group(function () {
 
         // Room management uses dedicated URLs so public catalogue links keep
         // the public navigation even for signed-in admin and staff users.
         Route::prefix('management')->name('management.')->group(function () {
+            Route::resource('customers', \App\Http\Controllers\Management\CustomerController::class)
+                ->only(['index', 'show', 'edit', 'update', 'destroy']);
             Route::post('rooms/{room}/images', [RoomImageController::class, 'store'])->name('rooms.images.store');
             Route::patch('rooms/{room}/images/{roomImage}/primary', [RoomImageController::class, 'primary'])->name('rooms.images.primary');
             Route::patch('rooms/{room}/images/{roomImage}', [RoomImageController::class, 'update'])->name('rooms.images.update');
@@ -164,13 +166,15 @@ Route::middleware('auth')->group(function () {
     // ADMIN ONLY
     // ======================================
 
-    Route::middleware('role:admin')
+    Route::middleware(['role:admin,manager,staff', \App\Http\Middleware\EnsureStaffPermission::class])
         ->prefix('admin')
         ->name('admin.')
         ->group(function () {
 
             Route::resource('users', UserController::class)
-                ->except('show');
+                ->middleware('role:admin')->except('show');
+            Route::get('/roles', [\App\Http\Controllers\Admin\RoleController::class, 'index'])->middleware('role:admin')->name('roles.index');
+            Route::patch('/roles/{role}', [\App\Http\Controllers\Admin\RoleController::class, 'update'])->middleware('role:admin')->name('roles.update');
 
             Route::resource('membership-types', MembershipTypeController::class)
                 ->except('show');

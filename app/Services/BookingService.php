@@ -164,7 +164,7 @@ class BookingService
                 abort_unless($actor->is_active && $newStatus === 'Cancelled', 403);
                 $query->where('user_id', $actor->id);
             } else {
-                abort_unless($actor->hasRole(User::ROLE_ADMIN, User::ROLE_STAFF), 403);
+                abort_unless($actor->hasRole(User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_STAFF), 403);
             }
 
             $booking = $query->findOrFail($id);

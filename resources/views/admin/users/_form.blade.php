@@ -37,12 +37,12 @@
     @if($isSelf)
         {{-- You can't change your own role; send the current value along so validation passes. --}}
         <input type="hidden" name="role" value="{{ $user->role }}">
-        <input type="text" class="form-control" value="{{ ucfirst($user->role) }}" disabled>
+        <input type="text" class="form-control" value="{{ $user->roleLabel() }}" disabled>
         <div class="form-text">You cannot change your own role.</div>
     @else
         <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
-            @foreach(\App\Models\User::ROLES as $role)
-                <option value="{{ $role }}" @selected(old('role', $user->role) === $role)>{{ ucfirst($role) }}</option>
+            @foreach([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_MANAGER, \App\Models\User::ROLE_STAFF] as $role)
+                <option value="{{ $role }}" @selected(old('role', $user->role) === $role)>{{ $role === 'staff' ? 'Staff / Front Desk' : ucfirst($role) }}</option>
             @endforeach
         </select>
         @error('role')

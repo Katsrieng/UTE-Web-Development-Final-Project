@@ -28,7 +28,7 @@ class LoginController extends Controller
 
     public function staffStore(LoginRequest $request): RedirectResponse
     {
-        return $this->authenticate($request, ['admin', 'staff']);
+        return $this->authenticate($request, ['admin', 'manager', 'staff']);
     }
 
     private function authenticate(LoginRequest $request, array $roles): RedirectResponse
@@ -62,7 +62,7 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        $portal = $request->user()?->hasRole('admin', 'staff') ? 'staff.login' : 'login';
+        $portal = $request->user()?->hasRole('admin', 'manager', 'staff') ? 'staff.login' : 'login';
         Auth::logout();
 
         $request->session()->invalidate();

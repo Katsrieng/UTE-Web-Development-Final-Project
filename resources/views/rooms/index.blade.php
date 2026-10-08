@@ -26,9 +26,21 @@
             </div>
             @if($managing)
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="{{ route('management.room-types.index') }}" class="btn btn-outline-secondary"><i class="bi bi-house-door me-1"></i> Room Types</a>
-                    <a href="{{ route('management.facilities.index') }}" class="btn btn-outline-secondary"><i class="bi bi-stars me-1"></i> Facilities</a>
-                    <a href="{{ route('management.rooms.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> Add Room</a>
+
+@staffroute('management.room-types.index')
+<a href="{{ route('management.room-types.index') }}" class="btn btn-outline-secondary"><i class="bi bi-house-door me-1"></i> Room Types</a>
+@endstaffroute
+
+
+@staffroute('management.facilities.index')
+<a href="{{ route('management.facilities.index') }}" class="btn btn-outline-secondary"><i class="bi bi-stars me-1"></i> Facilities</a>
+@endstaffroute
+
+
+@staffroute('management.rooms.create')
+<a href="{{ route('management.rooms.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> Add Room</a>
+@endstaffroute
+
                 </div>
             @endif
         </div>
@@ -53,16 +65,32 @@
                                     <td><span class="text-muted small">{{ $room->facilities->isNotEmpty() ? $room->facilities->pluck('name')->join(', ') : 'None' }}</span></td>
                                     <td><x-status-badge :status="$room->status" /></td>
                                     <td class="text-end pe-4 text-nowrap">
-                                        <a href="{{ route('management.rooms.show', $room) }}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
-                                        <a href="{{ route('management.rooms.edit', $room) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
-                                        <form action="{{ route('management.rooms.destroy', $room) }}" method="POST" class="d-inline">
+
+@staffroute('management.rooms.show')
+<a href="{{ route('management.rooms.show', $room) }}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+@endstaffroute
+
+
+@staffroute('management.rooms.edit')
+<a href="{{ route('management.rooms.edit', $room) }}" class="btn btn-sm btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+@endstaffroute
+
+
+@staffroute('management.rooms.destroy')
+<form action="{{ route('management.rooms.destroy', $room) }}" method="POST" class="d-inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete" data-confirm="Delete Room {{ $room->room_number }}? This cannot be undone."><i class="bi bi-trash"></i></button>
                                         </form>
+@endstaffroute
+
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7"><x-empty-state icon="bi-door-closed" title="No rooms found" message="Add the first room to begin managing hotel inventory."><a href="{{ route('management.rooms.create') }}" class="btn btn-hotel">Add Room</a></x-empty-state></td></tr>
+                                <tr><td colspan="7"><x-empty-state icon="bi-door-closed" title="No rooms found" message="Add the first room to begin managing hotel inventory.">
+@staffroute('management.rooms.create')
+<a href="{{ route('management.rooms.create') }}" class="btn btn-hotel">Add Room</a>
+@endstaffroute
+</x-empty-state></td></tr>
                             @endforelse
                         </tbody>
                     </table>

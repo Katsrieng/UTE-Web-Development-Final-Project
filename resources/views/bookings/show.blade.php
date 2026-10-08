@@ -5,13 +5,21 @@
 
 @section('content')
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <a href="{{ route('bookings.index') }}" class="text-decoration-none">
+
+@staffroute('bookings.index')
+<a href="{{ route('bookings.index') }}" class="text-decoration-none">
         <i class="bi bi-arrow-left me-1"></i> Back to bookings
     </a>
+@endstaffroute
+
     <div class="d-flex gap-2">
-        <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-outline-secondary btn-sm">
+
+@staffroute('bookings.edit')
+<a href="{{ route('bookings.edit', $booking) }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-pencil me-1"></i> Edit Booking
         </a>
+@endstaffroute
+
     </div>
 </div>
 
@@ -45,9 +53,13 @@
             <a href="#payment-slip-section" class="btn btn-sm btn-primary">
                 <i class="bi bi-eye me-1"></i> Review Slip
             </a>
-            <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-sm btn-success">
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-sm btn-success">
                 <i class="bi bi-cash-coin me-1"></i> Record Payment
             </a>
+@endstaffroute
+
         </div>
     </div>
 @endif
@@ -177,7 +189,7 @@
                         'Checked Out' => ['check-out', 'Check Out', 'btn-outline-primary', 'bi-door-closed'],
                         'Cancelled'   => ['cancel', 'Cancel Booking', 'btn-outline-danger', 'bi-x-circle'],
                     ] as $status => [$action, $label, $buttonClass, $icon])
-                        @if($booking->canTransitionTo($status))
+                        @if($booking->canTransitionTo($status) && auth()->user()->hasPermission(App\Support\RbacCatalog::routePermission('bookings.'.$action)))
                             <form action="{{ route('bookings.'.$action, $booking) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
@@ -188,9 +200,13 @@
                         @endif
                     @endforeach
 
-                    <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-outline-secondary">
+
+@staffroute('bookings.edit')
+<a href="{{ route('bookings.edit', $booking) }}" class="btn btn-outline-secondary">
                         <i class="bi bi-pencil me-1"></i> Edit Reservation
                     </a>
+@endstaffroute
+
                 </div>
             </div>
         </div>
@@ -224,9 +240,13 @@
                         <a href="{{ $booking->paymentSlip->url() }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-arrows-fullscreen me-1"></i> Open Full Size
                         </a>
-                        <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-hotel">
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-hotel">
                             <i class="bi bi-check-circle me-1"></i> Record Official Payment
                         </a>
+@endstaffroute
+
                     </div>
                 </div>
             </div>
@@ -235,9 +255,13 @@
                 <div class="card-body p-4">
                     <h2 class="h6 mb-2">Record Payment</h2>
                     <p class="small text-muted mb-3">Record an official cash, card, or transfer payment for this booking.</p>
-                    <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Cash']) }}" class="btn btn-outline-primary btn-sm w-100">
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Cash']) }}" class="btn btn-outline-primary btn-sm w-100">
                         <i class="bi bi-plus-lg me-1"></i> Add Payment Record
                     </a>
+@endstaffroute
+
                 </div>
             </div>
         @endif

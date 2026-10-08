@@ -9,9 +9,15 @@
         <h1 class="h3 mb-1">Manage Venues</h1>
         <p class="text-muted mb-0">Create, update, or archive event spaces.</p>
     </div>
-    <a href="{{ route('management.venues.create') }}" class="btn btn-primary">Add Venue</a>
+
+@staffroute('management.venues.create')
+<a href="{{ route('management.venues.create') }}" class="btn btn-primary">Add Venue</a>
+@endstaffroute
+
 </div>
 
+
+@staffroute('management.venues.index')
 <form method="GET" action="{{ route('management.venues.index') }}" class="card card-body mb-4">
     <div class="row g-2 align-items-end">
         <div class="col-lg-4">
@@ -44,6 +50,8 @@
         </div>
     </div>
 </form>
+@endstaffroute
+
 
 <div class="table-card">
     <div class="table-responsive">
@@ -78,15 +86,27 @@
                             </span>
                         </td>
                         <td class="text-end pe-4 text-nowrap">
-                            <a href="{{ route('management.venues.show', $venue) }}" class="btn btn-sm btn-outline-primary">View</a>
-                            <a href="{{ route('management.venues.edit', $venue) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+
+@staffroute('management.venues.show')
+<a href="{{ route('management.venues.show', $venue) }}" class="btn btn-sm btn-outline-primary">View</a>
+@endstaffroute
+
+
+@staffroute('management.venues.edit')
+<a href="{{ route('management.venues.edit', $venue) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+@endstaffroute
+
                             @if($venue->is_active)
-                                <form method="POST" action="{{ route('management.venues.destroy', $venue) }}" class="d-inline"
+
+@staffroute('management.venues.destroy')
+<form method="POST" action="{{ route('management.venues.destroy', $venue) }}" class="d-inline"
                                       onsubmit="return confirm('Archive this venue? Existing reservations will be preserved.');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Archive</button>
                                 </form>
+@endstaffroute
+
                             @endif
                         </td>
                     </tr>

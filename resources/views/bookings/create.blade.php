@@ -5,9 +5,13 @@
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('bookings.index') }}" class="text-decoration-none">
+
+@staffroute('bookings.index')
+<a href="{{ route('bookings.index') }}" class="text-decoration-none">
         <i class="bi bi-arrow-left me-1"></i> Back to bookings
     </a>
+@endstaffroute
+
 </div>
 
 <div class="page-heading">
@@ -32,6 +36,8 @@
     </div>
 @endif
 
+
+@staffroute('bookings.store')
 <form action="{{ route('bookings.store') }}" method="POST">
     @csrf
 
@@ -123,6 +129,8 @@
         </div>
     </div>
 </form>
+@endstaffroute
+
 
 @push('scripts')
 <script>

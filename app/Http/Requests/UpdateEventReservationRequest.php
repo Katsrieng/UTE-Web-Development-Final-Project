@@ -9,6 +9,6 @@ class UpdateEventReservationRequest extends StoreEventReservationRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole(User::ROLE_ADMIN, User::ROLE_STAFF) ?? false;
+        return $this->user()?->hasPermission('edit_event_reservations') ?? false;
     }
 }

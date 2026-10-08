@@ -38,7 +38,7 @@
                             @endif
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('event-reservations.*') ? 'active' : '' }}" href="{{ route('event-reservations.index') }}">My Events</a></li>
                         @endif
-                        @if(auth()->user()->hasRole('admin', 'staff'))
+                        @if(auth()->user()->hasRole('admin', 'manager', 'staff'))
                             <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Management</a></li>
                         @endif
                     @endauth

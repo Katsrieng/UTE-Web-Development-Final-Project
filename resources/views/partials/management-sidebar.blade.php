@@ -1,9 +1,13 @@
 <aside class="management-sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="managementSidebar" aria-label="Management navigation">
     <div class="offcanvas-header border-bottom border-light border-opacity-10">
-        <a class="management-brand" href="{{ route('dashboard') }}">
+
+@staffroute('dashboard')
+<a class="management-brand" href="{{ route('dashboard') }}">
             <span class="brand-mark"><i class="bi bi-buildings"></i></span>
             <span><strong>Hotel</strong><small>Management</small></span>
         </a>
+@endstaffroute
+
         <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#managementSidebar" aria-label="Close"></button>
     </div>
 
@@ -22,23 +26,38 @@
             <a class="management-nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}" href="{{ route('payments.index') }}"><i class="bi bi-credit-card"></i><span>Payments</span></a>
             <a class="management-nav-link {{ request()->routeIs('payment-settings.*') ? 'active' : '' }}" href="{{ route('payment-settings.edit') }}"><i class="bi bi-qr-code"></i><span>Payment Settings</span></a>
 
-            @if(auth()->user()->isAdmin())
+            @if(auth()->user()->hasPermission('manage_users') || auth()->user()->hasPermission('manage_roles_permissions'))
                 <p class="nav-section-label">Administration</p>
-                <a class="management-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><i class="bi bi-people"></i><span>Users</span></a>
-                @if(Route::has('admin.membership-types.index'))
-                    <a class="management-nav-link {{ request()->routeIs('admin.membership-types.*') ? 'active' : '' }}" href="{{ route('admin.membership-types.index') }}"><i class="bi bi-award"></i><span>Membership Types</span></a>
-                @endif
-                @if(Route::has('admin.packages.index'))
-                    <a class="management-nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}" href="{{ route('admin.packages.index') }}"><i class="bi bi-gift"></i><span>Packages</span></a>
-                @endif
             @endif
+            @staffroute('admin.users.index')
+            <a class="management-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}"><i class="bi bi-person-badge"></i><span>Staff Accounts</span></a>
+            @endstaffroute
+            @staffroute('admin.roles.index')
+            <a class="management-nav-link {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}" href="{{ route('admin.roles.index') }}"><i class="bi bi-shield-lock"></i><span>Roles &amp; Permissions</span></a>
+            @endstaffroute
+            @if(auth()->user()->hasPermission('view_customers'))
+                <p class="nav-section-label">Customer Management</p>
+            @endif
+            @staffroute('management.customers.index')
+            <a class="management-nav-link {{ request()->routeIs('management.customers.*') ? 'active' : '' }}" href="{{ route('management.customers.index') }}"><i class="bi bi-people"></i><span>Customers</span></a>
+            @endstaffroute
+            @if(auth()->user()->hasPermission('view_memberships') || auth()->user()->hasPermission('manage_packages'))
+                <p class="nav-section-label">Programs</p>
+            @endif
+            @staffroute('admin.membership-types.index')
+            <a class="management-nav-link {{ request()->routeIs('admin.membership-types.*') ? 'active' : '' }}" href="{{ route('admin.membership-types.index') }}"><i class="bi bi-award"></i><span>Membership Types</span></a>
+            @endstaffroute
+            @staffroute('admin.packages.index')
+            <a class="management-nav-link {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}" href="{{ route('admin.packages.index') }}"><i class="bi bi-gift"></i><span>Packages</span></a>
+            @endstaffroute
+
         </nav>
 
         <div class="sidebar-footer">
             <span class="avatar-circle">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
             <div class="overflow-hidden">
                 <strong class="d-block text-truncate">{{ auth()->user()->name }}</strong>
-                <small>{{ ucfirst(auth()->user()->role) }}</small>
+                <small>{{ auth()->user()->roleLabel() }}</small>
             </div>
         </div>
     </div>

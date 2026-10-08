@@ -9,7 +9,7 @@ class UpdateEventReservationStatusRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole('admin', 'staff') ?? false;
+        return $this->user()?->hasPermission(\App\Support\RbacCatalog::routePermission($this->route()?->getName()) ?? '') ?? false;
     }
 
     public function rules(): array

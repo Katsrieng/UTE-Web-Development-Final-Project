@@ -22,7 +22,8 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $bookings = Booking::with(['user', 'room'])
+        $bookings = Booking::with(['user', 'room.roomType', 'paymentSlip'])
+            ->withCount('payments')
             ->latest()
             ->paginate(10);
 
@@ -68,6 +69,7 @@ class BookingController extends Controller
             'room',
             'bookingPackages.package',
             'statusLogs.changedBy',
+            'paymentSlip',
         ])->findOrFail($id);
 
         return view('bookings.show', compact('booking'));

@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
+use App\Http\Controllers\Customer\PaymentSlipController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\HomeController;
@@ -99,6 +100,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/my-bookings', [CustomerBookingController::class, 'index'])->name('index');
         Route::get('/my-bookings/{booking}', [CustomerBookingController::class, 'show'])->name('show');
         Route::patch('/my-bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('cancel');
+        Route::post('/my-bookings/{booking}/payment-slip', [PaymentSlipController::class, 'store'])->name('payment-slip.store');
+        Route::delete('/my-bookings/{booking}/payment-slip', [PaymentSlipController::class, 'destroy'])->name('payment-slip.destroy');
     });
 
     Route::middleware(['role:customer', EnsureActiveCustomer::class])->name('customer.payments.')->group(function () {

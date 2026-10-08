@@ -49,14 +49,14 @@ class StorePaymentRequest extends FormRequest
             if (!$bookingId && !$eventBookingId && !$this->membership_purchase_id) {
                 $validator->errors()->add(
                     'booking_id',
-                    'A payment must belong to a room booking or an event booking.'
+                    'A payment must belong to a room booking, event booking or membership purchase.'
                 );
             }
 
             if (count(array_filter([$bookingId, $eventBookingId, $this->membership_purchase_id])) > 1) {
                 $validator->errors()->add(
                     'booking_id',
-                    'A payment cannot belong to both a room booking and an event booking.'
+                    'A payment must have exactly one booking or membership purchase.'
                 );
             }
         });

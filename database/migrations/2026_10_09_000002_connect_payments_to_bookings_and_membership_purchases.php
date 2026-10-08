@@ -15,8 +15,11 @@ return new class extends Migration
         })->exists()) {
             throw new RuntimeException('Legacy payments contain missing Booking references. Review those records before applying this migration.');
         }
-        Schema::table('payments', function (Blueprint $table) {
-            $table->foreign('booking_id', 'payments_booking_id_integrated_foreign')->references('id')->on('bookings')->restrictOnDelete();
+        $hasBookingForeignKey = collect(Schema::getForeignKeys('payments'))->contains(fn ($key) => $key['columns'] === ['booking_id']);
+        Schema::table('payments', function (Blueprint $table) use ($hasBookingForeignKey) {
+            if (! $hasBookingForeignKey) {
+                $table->foreign('booking_id', 'payments_booking_id_integrated_foreign')->references('id')->on('bookings')->restrictOnDelete();
+            }
             $table->foreignId('membership_purchase_id')->nullable()->unique()->constrained()->restrictOnDelete();
             $table->string('transaction_reference', 191)->nullable();
         });
@@ -24,8 +27,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropForeign('payments_booking_id_integrated_foreign');
+        $ownsBookingForeignKey = collect(Schema::getForeignKeys('payments'))->contains(fn ($key) => $key['name'] === 'payments_booking_id_integrated_foreign');
+        Schema::table('payments', function (Blueprint $table) use ($ownsBookingForeignKey) {
+            if ($ownsBookingForeignKey) {
+                $table->dropForeign('payments_booking_id_integrated_foreign');
+            }
             $table->dropConstrainedForeignId('membership_purchase_id');
             $table->dropColumn('transaction_reference');
         });

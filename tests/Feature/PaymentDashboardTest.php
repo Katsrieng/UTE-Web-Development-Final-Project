@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\EventBooking;
 use App\Models\Booking;
+use App\Models\EventBooking;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\Payment;
@@ -43,10 +43,11 @@ class PaymentDashboardTest extends TestCase
         $customer = User::factory()->create();
         $staff = User::factory()->staff()->create();
         $eventBooking = EventBooking::factory()->for($customer)->create();
+        $booking = $this->roomBookingFor($customer);
 
         Payment::create([
             'user_id' => $customer->id,
-            'booking_id' => $this->booking($customer)->id,
+            'booking_id' => $booking->id,
             'event_booking_id' => null,
             'amount' => 150.00,
             'payment_method' => 'Cash',
@@ -79,7 +80,7 @@ class PaymentDashboardTest extends TestCase
 
         Payment::create([
             'user_id' => $customer->id,
-            'booking_id' => $this->booking($customer)->id,
+            'booking_id' => $booking->id,
             'event_booking_id' => null,
             'amount' => 40.00,
             'payment_method' => 'Cash',
@@ -105,11 +106,12 @@ class PaymentDashboardTest extends TestCase
     {
         $customer = User::factory()->create();
         $staff = User::factory()->staff()->create();
+        $booking = $this->roomBookingFor($customer);
 
         for ($number = 1; $number <= 6; $number++) {
             $payment = new Payment([
                 'user_id' => $customer->id,
-                'booking_id' => $this->booking($customer)->id,
+                'booking_id' => $booking->id,
                 'event_booking_id' => null,
                 'amount' => 10.00 * $number,
                 'payment_method' => 'Cash',
@@ -137,10 +139,28 @@ class PaymentDashboardTest extends TestCase
             'PAY-DASH-RECENT-02',
         ], $references);
     }
-    private function booking(User $customer): Booking
+
+    private function roomBookingFor(User $customer): Booking
     {
-        $type = RoomType::create(['name' => 'Dashboard Suite', 'capacity' => 2, 'base_price' => 75]);
-        $room = Room::create(['room_type_id' => $type->id, 'room_number' => 'DASH-'.$type->id, 'floor' => 1, 'price_per_night' => 75, 'status' => 'available']);
-        return Booking::create(['user_id' => $customer->id, 'room_id' => $room->id, 'check_in_date' => '2026-10-01', 'check_out_date' => '2026-10-04', 'number_of_guests' => 1, 'total_amount' => 225, 'status' => 'Pending']);
+        $roomType = RoomType::create([
+            'name' => 'Dashboard test room type',
+            'base_price' => 100.00,
+            'capacity' => 2,
+        ]);
+        $room = Room::create([
+            'room_type_id' => $roomType->id,
+            'room_number' => 'DASH-101',
+            'price_per_night' => 100.00,
+        ]);
+
+        return Booking::create([
+            'user_id' => $customer->id,
+            'room_id' => $room->id,
+            'check_in_date' => '2026-10-20',
+            'check_out_date' => '2026-10-21',
+            'number_of_guests' => 1,
+            'total_amount' => 100.00,
+            'status' => 'Confirmed',
+        ]);
     }
 }

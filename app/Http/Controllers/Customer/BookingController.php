@@ -80,7 +80,7 @@ class BookingController extends Controller
 
     public function show(Request $request, string $booking): View
     {
-        $booking = Booking::with(['room.roomType', 'bookingPackages.package', 'payments'])->where('user_id', $request->user()->id)->findOrFail($booking);
+        $booking = Booking::with(['room.roomType', 'bookingPackages.package', 'paymentSlip', 'payments'])->where('user_id', $request->user()->id)->findOrFail($booking);
         $numberOfNights = Carbon::parse($booking->check_in_date)->diffInDays(Carbon::parse($booking->check_out_date));
 
         return view('customer.bookings.show', compact('booking', 'numberOfNights'));

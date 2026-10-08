@@ -2,8 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Booking;
 use App\Models\EventBooking;
 use App\Models\Payment;
+use App\Models\Room;
+use App\Models\RoomType;
 use App\Models\User;
 use Database\Seeders\PaymentSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
@@ -53,6 +56,62 @@ class PaymentFeatureTest extends TestCase
             'event_booking_id' => $eventBooking->id,
             'reference_number' => 'PAY-FEATURE-001',
         ]);
+    }
+
+    public function test_staff_can_create_a_valid_room_payment(): void
+    {
+        $customer = User::factory()->create();
+        $booking = $this->roomBookingFor($customer);
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'booking_id' => $booking->id,
+                'event_booking_id' => null,
+            ]))
+            ->assertRedirect(route('payments.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('payments', [
+            'user_id' => $customer->id,
+            'booking_id' => $booking->id,
+            'event_booking_id' => null,
+        ]);
+    }
+
+    public function test_room_payment_rejects_a_nonexistent_booking(): void
+    {
+        $customer = User::factory()->create();
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'booking_id' => 999999,
+                'event_booking_id' => null,
+            ]))
+            ->assertSessionHasErrors('booking_id');
+
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_room_payment_rejects_a_booking_owned_by_another_customer(): void
+    {
+        $customer = User::factory()->create();
+        $otherCustomer = User::factory()->create();
+        $booking = $this->roomBookingFor($otherCustomer);
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'booking_id' => $booking->id,
+                'event_booking_id' => null,
+            ]))
+            ->assertSessionHasErrors('booking_id');
+
+        $this->assertDatabaseCount('payments', 0);
     }
 
     public function test_new_payment_cannot_be_created_as_refunded(): void
@@ -144,12 +203,13 @@ class PaymentFeatureTest extends TestCase
     public function test_payment_rejects_when_both_booking_types_are_supplied(): void
     {
         $customer = User::factory()->create();
+        $booking = $this->roomBookingFor($customer);
         $eventBooking = EventBooking::factory()->for($customer)->create();
         $staff = User::factory()->staff()->create();
 
         $response = $this->actingAs($staff)
             ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
-                'booking_id' => 123,
+                'booking_id' => $booking->id,
             ]));
 
         $response->assertSessionHasErrors('booking_id');
@@ -182,13 +242,16 @@ class PaymentFeatureTest extends TestCase
         $customer = User::factory()->create();
         $eventBooking = EventBooking::factory()->for($customer)->create();
         $staff = User::factory()->staff()->create();
-        $payment = Payment::create($this->validPayload($customer, $eventBooking));
+        $payment = Payment::create($this->validPayload($customer, $eventBooking, [
+            'status' => 'Pending',
+        ]));
 
         foreach ([0, -1] as $bookingId) {
             $response = $this->actingAs($staff)
                 ->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
                     'booking_id' => $bookingId,
                     'event_booking_id' => null,
+                    'status' => 'Pending',
                 ]));
 
             $response->assertSessionHasErrors('booking_id');
@@ -219,6 +282,120 @@ class PaymentFeatureTest extends TestCase
         $response->assertSessionHasNoErrors();
         $this->assertSame('PAY-FEATURE-001', $payment->fresh()->reference_number);
         $this->assertSame('200.00', $payment->fresh()->amount);
+    }
+
+    public function test_update_rejects_a_nonexistent_or_other_customers_room_booking(): void
+    {
+        $customer = User::factory()->create();
+        $otherCustomer = User::factory()->create();
+        $otherBooking = $this->roomBookingFor($otherCustomer);
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+        $payment = Payment::create($this->validPayload($customer, $eventBooking, [
+            'status' => 'Pending',
+        ]));
+
+        foreach ([999999, $otherBooking->id] as $bookingId) {
+            $this->actingAs($staff)
+                ->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
+                    'booking_id' => $bookingId,
+                    'event_booking_id' => null,
+                    'status' => 'Pending',
+                ]))
+                ->assertSessionHasErrors('booking_id');
+        }
+
+        $this->assertNull($payment->fresh()->booking_id);
+        $this->assertSame($eventBooking->id, $payment->fresh()->event_booking_id);
+    }
+
+    public function test_reference_number_must_fit_the_database_column_on_create_and_update(): void
+    {
+        $customer = User::factory()->create();
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'reference_number' => str_repeat('A', 192),
+            ]))
+            ->assertSessionHasErrors('reference_number');
+
+        $reference = str_repeat('A', 191);
+        $this->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+            'reference_number' => $reference,
+            'status' => 'Pending',
+        ]))->assertRedirect(route('payments.index'))
+            ->assertSessionHasNoErrors();
+        $payment = Payment::where('reference_number', $reference)->firstOrFail();
+
+        $this->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
+            'reference_number' => str_repeat('B', 192),
+            'status' => 'Pending',
+        ]))->assertSessionHasErrors('reference_number');
+
+        $this->assertSame($reference, $payment->fresh()->reference_number);
+    }
+
+    public function test_amount_rejects_more_than_two_decimal_places_on_create_and_update(): void
+    {
+        $customer = User::factory()->create();
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'amount' => '10.001',
+            ]))
+            ->assertSessionHasErrors('amount');
+
+        $this->assertDatabaseCount('payments', 0);
+
+        $payment = Payment::create($this->validPayload($customer, $eventBooking, [
+            'status' => 'Pending',
+        ]));
+
+        $this->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
+            'amount' => '10.001',
+            'status' => 'Pending',
+        ]))->assertSessionHasErrors('amount');
+
+        $this->assertSame('150.00', $payment->fresh()->amount);
+    }
+
+    public function test_amount_stays_within_the_database_range(): void
+    {
+        $customer = User::factory()->create();
+        $eventBooking = EventBooking::factory()->for($customer)->create();
+        $staff = User::factory()->staff()->create();
+
+        $this->actingAs($staff)
+            ->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+                'amount' => '100000000.00',
+            ]))
+            ->assertSessionHasErrors('amount');
+
+        $this->post(route('payments.store'), $this->validPayload($customer, $eventBooking, [
+            'amount' => '99999999.99',
+            'status' => 'Pending',
+        ]))->assertRedirect(route('payments.index'))
+            ->assertSessionHasNoErrors();
+
+        $payment = Payment::where('reference_number', 'PAY-FEATURE-001')->firstOrFail();
+        $this->assertSame('99999999.99', $payment->amount);
+
+        $this->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
+            'amount' => '100000000.00',
+            'status' => 'Pending',
+        ]))->assertSessionHasErrors('amount');
+
+        $this->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
+            'amount' => '0.01',
+            'status' => 'Pending',
+        ]))->assertRedirect(route('payments.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('0.01', $payment->fresh()->amount);
     }
 
     public function test_pending_payment_can_be_edited(): void
@@ -348,11 +525,12 @@ class PaymentFeatureTest extends TestCase
             'status' => 'Pending',
         ]));
 
+        // Refunded is no longer a valid value for the update endpoint —
+        // it is rejected at the validation layer before reaching the controller.
         $this->actingAs($staff)
             ->put(route('payments.update', $payment), $this->validPayload($customer, $eventBooking, [
                 'status' => 'Refunded',
-            ]))->assertRedirect(route('payments.show', $payment))
-            ->assertSessionHas('error', 'Only paid payments can be refunded.');
+            ]))->assertSessionHasErrors(['status']);
 
         $this->assertSame('Pending', $payment->fresh()->status);
     }
@@ -443,6 +621,22 @@ class PaymentFeatureTest extends TestCase
         $this->assertDatabaseCount('payments', 2);
     }
 
+    public function test_demo_seeder_does_not_restore_a_refunded_payment_to_paid(): void
+    {
+        $customer = User::factory()->create();
+        EventBooking::factory()->for($customer)->create();
+
+        $this->seed(PaymentSeeder::class);
+        $demoPayment = Payment::where('reference_number', 'DEMO-EVENT-PAYMENT')->firstOrFail();
+        $demoPayment->update(['status' => 'Refunded']);
+        $original = $demoPayment->fresh()->getRawOriginal();
+
+        $this->seed(PaymentSeeder::class);
+
+        $this->assertSame($original, $demoPayment->fresh()->getRawOriginal());
+        $this->assertDatabaseCount('payments', 1);
+    }
+
     public function test_receipt_explains_paid_pending_and_refunded_statuses(): void
     {
         $customer = User::factory()->create();
@@ -473,6 +667,46 @@ class PaymentFeatureTest extends TestCase
         }
     }
 
+    public function test_booking_with_attached_payments_cannot_be_deleted(): void
+    {
+        $customer = User::factory()->create();
+        $staff = User::factory()->staff()->create();
+        $booking = $this->roomBookingFor($customer);
+
+        Payment::create([
+            'user_id' => $customer->id,
+            'booking_id' => $booking->id,
+            'amount' => 100.00,
+            'payment_method' => 'Cash',
+            'payment_date' => '2026-10-01',
+            'status' => 'Paid',
+            'reference_number' => 'PAY-PREVENT-DEL',
+        ]);
+
+        $response = $this->actingAs($staff)
+            ->delete(route('bookings.destroy', $booking));
+
+        $response->assertRedirect(route('bookings.index'));
+        $response->assertSessionHas('error', 'Cannot delete Booking #' . $booking->id . ' because it has payment records attached. Please delete or refund the payment records first.');
+
+        $this->assertDatabaseHas('bookings', ['id' => $booking->id]);
+    }
+
+    public function test_booking_without_attached_payments_can_be_deleted(): void
+    {
+        $customer = User::factory()->create();
+        $staff = User::factory()->staff()->create();
+        $booking = $this->roomBookingFor($customer);
+
+        $response = $this->actingAs($staff)
+            ->delete(route('bookings.destroy', $booking));
+
+        $response->assertRedirect(route('bookings.index'));
+        $response->assertSessionHas('success', 'Booking deleted successfully.');
+
+        $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>
@@ -489,5 +723,29 @@ class PaymentFeatureTest extends TestCase
             'status' => 'Paid',
             'reference_number' => 'PAY-FEATURE-001',
         ], $overrides);
+    }
+
+    private function roomBookingFor(User $customer): Booking
+    {
+        $roomType = RoomType::create([
+            'name' => 'Payment test room type',
+            'base_price' => 100.00,
+            'capacity' => 2,
+        ]);
+        $room = Room::create([
+            'room_type_id' => $roomType->id,
+            'room_number' => 'PAY-101',
+            'price_per_night' => 100.00,
+        ]);
+
+        return Booking::create([
+            'user_id' => $customer->id,
+            'room_id' => $room->id,
+            'check_in_date' => '2026-10-20',
+            'check_out_date' => '2026-10-21',
+            'number_of_guests' => 1,
+            'total_amount' => 100.00,
+            'status' => 'Confirmed',
+        ]);
     }
 }

@@ -36,12 +36,16 @@ class Payment extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
+    }
+
     public function eventBooking(): BelongsTo
     {
         return $this->belongsTo(EventBooking::class);
     }
 
-    public function booking(): BelongsTo { return $this->belongsTo(Booking::class); }
     public function membershipPurchase(): BelongsTo { return $this->belongsTo(MembershipPurchase::class); }
 
     public const CUSTOMER_METHODS = ['Card', 'ABA / KHQR', 'Cash at Hotel'];

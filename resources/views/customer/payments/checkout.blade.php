@@ -14,8 +14,8 @@
                 @include('customer.payments._stay-summary')
             @else
                 <h2 class="h3">{{ $plan->name }} Membership</h2><p class="text-muted">12 months of member benefits, starting once payment is recorded as Paid.</p>
-                <ul class="list-unstyled payment-benefits"><li><i class="bi bi-check2" aria-hidden="true"></i> {{ number_format($plan->discount_percentage, 2) }}% off room and package bookings</li><li><i class="bi bi-check2" aria-hidden="true"></i> Annual plan · ${{ number_format($amount, 2) }}</li>@if($plan->loyalty_upgrade_points)<li><i class="bi bi-check2" aria-hidden="true"></i> {{ number_format($plan->loyalty_upgrade_points) }} points toward your next tier <span class="text-muted small">(future loyalty program)</span></li>@endif</ul>
-                <p class="small text-muted mb-0">Loyalty earning and tier upgrades are not available yet.</p>
+                <ul class="list-unstyled payment-benefits"><li><i class="bi bi-check2" aria-hidden="true"></i> {{ number_format($plan->discount_percentage, 2) }}% off room and package bookings</li><li><i class="bi bi-check2" aria-hidden="true"></i> Annual plan · ${{ number_format($amount, 2) }}</li>@if($plan->loyalty_upgrade_points)<li><i class="bi bi-check2" aria-hidden="true"></i> {{ number_format($plan->loyalty_upgrade_points) }} points toward your next tier</li>@endif</ul>
+                <p class="small text-muted mb-0">Earn 1 point per $1 paid on eligible stays while your paid membership is active.</p>
             @endif
         </section></div>
         <div class="col-lg-7"><section class="checkout-summary p-4">

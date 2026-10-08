@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Membership;
 use App\Models\MembershipType;
+use App\Models\User;
+use App\Services\LoyaltyService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -24,7 +27,8 @@ class MembershipController extends Controller
             ->first();
 
         $pendingPurchase = \App\Models\MembershipPurchase::with('payment')->where('user_id', Auth::id())->where('status', 'pending')->first();
-        return view('memberships.index', compact('membershipTypes', 'currentMembership', 'pendingPurchase'));
+        $loyalty = app(LoyaltyService::class)->summary(Auth::user());
+        return view('memberships.index', compact('membershipTypes', 'currentMembership', 'pendingPurchase', 'loyalty'));
     }
 
     /**
@@ -47,7 +51,10 @@ class MembershipController extends Controller
     {
         abort_unless($membership->user_id === Auth::id(), 403);
 
-        $membership->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($membership) {
+            User::whereKey($membership->user_id)->lockForUpdate()->firstOrFail();
+            Membership::lockForUpdate()->findOrFail($membership->id)->update(['status' => 'cancelled']);
+        });
 
         return redirect()
             ->route('memberships.index')

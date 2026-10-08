@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
+
     public function bookingPackages(): HasMany
     {
         return $this->hasMany(BookingPackage::class);

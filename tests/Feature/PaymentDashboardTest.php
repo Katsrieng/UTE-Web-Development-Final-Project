@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Booking;
 use App\Models\EventBooking;
-use App\Models\Payment;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;

@@ -25,6 +25,7 @@
             </div>
         </section>
     @endif
+    @if($pendingPurchase?->payment)<div class="payment-instructions mb-4"><i class="bi bi-clock" aria-hidden="true"></i><div><strong>Your membership purchase is pending.</strong><a class="d-block" href="{{ route('customer.payments.show', $pendingPurchase->payment) }}">View payment details</a></div></div>@endif
     <div class="row g-4 justify-content-center">
         @forelse($membershipTypes as $type)
             @php
@@ -59,18 +60,22 @@
                         @endif
                         <li><i class="bi bi-check2" aria-hidden="true"></i><span>Valid for {{ $type->duration_months }} months</span></li>
                     </ul>
-                    <button type="button" class="btn btn-hotel membership-purchase w-100" disabled aria-describedby="membership-purchase-note">Purchase Membership</button>
+                    @if(!$currentMembership && !$pendingPurchase && $type->price !== null && (float) $type->price > 0 && $type->duration_months == 12)
+                        <a class="btn btn-hotel membership-purchase w-100" href="{{ route('customer.payments.membership', $type) }}">Purchase Membership</a>
+                    @else
+                        <button type="button" class="btn btn-hotel membership-purchase w-100" disabled aria-describedby="membership-purchase-note">{{ $currentMembership ? 'Current membership active' : ($pendingPurchase ? 'Purchase pending' : 'Plan unavailable') }}</button>
+                    @endif
                 </article>
             </div>
         @empty
             <div class="col-12"><x-empty-state icon="bi-award" title="Memberships coming soon" message="No active membership tiers are currently available." /></div>
         @endforelse
     </div>
-    @if($membershipTypes->isNotEmpty())<p id="membership-purchase-note" class="membership-purchase-note small mt-3 mb-0" role="note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Secure online membership purchase will be available once payment integration is enabled.</span></p>@endif
+    @if($membershipTypes->isNotEmpty())<p id="membership-purchase-note" class="membership-purchase-note small mt-3 mb-0" role="note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Cash and transfers require hotel verification. Card checkout is a demo simulation, with no real charge.</span></p>@endif
     <section class="membership-loyalty mt-4 p-3 p-md-4" aria-labelledby="loyalty-heading">
         <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3"><h2 id="loyalty-heading" class="h5 mb-0">How loyalty works</h2><p class="small text-muted mb-0">Coming with payment and loyalty integration.</p></div>
         <ol class="row g-3 list-unstyled mb-0">
-            <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">1</span><div><h3 class="h6 mb-1">Join</h3><p class="small text-muted mb-0">Choose your membership when purchases open.</p></div></li>
+            <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">1</span><div><h3 class="h6 mb-1">Join</h3><p class="small text-muted mb-0">Choose a membership and complete your payment.</p></div></li>
             <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">2</span><div><h3 class="h6 mb-1">Stay &amp; Earn</h3><p class="small text-muted mb-0">Active members earn 1 point per $1 actually paid on eligible stays.</p></div></li>
             <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">3</span><div><h3 class="h6 mb-1">Upgrade</h3><p class="small text-muted mb-0">Reach the required points to unlock your next tier.</p></div></li>
         </ol>

@@ -20,6 +20,7 @@
             <a class="management-nav-link {{ request()->routeIs('management.venues.*') ? 'active' : '' }}" href="{{ route('management.venues.index') }}"><i class="bi bi-building"></i><span>Venues</span></a>
             <a class="management-nav-link {{ request()->routeIs('management.event-reservations.*') ? 'active' : '' }}" href="{{ route('management.event-reservations.index') }}"><i class="bi bi-calendar2-check"></i><span>Event Reservations</span></a>
             <a class="management-nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}" href="{{ route('payments.index') }}"><i class="bi bi-credit-card"></i><span>Payments</span></a>
+            <a class="management-nav-link {{ request()->routeIs('payment-settings.*') ? 'active' : '' }}" href="{{ route('payment-settings.edit') }}"><i class="bi bi-qr-code"></i><span>Payment Settings</span></a>
 
             @if(auth()->user()->isAdmin())
                 <p class="nav-section-label">Administration</p>

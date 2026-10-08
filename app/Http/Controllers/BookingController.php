@@ -123,13 +123,25 @@ class BookingController extends Controller
                 ]);
             }
 
+            $payments = $booking->payments()->lockForUpdate()->get();
+            if ($payments->isNotEmpty() && (int) $validated['user_id'] !== (int) $booking->user_id) {
+                throw ValidationException::withMessages(['user_id' => 'A booking with a payment record cannot be reassigned to another customer.']);
+            }
+
             $room = $this->bookings->validateRoom(array_merge($validated, ['status' => $booking->status]), $booking);
             unset($validated['status']);
 
             $subtotal = $this->bookings->combineTotal($this->bookings->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $booking->packageTotalCents());
             $validated = array_merge($validated, $this->bookings->applyMembershipDiscount($subtotal, $booking->membership_discount_percentage ?? '0.00'));
 
+            if ($payments->contains('status', 'Paid') && (int) round($validated['total_amount'] * 100) !== (int) round((float) $booking->total_amount * 100)) {
+                throw ValidationException::withMessages(['payment' => 'The total of a paid booking cannot be changed. Resolve its payment with the hotel first.']);
+            }
+
             $booking->update($validated);
+            foreach ($payments->where('status', 'Pending') as $payment) {
+                $payment->update(['amount' => $booking->total_amount]);
+            }
 
             return redirect()
                 ->route('bookings.index')
@@ -178,15 +190,15 @@ class BookingController extends Controller
      */
     public function destroy(string $id)
     {
-        $booking = Booking::withCount('payments')->findOrFail($id);
-
-        if ($booking->payments_count > 0) {
-            return redirect()
-                ->route('bookings.index')
-                ->with('error', 'Cannot delete Booking #' . $booking->id . ' because it has payment records attached. Please delete or refund the payment records first.');
-        }
-
-        $booking->delete();
+        DB::transaction(function () use ($id) {
+            $booking = Booking::lockForUpdate()->findOrFail($id);
+            if ($booking->payments()->exists()) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Bookings with payment records cannot be deleted.',
+                ]);
+            }
+            $booking->delete();
+        });
 
         return redirect()
             ->route('bookings.index')

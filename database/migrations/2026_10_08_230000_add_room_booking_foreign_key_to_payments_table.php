@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (collect(Schema::getForeignKeys('payments'))->contains(fn ($key) => $key['columns'] === ['booking_id'])) {
+            return;
+        }
+
         Schema::table('payments', function (Blueprint $table) {
             $table->foreign('booking_id')
                 ->references('id')
@@ -18,6 +22,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! collect(Schema::getForeignKeys('payments'))->contains(fn ($key) => $key['name'] === 'payments_booking_id_foreign')) {
+            return;
+        }
+
         Schema::table('payments', function (Blueprint $table) {
             $table->dropForeign(['booking_id']);
         });

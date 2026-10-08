@@ -7,12 +7,14 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
+use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\Customer\PaymentSlipController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FacilityController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentSettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomImageController;
@@ -103,6 +105,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/my-bookings/{booking}/payment-slip', [PaymentSlipController::class, 'destroy'])->name('payment-slip.destroy');
     });
 
+    Route::middleware(['role:customer', EnsureActiveCustomer::class])->name('customer.payments.')->group(function () {
+        Route::get('/my-bookings/{booking}/payment', [CustomerPaymentController::class, 'booking'])->name('booking');
+        Route::post('/my-bookings/{booking}/payment', [CustomerPaymentController::class, 'storeBooking'])->name('booking.store');
+        Route::get('/memberships/{membershipType}/purchase', [CustomerPaymentController::class, 'membership'])->name('membership');
+        Route::post('/memberships/{membershipType}/purchase', [CustomerPaymentController::class, 'storeMembership'])->name('membership.store');
+        Route::get('/my-payments/{payment}', [CustomerPaymentController::class, 'show'])->name('show');
+        Route::get('/my-payments/{payment}/receipt', [CustomerPaymentController::class, 'receipt'])->name('receipt');
+    });
+
     // ======================================
     // ADMIN & STAFF ONLY
     // ======================================
@@ -129,6 +140,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('bookings', BookingController::class);
 
         // Payments
+        Route::get('/payment-settings', [PaymentSettingsController::class, 'edit'])->name('payment-settings.edit');
+        Route::put('/payment-settings', [PaymentSettingsController::class, 'update'])->name('payment-settings.update');
+        Route::delete('/payment-settings/qr', [PaymentSettingsController::class, 'removeQr'])->name('payment-settings.remove-qr');
         Route::get(
             '/payments/{payment}/receipt',
             [PaymentController::class, 'receipt']
@@ -136,6 +150,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/payments/{payment}/refund', [PaymentController::class, 'refund'])
             ->name('payments.refund');
+        Route::post('/payments/{payment}/verify', [PaymentController::class, 'verify'])->name('payments.verify');
 
         Route::resource('payments', PaymentController::class);
 

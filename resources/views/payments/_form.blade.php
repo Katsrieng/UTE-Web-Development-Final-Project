@@ -13,6 +13,21 @@
     </div>
 @endif
 
+@if(isset($payment) && ($payment->booking_id || $payment->membership_purchase_id))
+<div class="card shadow-sm border-0"><div class="card-body p-4">
+    @include('payments._purpose')
+    <p class="small text-muted">Customer, payment purpose and amount are linked to the original record.</p>
+    @foreach(['user_id','booking_id','event_booking_id','membership_purchase_id'] as $field)<input type="hidden" name="{{ $field }}" value="{{ $payment->$field }}">@endforeach
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label" for="amount">Amount</label><input id="amount" class="form-control" name="amount" value="{{ $payment->booking_id ? $payment->booking->total_amount : $payment->membershipPurchase->price }}" readonly></div>
+        <div class="col-md-6"><label class="form-label" for="reference_number">Payment reference</label><input id="reference_number" class="form-control" name="reference_number" value="{{ $payment->reference_number }}" maxlength="191" required></div>
+        <div class="col-md-6"><label class="form-label" for="payment_method">Method</label><select id="payment_method" name="payment_method" class="form-select">@foreach(App\Models\Payment::METHODS as $method)<option @selected($payment->payment_method === $method)>{{ $method }}</option>@endforeach</select></div>
+        <div class="col-md-6"><label class="form-label" for="payment_date">Date</label><input id="payment_date" type="date" class="form-control" name="payment_date" value="{{ $payment->payment_date->toDateString() }}" required></div>
+        <div class="col-md-6"><label class="form-label" for="status">Status</label><select id="status" name="status" class="form-select"><option>Pending</option><option>Paid</option></select></div>
+        <div class="col-md-6"><label class="form-label" for="transaction_reference">Transaction reference</label><input id="transaction_reference" name="transaction_reference" class="form-control" value="{{ $payment->transaction_reference }}" maxlength="191"></div>
+    </div>
+</div></div>
+@else
 <div class="row g-4">
     <div class="col-lg-7">
         <div class="card shadow-sm border-0">
@@ -64,7 +79,7 @@
                         <label for="payment_method" class="form-label">Payment method</label>
                         <select id="payment_method" name="payment_method" class="form-select @error('payment_method') is-invalid @enderror" required>
                             <option value="">Select method</option>
-                            @foreach(['Cash', 'Card', 'Bank Transfer'] as $method)
+                            @foreach(App\Models\Payment::METHODS as $method)
                                 <option value="{{ $method }}" @selected(old('payment_method', $payment->payment_method ?? request('payment_method', '')) === $method)>
                                     {{ $method }}
                                 </option>
@@ -134,6 +149,7 @@
     </div>
 </div>
 
+@endif
 <div class="d-flex justify-content-between mt-4">
     <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">Cancel</a>
     <button class="btn btn-hotel" type="submit">{{ $editing ? 'Save Changes' : 'Create Payment' }}</button>

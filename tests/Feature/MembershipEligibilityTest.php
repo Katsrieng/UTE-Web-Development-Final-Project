@@ -78,12 +78,12 @@ class MembershipEligibilityTest extends TestCase
             ->assertSessionHasErrors(['price', 'loyalty_upgrade_points', 'duration_months']);
     }
 
-    public function test_plan_page_has_disabled_purchase_actions_and_future_loyalty_wording(): void
+    public function test_plan_page_offers_payment_checkout_and_future_loyalty_wording(): void
     {
-        $this->tier(['price' => 40, 'loyalty_upgrade_points' => 700]);
+        $type = $this->tier(['price' => 40, 'loyalty_upgrade_points' => 700]);
         $this->actingAs(User::factory()->create())->get(route('memberships.index'))->assertOk()
             ->assertSee('$40.00')->assertSee('Purchase Membership')->assertSee('700')
-            ->assertSee('disabled', false)->assertDontSee('Join Gold');
+            ->assertSee(route('customer.payments.membership', $type))->assertDontSee('Join Gold');
     }
 
     public function test_cancelled_latest_record_does_not_hide_current_legacy_membership(): void

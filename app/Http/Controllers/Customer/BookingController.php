@@ -72,7 +72,7 @@ class BookingController extends Controller
 
     public function index(Request $request): View
     {
-        $bookings = Booking::with('room.roomType')->where('user_id', $request->user()->id)
+        $bookings = Booking::with(['room.roomType', 'payments'])->where('user_id', $request->user()->id)
             ->latest()->paginate(10);
 
         return view('customer.bookings.index', compact('bookings'));

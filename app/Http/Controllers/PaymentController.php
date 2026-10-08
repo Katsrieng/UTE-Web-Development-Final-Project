@@ -11,17 +11,20 @@ use App\Models\User;
 use App\Models\MembershipPurchase;
 use App\Services\PaymentService;
 use App\Services\LoyaltyService;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
     public function __construct(private PaymentService $payments) {}
-    public function index()
+    public function index(Request $request)
     {
         $payments = Payment::with(['user', 'eventBooking.user', 'eventBooking.venue', 'booking.room', 'membershipPurchase'])
+            ->when(in_array($request->query('status'), ['Pending', 'Paid', 'Refunded'], true), fn ($query) => $query->where('status', $request->query('status')))
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('payments.index', compact('payments'));
     }

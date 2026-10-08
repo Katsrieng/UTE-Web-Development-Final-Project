@@ -12,11 +12,12 @@
     $eventRevenueRate = $totalRevenue > 0 ? round(($eventBookingRevenue / $totalRevenue) * 100) : 0;
 @endphp
 
+<div class="operations-dashboard">
 <section class="dashboard-welcome">
     <div>
         <p class="section-kicker">Operations overview</p>
-        <h1>Welcome back, {{ auth()->user()->name }}</h1>
-        <p>Here is the latest snapshot of hotel payment activity.</p>
+        <h1>Hotel Operations</h1>
+        <p>Daily stays, room readiness and payment activity.</p>
     </div>
     <div class="dashboard-welcome-actions">
         <span class="dashboard-date"><i class="bi bi-calendar3"></i>{{ now()->format('D, M j') }}</span>
@@ -25,6 +26,8 @@
         </a>
     </div>
 </section>
+
+@include('admin.dashboard._operations')
 
 <section class="row g-3 g-xl-4 mb-4" aria-label="Payment summary">
     <div class="col-sm-6 col-xl-3">
@@ -35,7 +38,7 @@
             </div>
             <p>Total revenue</p>
             <strong>${{ number_format($totalRevenue, 2) }}</strong>
-            <small>From completed payments</small>
+            <small>Today's Recorded Revenue: ${{ number_format($todayRevenue, 2) }}</small>
         </article>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -46,7 +49,7 @@
             </div>
             <p>Total payments</p>
             <strong>{{ number_format($totalPayments) }}</strong>
-            <small>Across rooms and events</small>
+            <small>Rooms, events and memberships</small>
         </article>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -164,6 +167,8 @@
     </div>
 </div>
 
+@include('admin.dashboard._bookings', ['heading'=>'Recent Bookings', 'records'=>$recentBookings, 'dateField'=>null])
+
 <section class="dashboard-panel">
     <header class="dashboard-panel-header">
         <div>
@@ -181,7 +186,7 @@
             <tbody>
                 @forelse($recentPayments as $payment)
                     <tr>
-                        <td class="ps-4"><strong>{{ $payment->reference_number }}</strong><small>Payment #{{ $payment->id }}</small></td>
+                        <td class="ps-4"><strong>{{ $payment->reference_number }}</strong><small>{{ $payment->user?->name ?? 'Customer unavailable' }} · {{ $payment->booking_id ? 'Booking #'.$payment->booking_id : ($payment->membership_purchase_id ? 'Membership' : ($payment->event_booking_id ? 'Event #'.$payment->event_booking_id : 'Other')) }}</small></td>
                         <td class="fw-semibold">${{ number_format($payment->amount, 2) }}</td>
                         <td>{{ $payment->payment_method }}</td>
                         <td><x-status-badge :status="$payment->status" /></td>
@@ -203,6 +208,7 @@
         </table>
     </div>
 </section>
+</div>
 @endsection
 
 @if($totalPayments > 0)

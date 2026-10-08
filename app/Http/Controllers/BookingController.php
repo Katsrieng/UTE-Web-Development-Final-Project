@@ -20,12 +20,16 @@ class BookingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $bookings = Booking::with(['user', 'room.roomType', 'paymentSlip'])
             ->withCount('payments')
+            ->when(is_string($request->query('arrival_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('arrival_date')), fn ($query) => $query->whereDate('check_in_date', $request->query('arrival_date')))
+            ->when(is_string($request->query('departure_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('departure_date')), fn ($query) => $query->whereDate('check_out_date', $request->query('departure_date')))
+            ->when(in_array($request->query('status'), ['Pending', 'Confirmed', 'Checked In', 'Checked Out', 'Cancelled'], true), fn ($query) => $query->where('status', $request->query('status')))
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('bookings.index', compact('bookings'));
     }

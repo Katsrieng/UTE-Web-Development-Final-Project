@@ -50,10 +50,15 @@
                         @isset($totalAmount)
                             <div id="availabilityResult" class="checkout-availability" role="status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Available for your selected dates</div>
                             <div id="previewStay" class="small mt-2 mb-3"><p class="mb-1">{{ Carbon\Carbon::parse($reservation['check_in_date'])->format('M j') }} → {{ Carbon\Carbon::parse($reservation['check_out_date'])->format('M j, Y') }}</p><span class="text-muted">{{ $numberOfNights }} nights · {{ $reservation['number_of_guests'] }} guests</span></div>
-                            <div id="bookingPricePreview" class="checkout-prices" data-room-total-cents="{{ (int) round($roomTotal * 100) }}">
+                            <div id="bookingPricePreview" class="checkout-prices" data-room-total-cents="{{ (int) round($roomTotal * 100) }}" data-discount-basis-points="{{ (int) round((float) $membershipPricing['membership_discount_percentage'] * 100) }}">
                                 <div class="checkout-price-line"><span>Room stay</span><span>${{ number_format($roomTotal, 2) }}</span></div>
                                 <div id="livePackageLines">@foreach($packageLines as $line)<div class="checkout-price-line"><span>{{ $line['name'] }} × {{ $line['quantity'] }}</span><span>${{ number_format($line['line_total'], 2) }}</span></div>@endforeach</div>
                                 <div id="livePackageTotalRow" @if(!$packageLines) hidden @endif><div class="checkout-price-line small text-muted"><span>Package total</span><span id="livePackageTotal">${{ number_format($packageTotal, 2) }}</span></div></div>
+                                @if((float) $membershipPricing['membership_discount_percentage'] > 0)
+                                    <div class="checkout-price-line mt-3 pt-2 border-top"><span>Subtotal</span><span id="liveBookingSubtotal">${{ number_format($subtotal, 2) }}</span></div>
+                                    <div class="checkout-price-line"><span>{{ $membershipPricing['membership_name'] }} Member · {{ number_format($membershipPricing['membership_discount_percentage'], 2) }}% discount</span><span id="liveMembershipDiscount" class="text-success">−${{ number_format($membershipPricing['membership_discount_amount'], 2) }}</span></div>
+                                    <p class="small text-success mb-2">You save <span id="liveMembershipSaving">${{ number_format($membershipPricing['membership_discount_amount'], 2) }}</span></p>
+                                @endif
                                 <div class="checkout-total"><span>Total</span><strong id="liveBookingTotal">${{ number_format($totalAmount, 2) }}</strong></div>
                             </div>
                             <p id="staleTotalNotice" class="checkout-stale small" role="status" hidden>Your dates or guests changed. Check availability again before booking.</p>
@@ -128,7 +133,15 @@
         });
         document.getElementById('livePackageTotalRow').hidden = packageCents === 0;
         document.getElementById('livePackageTotal').textContent = money.format(packageCents / 100);
-        document.getElementById('liveBookingTotal').textContent = money.format((Number(pricePreview.dataset.roomTotalCents) + packageCents) / 100);
+        const subtotalCents = Number(pricePreview.dataset.roomTotalCents) + packageCents;
+        const discountCents = Math.floor((subtotalCents * Number(pricePreview.dataset.discountBasisPoints || 0) + 5000) / 10000);
+        const subtotal = document.getElementById('liveBookingSubtotal');
+        if (subtotal) {
+            subtotal.textContent = money.format(subtotalCents / 100);
+            document.getElementById('liveMembershipDiscount').textContent = '−' + money.format(discountCents / 100);
+            document.getElementById('liveMembershipSaving').textContent = money.format(discountCents / 100);
+        }
+        document.getElementById('liveBookingTotal').textContent = money.format((subtotalCents - discountCents) / 100);
     }
     ['check_in_date', 'check_out_date', 'number_of_guests'].forEach(function (id) {
         document.getElementById(id).addEventListener('input', invalidateBookingPreview);

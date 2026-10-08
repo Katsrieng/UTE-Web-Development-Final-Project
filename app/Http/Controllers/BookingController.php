@@ -124,7 +124,8 @@ class BookingController extends Controller
             $room = $this->bookings->validateRoom(array_merge($validated, ['status' => $booking->status]), $booking);
             unset($validated['status']);
 
-            $validated['total_amount'] = $this->bookings->combineTotal($this->bookings->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $booking->packageTotalCents());
+            $subtotal = $this->bookings->combineTotal($this->bookings->calculateTotal($room, $validated['check_in_date'], $validated['check_out_date']), $booking->packageTotalCents());
+            $validated = array_merge($validated, $this->bookings->applyMembershipDiscount($subtotal, $booking->membership_discount_percentage ?? '0.00'));
 
             $booking->update($validated);
 

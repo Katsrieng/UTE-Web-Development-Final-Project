@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             ['name' => 'Hotel Admin',    'email' => 'admin@hotel.com',     'role' => User::ROLE_ADMIN,    'phone' => '012 000 001'],
             ['name' => 'Front Desk',     'email' => 'staff@hotel.com',     'role' => User::ROLE_STAFF,    'phone' => '012 000 002'],
             ['name' => 'Sokha Customer', 'email' => 'customer1@hotel.com', 'role' => User::ROLE_CUSTOMER, 'phone' => '012 000 003'],
-            ['name' => 'Dara Customer',  'email' => 'customer2@hotel.com', 'role' => User::ROLE_CUSTOMER, 'phone' => '012 000 004'],
+            ['name' => 'Dara Customer',  'email' => 'customer2@hotel.com', 'role' => User::ROLE_CUSTOMER, 'phone' => '012 000 004'], 
         ];
 
         foreach ($users as $data) {

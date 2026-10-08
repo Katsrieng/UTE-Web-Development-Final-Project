@@ -26,7 +26,8 @@ class DashboardController extends Controller
             ->whereNotNull('event_booking_id')
             ->sum('amount');
 
-        $recentPayments = Payment::latest()
+        $recentPayments = Payment::with(['user', 'booking.room', 'eventBooking.venue'])
+            ->latest()
             ->take(5)
             ->get();
 

@@ -22,7 +22,8 @@ class BookingController extends Controller
      */
     public function index()
     {
-        $bookings = Booking::with(['user', 'room'])
+        $bookings = Booking::with(['user', 'room.roomType', 'paymentSlip'])
+            ->withCount('payments')
             ->latest()
             ->paginate(10);
 
@@ -68,6 +69,7 @@ class BookingController extends Controller
             'room',
             'bookingPackages.package',
             'statusLogs.changedBy',
+            'paymentSlip',
         ])->findOrFail($id);
 
         return view('bookings.show', compact('booking'));
@@ -176,7 +178,13 @@ class BookingController extends Controller
      */
     public function destroy(string $id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::withCount('payments')->findOrFail($id);
+
+        if ($booking->payments_count > 0) {
+            return redirect()
+                ->route('bookings.index')
+                ->with('error', 'Cannot delete Booking #' . $booking->id . ' because it has payment records attached. Please delete or refund the payment records first.');
+        }
 
         $booking->delete();
 

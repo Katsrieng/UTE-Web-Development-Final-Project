@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdatePaymentRequest;
+use App\Models\Booking;
 use App\Models\EventBooking;
 use App\Models\Payment;
 use App\Models\User;
@@ -27,8 +28,9 @@ class PaymentController extends Controller
             ->orderBy('name')
             ->get();
         $eventBookings = EventBooking::with(['user', 'venue'])->latest()->get();
+        $roomBookings = Booking::with(['user', 'room'])->latest()->get();
 
-        return view('payments.create', compact('users', 'eventBookings'));
+        return view('payments.create', compact('users', 'eventBookings', 'roomBookings'));
     }
 
     public function store(StorePaymentRequest $request)
@@ -62,8 +64,9 @@ class PaymentController extends Controller
             ->orderBy('name')
             ->get();
         $eventBookings = EventBooking::with(['user', 'venue'])->latest()->get();
+        $roomBookings = Booking::with(['user', 'room'])->latest()->get();
 
-        return view('payments.edit', compact('payment', 'users', 'eventBookings'));
+        return view('payments.edit', compact('payment', 'users', 'eventBookings', 'roomBookings'));
     }
 
     public function update(UpdatePaymentRequest $request, Payment $payment)

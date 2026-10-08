@@ -10,14 +10,14 @@ class PaymentSeeder extends Seeder
 {
     public function run(): void
     {
-        // Room-payment demo seeding is deferred until the room Booking module exists.
+        // Room-payment demo seeding is deferred to avoid inventing booking IDs.
         $eventBooking = EventBooking::whereNotNull('user_id')->orderBy('id')->first();
 
         if (! $eventBooking) {
             return;
         }
 
-        Payment::updateOrCreate(
+        Payment::firstOrCreate(
             ['reference_number' => 'DEMO-EVENT-PAYMENT'],
             [
                 'user_id' => $eventBooking->user_id,

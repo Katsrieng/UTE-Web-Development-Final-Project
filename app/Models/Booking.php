@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -100,5 +101,15 @@ class Booking extends Model
     public function statusLogs()
     {
         return $this->hasMany(BookingStatusLog::class);
+    }
+
+    public function paymentSlip(): HasOne
+    {
+        return $this->hasOne(BookingPaymentSlip::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 }

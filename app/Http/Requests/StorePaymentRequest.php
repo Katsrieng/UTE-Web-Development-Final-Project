@@ -17,7 +17,13 @@ class StorePaymentRequest extends FormRequest
         return [
             'user_id' => 'required|integer|exists:users,id',
 
-            'booking_id' => 'nullable|integer|min:1',
+            'booking_id' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::exists('bookings', 'id')
+                    ->where('user_id', $this->input('user_id')),
+            ],
             'event_booking_id' => [
                 'nullable',
                 'integer',
@@ -25,7 +31,7 @@ class StorePaymentRequest extends FormRequest
                     ->where('user_id', $this->input('user_id')),
             ],
 
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|decimal:0,2|min:0.01|max:99999999.99',
 
             'payment_method' => 'required|in:Cash,Card,Bank Transfer',
 
@@ -33,7 +39,7 @@ class StorePaymentRequest extends FormRequest
 
             'status' => 'required|in:Pending,Paid',
 
-            'reference_number' => 'required|string|max:255|unique:payments,reference_number',
+            'reference_number' => 'required|string|max:191|unique:payments,reference_number',
         ];
     }
 

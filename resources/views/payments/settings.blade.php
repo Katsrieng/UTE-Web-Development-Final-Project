@@ -3,6 +3,8 @@
 @section('page-label', 'Payments')
 @section('content')
 <div class="page-heading"><div><p class="section-kicker">Hotel payment information</p><h1>Payment Settings</h1><p>Manage the account and QR code shown at customer checkout.</p></div></div>
+
+@staffroute('payment-settings.update')
 <form action="{{ route('payment-settings.update') }}" method="POST" enctype="multipart/form-data" class="card border-0 shadow-sm">
     @csrf @method('PUT')
     <div class="card-body p-4">
@@ -57,7 +59,13 @@
     </div>
     <div class="card-footer bg-white px-4 py-3 d-flex justify-content-end"><button class="btn btn-hotel px-4" type="submit">Save Payment Settings</button></div>
 </form>
+@endstaffroute
+
 @if($settings->hasCustomQr())
-    <form id="removeCustomQrForm" action="{{ route('payment-settings.remove-qr') }}" method="POST">@csrf @method('DELETE')</form>
+
+@staffroute('payment-settings.remove-qr')
+<form id="removeCustomQrForm" action="{{ route('payment-settings.remove-qr') }}" method="POST">@csrf @method('DELETE')</form>
+@endstaffroute
+
 @endif
 @endsection

@@ -9,7 +9,11 @@
         <h1 class="h3 mb-1">Event Reservations</h1>
         <p class="text-muted mb-0">Review customer requests and manage reservation statuses.</p>
     </div>
-    <a href="{{ route('management.venues.index') }}" class="btn btn-outline-primary">Manage Venues</a>
+
+@staffroute('management.venues.index')
+<a href="{{ route('management.venues.index') }}" class="btn btn-outline-primary">Manage Venues</a>
+@endstaffroute
+
 </div>
 
 <x-list-toolbar :action="route('management.event-reservations.index')" placeholder="Customer, email, ID, venue or event type" :fields="['status'=>['label'=>'Status','all'=>'All statuses','options'=>array_combine(App\Models\EventBooking::STATUSES, array_map('ucfirst',App\Models\EventBooking::STATUSES))], 'venue_id'=>['label'=>'Venue','all'=>'All venues','options'=>$venues->pluck('name','id')->all()], 'event_date'=>['label'=>'Event date', 'type'=>'date']]" />
@@ -49,8 +53,12 @@
                         </td>
                         <td><span class="badge text-bg-{{ $statusColor }}">{{ ucfirst($eventBooking->status) }}</span></td>
                         <td class="text-end pe-4">
-                            <a href="{{ route('management.event-reservations.show', $eventBooking) }}"
+
+@staffroute('management.event-reservations.show')
+<a href="{{ route('management.event-reservations.show', $eventBooking) }}"
                                class="btn btn-sm btn-outline-primary mb-2">View</a>
+@endstaffroute
+
                             @include('management.event-reservations._record-actions', ['compact'=>true])
                         </td>
                     </tr>

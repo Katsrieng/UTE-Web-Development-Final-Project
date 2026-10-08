@@ -14,7 +14,15 @@
     <div class="{{ $managing ? '' : 'container' }}">
         <div class="page-heading">
             <div>@if($managing)<p class="section-kicker">Room catalogue</p>@endif<h1>{{ $managing ? 'Manage Room Types' : 'Explore Room Types' }}</h1><p>{{ $managing ? 'Maintain room categories, pricing, capacity, and catalogue images.' : 'Find the space that best suits your visit.' }}</p></div>
-            @if($managing)<div class="d-flex gap-2"><a href="{{ route('management.rooms.index') }}" class="btn btn-outline-secondary">Rooms</a><a href="{{ route('management.room-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> Add Room Type</a></div>@endif
+            @if($managing)<div class="d-flex gap-2">
+@staffroute('management.rooms.index')
+<a href="{{ route('management.rooms.index') }}" class="btn btn-outline-secondary">Rooms</a>
+@endstaffroute
+
+@staffroute('management.room-types.create')
+<a href="{{ route('management.room-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> Add Room Type</a>
+@endstaffroute
+</div>@endif
         </div>
 
         @if($managing)
@@ -31,7 +39,19 @@
                                     <td>{{ $type->capacity }} guests</td>
                                     <td>{{ $type->bed_type ?: '—' }}</td>
                                     <td>{{ $type->rooms_count }}</td>
-                                    <td class="text-end pe-4 text-nowrap"><a href="{{ route('management.room-types.show', $type) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a> <a href="{{ route('management.room-types.edit', $type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <form action="{{ route('management.room-types.destroy', $type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" data-confirm="Delete {{ $type->name }}?" type="submit"><i class="bi bi-trash"></i></button></form></td>
+                                    <td class="text-end pe-4 text-nowrap">
+@staffroute('management.room-types.show')
+<a href="{{ route('management.room-types.show', $type) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+@endstaffroute
+
+@staffroute('management.room-types.edit')
+<a href="{{ route('management.room-types.edit', $type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+@endstaffroute
+
+@staffroute('management.room-types.destroy')
+<form action="{{ route('management.room-types.destroy', $type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger" data-confirm="Delete {{ $type->name }}?" type="submit"><i class="bi bi-trash"></i></button></form>
+@endstaffroute
+</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="6"><x-empty-state icon="bi-house-door" title="No room types found" message="Create a room type to organize hotel inventory." /></td></tr>

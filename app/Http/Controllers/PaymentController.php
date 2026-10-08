@@ -45,6 +45,7 @@ class PaymentController extends Controller
     {
         DB::transaction(function () use ($request) {
             $data = $request->validated();
+            if ($data['status'] === 'Paid') { abort_unless($request->user()->hasPermission('verify_payments'), 403); }
             if (! empty($data['membership_purchase_id'])) {
                 throw ValidationException::withMessages(['membership_purchase_id' => 'Membership payments must originate from a customer purchase.']);
             }
@@ -115,6 +116,7 @@ class PaymentController extends Controller
             }
 
             $data = $request->validated();
+            if ($data['status'] === 'Paid') { abort_unless($request->user()->hasPermission('verify_payments'), 403); }
             if ($payment->booking_id || $payment->membership_purchase_id || ! empty($data['booking_id']) || ! empty($data['membership_purchase_id'])) {
                 foreach (['user_id', 'booking_id', 'event_booking_id', 'membership_purchase_id'] as $field) {
                     if ((int) ($data[$field] ?? 0) !== (int) ($payment->$field ?? 0)) {

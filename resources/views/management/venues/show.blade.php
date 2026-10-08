@@ -6,7 +6,11 @@
 @section('content')
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <a href="{{ route('management.venues.index') }}" class="text-decoration-none small">&larr; Manage venues</a>
+
+@staffroute('management.venues.index')
+<a href="{{ route('management.venues.index') }}" class="text-decoration-none small">&larr; Manage venues</a>
+@endstaffroute
+
         <h1 class="h3 mt-2 mb-1">{{ $venue->name }}</h1>
         <span class="badge text-bg-{{ $venue->is_active ? 'success' : 'secondary' }}">
             {{ $venue->is_active ? 'Active' : 'Archived' }}
@@ -14,7 +18,11 @@
     </div>
     <div class="d-flex gap-2">
         <a href="{{ route('venues.show', $venue) }}" class="btn btn-outline-secondary {{ $venue->is_active ? '' : 'disabled' }}">Public View</a>
-        <a href="{{ route('management.venues.edit', $venue) }}" class="btn btn-primary">Edit Venue</a>
+
+@staffroute('management.venues.edit')
+<a href="{{ route('management.venues.edit', $venue) }}" class="btn btn-primary">Edit Venue</a>
+@endstaffroute
+
     </div>
 </div>
 
@@ -62,7 +70,11 @@
 <div class="card shadow-sm border-0">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-3">
         <h2 class="h5 mb-0">Recent reservations</h2>
-        <a href="{{ route('management.event-reservations.index', ['venue_id' => $venue->id]) }}" class="btn btn-sm btn-outline-primary">View All</a>
+
+@staffroute('management.event-reservations.index')
+<a href="{{ route('management.event-reservations.index', ['venue_id' => $venue->id]) }}" class="btn btn-sm btn-outline-primary">View All</a>
+@endstaffroute
+
     </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -85,7 +97,11 @@
                         <td>{{ $eventBooking->guest_count }}</td>
                         <td>{{ ucfirst($eventBooking->status) }}</td>
                         <td class="text-end pe-3">
-                            <a href="{{ route('management.event-reservations.show', $eventBooking) }}" class="btn btn-sm btn-outline-primary">View</a>
+
+@staffroute('management.event-reservations.show')
+<a href="{{ route('management.event-reservations.show', $eventBooking) }}" class="btn btn-sm btn-outline-primary">View</a>
+@endstaffroute
+
                         </td>
                     </tr>
                 @empty

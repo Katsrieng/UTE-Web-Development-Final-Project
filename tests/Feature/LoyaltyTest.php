@@ -290,7 +290,7 @@ class LoyaltyTest extends TestCase
         $this->member();
         $this->pay('75.00');
         $this->actingAs(User::factory()->create(['role' => 'admin']))
-            ->delete(route('admin.users.destroy', $this->customer))->assertSessionHas('error');
+            ->delete(route('management.customers.destroy', $this->customer))->assertSessionHas('error');
         $this->assertDatabaseHas('users', ['id' => $this->customer->id]);
         $this->assertDatabaseCount('loyalty_transactions', 1);
     }

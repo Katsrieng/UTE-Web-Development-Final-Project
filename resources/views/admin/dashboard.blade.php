@@ -21,14 +21,19 @@
     </div>
     <div class="dashboard-welcome-actions">
         <span class="dashboard-date"><i class="bi bi-calendar3"></i>{{ now()->format('D, M j') }}</span>
-        <a href="{{ route('payments.create') }}" class="btn btn-hotel">
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create') }}" class="btn btn-hotel">
             <i class="bi bi-plus-lg me-1"></i> Add Payment
         </a>
+@endstaffroute
+
     </div>
 </section>
 
 @include('admin.dashboard._operations')
 
+@can('view_payments')
 <section class="row g-3 g-xl-4 mb-4" aria-label="Payment summary">
     <div class="col-sm-6 col-xl-3">
         <article class="dashboard-stat dashboard-stat--gold">
@@ -85,11 +90,15 @@
                     <h2>Payment status</h2>
                     <span>Distribution across all payment records</span>
                 </div>
-                <a href="{{ route('payments.index') }}" class="dashboard-panel-link">View payments <i class="bi bi-arrow-right"></i></a>
+
+@staffroute('payments.index')
+<a href="{{ route('payments.index') }}" class="dashboard-panel-link">View payments <i class="bi bi-arrow-right"></i></a>
+@endstaffroute
+
             </header>
 
             <div class="dashboard-panel-body dashboard-chart-area">
-                @if($totalPayments > 0)
+                @if($totalPayments > 0 && auth()->user()->hasPermission('view_payments'))
                     <div class="dashboard-chart-wrap">
                         <canvas id="paymentStatusChart" aria-label="Payment status chart"></canvas>
                     </div>
@@ -103,7 +112,11 @@
                         <span><i class="bi bi-pie-chart"></i></span>
                         <h3>No payment data yet</h3>
                         <p>The payment breakdown will appear after the first payment is recorded.</p>
-                        <a href="{{ route('payments.create') }}" class="btn btn-outline-primary btn-sm">Record first payment</a>
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create') }}" class="btn btn-outline-primary btn-sm">Record first payment</a>
+@endstaffroute
+
                     </div>
                 @endif
             </div>
@@ -158,17 +171,35 @@
                 </div>
             </header>
             <div class="dashboard-quick-grid">
-                <a href="{{ route('management.rooms.index') }}"><i class="bi bi-door-open"></i><span>Manage rooms</span></a>
-                <a href="{{ route('management.venues.index') }}"><i class="bi bi-building"></i><span>Manage venues</span></a>
-                <a href="{{ route('management.event-reservations.index') }}"><i class="bi bi-calendar2-check"></i><span>Event requests</span></a>
-                <a href="{{ route('payments.index') }}"><i class="bi bi-credit-card"></i><span>All payments</span></a>
+
+@staffroute('management.rooms.index')
+<a href="{{ route('management.rooms.index') }}"><i class="bi bi-door-open"></i><span>Manage rooms</span></a>
+@endstaffroute
+
+
+@staffroute('management.venues.index')
+<a href="{{ route('management.venues.index') }}"><i class="bi bi-building"></i><span>Manage venues</span></a>
+@endstaffroute
+
+
+@staffroute('management.event-reservations.index')
+<a href="{{ route('management.event-reservations.index') }}"><i class="bi bi-calendar2-check"></i><span>Event requests</span></a>
+@endstaffroute
+
+
+@staffroute('payments.index')
+<a href="{{ route('payments.index') }}"><i class="bi bi-credit-card"></i><span>All payments</span></a>
+@endstaffroute
+
             </div>
         </section>
     </div>
 </div>
 
+@endcan
 @include('admin.dashboard._bookings', ['heading'=>'Recent Bookings', 'records'=>$recentBookings, 'dateField'=>null])
 
+@can('view_payments')
 <section class="dashboard-panel">
     <header class="dashboard-panel-header">
         <div>
@@ -176,7 +207,11 @@
             <h2>Recent payments</h2>
             <span>The five most recently recorded transactions</span>
         </div>
-        <a href="{{ route('payments.index') }}" class="dashboard-panel-link">View all <i class="bi bi-arrow-right"></i></a>
+
+@staffroute('payments.index')
+<a href="{{ route('payments.index') }}" class="dashboard-panel-link">View all <i class="bi bi-arrow-right"></i></a>
+@endstaffroute
+
     </header>
     <div class="table-responsive">
         <table class="table dashboard-table align-middle mb-0">
@@ -191,7 +226,11 @@
                         <td>{{ $payment->payment_method }}</td>
                         <td><x-status-badge :status="$payment->status" /></td>
                         <td>{{ $payment->payment_date?->format('M j, Y') }}</td>
-                        <td class="text-end pe-4"><a href="{{ route('payments.show', $payment) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        <td class="text-end pe-4">
+@staffroute('payments.show')
+<a href="{{ route('payments.show', $payment) }}" class="btn btn-sm btn-outline-primary">View</a>
+@endstaffroute
+</td>
                     </tr>
                 @empty
                     <tr>
@@ -199,7 +238,11 @@
                             <div class="dashboard-table-empty">
                                 <span><i class="bi bi-receipt"></i></span>
                                 <div><strong>No payments recorded</strong><p>Add a payment to start tracking revenue and transaction activity.</p></div>
-                                <a href="{{ route('payments.create') }}" class="btn btn-hotel btn-sm">Add payment</a>
+
+@staffroute('payments.create')
+<a href="{{ route('payments.create') }}" class="btn btn-hotel btn-sm">Add payment</a>
+@endstaffroute
+
                             </div>
                         </td>
                     </tr>
@@ -208,10 +251,11 @@
         </table>
     </div>
 </section>
+@endcan
 </div>
 @endsection
 
-@if($totalPayments > 0)
+@if($totalPayments > 0 && auth()->user()->hasPermission('view_payments'))
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>

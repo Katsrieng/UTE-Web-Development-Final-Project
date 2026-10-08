@@ -1613,3 +1613,23 @@ textarea.form-control {
 .booking-history time { display: block; color: #65717d; font-size: .8rem; }
 @media (max-width: 991px) { .operations-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 575px) { .operations-kpis { gap: 10px; } .operations-kpi { padding: 12px; } .operations-kpi span { font-size: .8rem; } .operations-kpi small { font-size: .7rem; } .booking-history ol { flex-direction: column; gap: 12px; } }
+
+/* Staff role and permission management. */
+.rbac-role-list { display: grid; gap: 10px; }
+.rbac-role { display: grid; gap: 6px; padding: 16px; border: 1px solid #e4ded3; border-radius: 8px; background: #fff; color: #283442; text-decoration: none; }
+.rbac-role small { color: #626d77; font-size: .8rem; }
+.rbac-role span { font-size: .75rem; color: #74603e; }
+.rbac-role.is-selected { border-color: #ae844b; box-shadow: inset 3px 0 #ae844b; background: #fcf9f3; }
+.rbac-permission-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.rbac-permission-column { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.rbac-group { padding: 16px 18px; background: #fff; border: 1px solid #e4ded3; border-radius: 8px; }
+.rbac-group h3 { font-size: 1rem; margin-bottom: 12px; }
+.rbac-permission { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 0; border-top: 1px solid #eee9df; }
+.rbac-permission label { font-size: .85rem; font-weight: 600; cursor: pointer; }
+.rbac-permission small { display: block; color: #626d77; font-size: .75rem; }
+.rbac-permission .form-check { flex-shrink: 0; }
+.rbac-permission .form-check-input:checked { background-color: #8d6839; border-color: #8d6839; }
+.rbac-permission .form-check-input:focus { border-color: #8d6839; box-shadow: 0 0 0 .2rem #b68b5033; }
+.rbac-protected { background: #f4efe5; padding: 12px 16px; border-radius: 8px; color: #574327; font-size: .85rem; }
+.rbac-role:focus-visible { outline: 3px solid #ae844b; outline-offset: 3px; }
+@media (max-width: 991.98px) { .rbac-permission-columns { grid-template-columns: minmax(0, 1fr); } }

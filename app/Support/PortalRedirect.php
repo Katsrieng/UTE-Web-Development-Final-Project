@@ -12,7 +12,7 @@ class PortalRedirect
     public static function loginFor(Request $request): string
     {
         foreach ($request->route()?->gatherMiddleware() ?? [] as $middleware) {
-            if (is_string($middleware) && str_starts_with($middleware, 'role:') && array_intersect(explode(',', substr($middleware, 5)), ['admin', 'staff'])) {
+            if (is_string($middleware) && str_starts_with($middleware, 'role:') && array_intersect(explode(',', substr($middleware, 5)), ['admin', 'manager', 'staff'])) {
                 return route('staff.login');
             }
         }
@@ -60,7 +60,8 @@ class PortalRedirect
                 }
             }
 
-            return true;
+            $permission = RbacCatalog::routePermission($route->getName());
+            return !$permission || RbacCatalog::allowsRoute($user, $route->getName());
         } catch (HttpException $exception) {
             return false;
         }

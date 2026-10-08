@@ -25,7 +25,11 @@
                 <div class="d-flex justify-content-between align-items-start gap-3"><div><p class="section-kicker">{{ $room->roomType->name ?? 'Hotel room' }}</p><h2 class="h3 mb-0">Room {{ $room->room_number }}</h2></div><x-status-badge :status="$room->status" /></div>
                 <dl class="detail-list"><div><dt>Nightly rate</dt><dd>${{ number_format($room->price_per_night, 2) }}</dd></div><div><dt>Floor</dt><dd>{{ $room->floor }}</dd></div><div><dt>Capacity</dt><dd>{{ $room->roomType->capacity ?? '—' }} guests</dd></div><div><dt>Bed</dt><dd>{{ $room->roomType->bed_type ?? 'Contact hotel' }}</dd></div></dl>
                 @if($managing)
-                    <a href="{{ route('management.rooms.edit', $room) }}" class="btn btn-hotel w-100">Edit Room</a>
+
+@staffroute('management.rooms.edit')
+<a href="{{ route('management.rooms.edit', $room) }}" class="btn btn-hotel w-100">Edit Room</a>
+@endstaffroute
+
                 @elseif(auth()->guest())
                     <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Sign in to reserve this room</a>
                 @elseif(auth()->user()->isCustomer() && auth()->user()->is_active)

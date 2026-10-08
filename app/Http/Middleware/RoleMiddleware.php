@@ -16,7 +16,7 @@ class RoleMiddleware
     {
         $user = $request->user();
         if ($user && ! $user->is_active) {
-            $portal = $user->hasRole('admin', 'staff') ? 'staff.login' : 'login';
+            $portal = $user->hasRole('admin', 'manager', 'staff') ? 'staff.login' : 'login';
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

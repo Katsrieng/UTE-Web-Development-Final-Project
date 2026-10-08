@@ -10,9 +10,13 @@
         <h1>Bookings</h1>
         <p>Review customer room reservations, stay dates, guest counts, and statuses.</p>
     </div>
-    <a href="{{ route('bookings.create') }}" class="btn btn-hotel">
+
+@staffroute('bookings.create')
+<a href="{{ route('bookings.create') }}" class="btn btn-hotel">
         <i class="bi bi-plus-lg me-1"></i> Add Booking
     </a>
+@endstaffroute
+
 </div>
 
 <x-list-toolbar :action="route('bookings.index')" placeholder="Customer, email, booking ID or room" :fields="['status'=>['label'=>'Booking status', 'all'=>'All bookings', 'options'=>array_combine(array_keys(App\Models\Booking::STATUS_TRANSITIONS), array_keys(App\Models\Booking::STATUS_TRANSITIONS))], 'payment_status'=>['label'=>'Payment status', 'all'=>'All payments', 'options'=>['Pending'=>'Pending','Paid'=>'Paid','Refunded'=>'Refunded']], 'arrival_date'=>['label'=>'Arrival date', 'type'=>'date'], 'departure_date'=>['label'=>'Departure date', 'type'=>'date']]" />
@@ -72,24 +76,36 @@
                             @endif
                         </td>
                         <td class="text-end pe-4 text-nowrap">
-                            <a href="{{ route('bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary" title="View Details">
+
+@staffroute('bookings.show')
+<a href="{{ route('bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary" title="View Details">
                                 <i class="bi bi-eye"></i>
                             </a>
-                            <a href="{{ route('bookings.edit', $booking) }}" class="btn btn-sm btn-outline-secondary" title="Edit Booking">
+@endstaffroute
+
+
+@staffroute('bookings.edit')
+<a href="{{ route('bookings.edit', $booking) }}" class="btn btn-sm btn-outline-secondary" title="Edit Booking">
                                 <i class="bi bi-pencil"></i>
                             </a>
+@endstaffroute
+
                             @if(($booking->payments_count ?? 0) > 0)
                                 <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Cannot delete: payment records attached">
                                     <i class="bi bi-lock"></i>
                                 </button>
                             @else
-                                <form action="{{ route('bookings.destroy', $booking) }}" method="POST" class="d-inline">
+
+@staffroute('bookings.destroy')
+<form action="{{ route('bookings.destroy', $booking) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Booking" onclick="return confirm('Are you sure you want to delete Booking #{{ $booking->id }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
+@endstaffroute
+
                             @endif
                         </td>
                     </tr>

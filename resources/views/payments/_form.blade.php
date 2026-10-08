@@ -23,7 +23,7 @@
         <div class="col-md-6"><label class="form-label" for="reference_number">Payment reference</label><input id="reference_number" class="form-control" name="reference_number" value="{{ $payment->reference_number }}" maxlength="191" required></div>
         <div class="col-md-6"><label class="form-label" for="payment_method">Method</label><select id="payment_method" name="payment_method" class="form-select">@foreach(App\Models\Payment::METHODS as $method)<option @selected($payment->payment_method === $method)>{{ $method }}</option>@endforeach</select></div>
         <div class="col-md-6"><label class="form-label" for="payment_date">Date</label><input id="payment_date" type="date" class="form-control" name="payment_date" value="{{ $payment->payment_date->toDateString() }}" required></div>
-        <div class="col-md-6"><label class="form-label" for="status">Status</label><select id="status" name="status" class="form-select"><option>Pending</option><option>Paid</option></select></div>
+        <div class="col-md-6"><label class="form-label" for="status">Status</label><select id="status" name="status" class="form-select"><option>Pending</option>@can('verify_payments')<option>Paid</option>@endcan</select></div>
         <div class="col-md-6"><label class="form-label" for="transaction_reference">Transaction reference</label><input id="transaction_reference" name="transaction_reference" class="form-control" value="{{ $payment->transaction_reference }}" maxlength="191"></div>
     </div>
 </div></div>
@@ -92,6 +92,7 @@
                         <label for="status" class="form-label">Status</label>
                         <select id="status" name="status" class="form-select @error('status') is-invalid @enderror" required>
                             @foreach(['Pending', 'Paid'] as $status)
+                                @if($status === 'Paid' && !auth()->user()->hasPermission('verify_payments')) @continue @endif
                                 <option value="{{ $status }}" @selected(old('status', $payment->status ?? 'Pending') === $status)>
                                     {{ $status }}
                                 </option>
@@ -151,6 +152,10 @@
 
 @endif
 <div class="d-flex justify-content-between mt-4">
-    <a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">Cancel</a>
+
+@staffroute('payments.index')
+<a href="{{ route('payments.index') }}" class="btn btn-outline-secondary">Cancel</a>
+@endstaffroute
+
     <button class="btn btn-hotel" type="submit">{{ $editing ? 'Save Changes' : 'Create Payment' }}</button>
 </div>

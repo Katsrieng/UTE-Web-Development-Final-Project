@@ -39,4 +39,8 @@
     </div>
 </div>
 
-<div class="d-flex justify-content-between mt-4"><a href="{{ route('management.room-types.index') }}" class="btn btn-outline-secondary">Cancel</a><button class="btn btn-hotel" type="submit">{{ $editing ? 'Save Changes' : 'Create Room Type' }}</button></div>
+<div class="d-flex justify-content-between mt-4">
+@staffroute('management.room-types.index')
+<a href="{{ route('management.room-types.index') }}" class="btn btn-outline-secondary">Cancel</a>
+@endstaffroute
+<button class="btn btn-hotel" type="submit">{{ $editing ? 'Save Changes' : 'Create Room Type' }}</button></div>

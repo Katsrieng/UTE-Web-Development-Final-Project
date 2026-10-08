@@ -21,12 +21,15 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
+    public const ROLE_MANAGER = 'manager';
+
     public const ROLE_STAFF = 'staff';
 
     public const ROLE_CUSTOMER = 'customer';
 
     public const ROLES = [
         self::ROLE_ADMIN,
+        self::ROLE_MANAGER,
         self::ROLE_STAFF,
         self::ROLE_CUSTOMER,
     ];
@@ -46,6 +49,8 @@ class User extends Authenticatable
     }
 
     /* ---------- Relationships ---------- */
+
+    public function bookings(): HasMany { return $this->hasMany(Booking::class); }
 
     public function loyaltyAccount(): HasOne { return $this->hasOne(LoyaltyAccount::class); }
 
@@ -71,6 +76,25 @@ class User extends Authenticatable
         return in_array($this->role, $roles, true);
     }
 
+    public function staffRole(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role', 'slug');
+    }
+
+    public function hasPermission(string $slug): bool
+    {
+        if (! $this->is_active) { return false; }
+        if ($this->isAdmin()) { return true; }
+        if (! $this->hasRole(self::ROLE_MANAGER, self::ROLE_STAFF)
+            || in_array($slug, \App\Support\RbacCatalog::ADMIN_ONLY, true)) { return false; }
+        return $this->staffRole()->whereHas('permissions', fn ($query) => $query->where('permissions.slug', $slug))->exists();
+    }
+
+    public function roleLabel(): string
+    {
+        return $this->role === self::ROLE_STAFF ? 'Staff / Front Desk' : ucfirst($this->role);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
@@ -92,7 +116,7 @@ class User extends Authenticatable
      */
     public function homeRoute(): string
     {
-        return $this->hasRole(self::ROLE_ADMIN, self::ROLE_STAFF)
+        return $this->hasRole(self::ROLE_ADMIN, self::ROLE_MANAGER, self::ROLE_STAFF)
             ? 'dashboard'
             : 'customer.bookings.index';
     }

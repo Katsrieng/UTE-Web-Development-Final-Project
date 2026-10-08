@@ -111,7 +111,11 @@
 </div>
 
 <div class="d-flex justify-content-between mt-4">
-    <a href="{{ $editing ? route('management.venues.show', $venue) : route('management.venues.index') }}"
+
+@staffroute('management.venues.show')
+<a href="{{ $editing ? route('management.venues.show', $venue) : route('management.venues.index') }}"
        class="btn btn-outline-secondary">Cancel</a>
+@endstaffroute
+
     <button type="submit" class="btn btn-primary">{{ $editing ? 'Save Changes' : 'Create Venue' }}</button>
 </div>

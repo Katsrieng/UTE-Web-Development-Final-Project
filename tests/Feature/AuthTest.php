@@ -90,6 +90,7 @@ class AuthTest extends TestCase
 
     public function test_staff_can_open_dashboard_but_not_user_management(): void
     {
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
         $staff = User::factory()->staff()->create();
 
         $this->actingAs($staff)->get('/dashboard')->assertOk();

@@ -1537,3 +1537,19 @@ textarea.form-control {
 .membership-loyalty-step { font-size: .875rem; }
 .membership-loyalty li > div { min-width: 0; }
 @media (max-width: 575px) { .membership-purchase-note { justify-content: flex-start; } }
+
+.payment-checkout .payment-stay { background: white; border-radius: var(--hotel-radius); }
+.payment-total { font-size: clamp(1.5rem, 3vw, 2rem); color: var(--hotel-navy); white-space: nowrap; }
+.payment-method-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.payment-method-tile { display: flex; align-items: center; gap: .65rem; padding: .85rem; border: 1px solid var(--hotel-border); border-radius: var(--hotel-radius); cursor: pointer; font-size: .9rem; }
+.payment-method-tile.is-selected, .payment-method-tile:has(input:checked) { border-color: var(--hotel-gold-dark); background: var(--hotel-cream); }
+.payment-method-tile:focus-within { outline: 2px solid var(--hotel-navy); outline-offset: 2px; }
+.payment-method-tile input { accent-color: #8f6138; flex-shrink: 0; }
+.payment-method-tile > i { color: #8f6138; }
+.payment-card-fields { padding: 1rem 0; border-top: 1px solid var(--hotel-border); }
+.payment-card-fields[hidden], #manualPaymentFields[hidden] { display: none; }
+.payment-card-fields legend { float: none; width: auto; }
+.payment-instructions { display: flex; gap: .7rem; padding: .85rem; background: var(--hotel-cream); border-radius: var(--hotel-radius); }
+.payment-instructions > i { flex-shrink: 0; color: #8f6138; }
+.payment-benefits li { margin-bottom: .75rem; }
+@media (max-width: 575px) { .payment-method-grid { grid-template-columns: minmax(0, 1fr); } .payment-checkout .checkout-summary > .d-flex { flex-wrap: wrap; } }

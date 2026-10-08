@@ -201,4 +201,18 @@ class BookingService
             return $booking;
         });
     }
+
+    /** Internal payment side effect; the caller must hold the booking lock in its payment transaction. */
+    public function confirmPaidBooking(Booking $booking, User $actor): void
+    {
+        if ($booking->status !== 'Pending') {
+            return;
+        }
+        if (! $booking->canTransitionTo('Confirmed')) {
+            return;
+        }
+        $booking->update(['status' => 'Confirmed']);
+        BookingStatusLog::create(['booking_id' => $booking->id, 'changed_by' => $actor->id,
+            'old_status' => 'Pending', 'new_status' => 'Confirmed', 'note' => 'Payment recorded as Paid.']);
+    }
 }

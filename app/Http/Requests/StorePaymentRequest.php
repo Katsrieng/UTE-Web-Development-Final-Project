@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Payment;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +18,9 @@ class StorePaymentRequest extends FormRequest
         return [
             'user_id' => 'required|integer|exists:users,id',
 
-            'booking_id' => 'nullable|integer|min:1',
+            'booking_id' => ['nullable', 'integer', 'min:1', Rule::exists('bookings', 'id')->where('user_id', $this->input('user_id'))],
+            'membership_purchase_id' => ['nullable', 'integer', Rule::exists('membership_purchases', 'id')->where('user_id', $this->input('user_id'))],
+            'transaction_reference' => 'nullable|string|max:191',
             'event_booking_id' => [
                 'nullable',
                 'integer',
@@ -25,15 +28,15 @@ class StorePaymentRequest extends FormRequest
                     ->where('user_id', $this->input('user_id')),
             ],
 
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01|max:99999999.99|decimal:0,2',
 
-            'payment_method' => 'required|in:Cash,Card,Bank Transfer',
+            'payment_method' => ['required', Rule::in(Payment::METHODS)],
 
             'payment_date' => 'required|date',
 
             'status' => 'required|in:Pending,Paid',
 
-            'reference_number' => 'required|string|max:255|unique:payments,reference_number',
+            'reference_number' => 'required|string|max:191|unique:payments,reference_number',
         ];
     }
 
@@ -43,14 +46,14 @@ class StorePaymentRequest extends FormRequest
             $bookingId = $this->booking_id;
             $eventBookingId = $this->event_booking_id;
 
-            if (!$bookingId && !$eventBookingId) {
+            if (!$bookingId && !$eventBookingId && !$this->membership_purchase_id) {
                 $validator->errors()->add(
                     'booking_id',
                     'A payment must belong to a room booking or an event booking.'
                 );
             }
 
-            if ($bookingId && $eventBookingId) {
+            if (count(array_filter([$bookingId, $eventBookingId, $this->membership_purchase_id])) > 1) {
                 $validator->errors()->add(
                     'booking_id',
                     'A payment cannot belong to both a room booking and an event booking.'

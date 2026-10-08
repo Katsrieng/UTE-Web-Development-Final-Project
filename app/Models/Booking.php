@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
+    public function payments(): HasMany { return $this->hasMany(Payment::class); }
+
     public function bookingPackages(): HasMany
     {
         return $this->hasMany(BookingPackage::class);

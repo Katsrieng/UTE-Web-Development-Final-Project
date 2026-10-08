@@ -23,6 +23,13 @@
                 @if($booking->special_request)<div class="col-12"><hr><small class="text-muted d-block mb-1">Special request</small><p class="mb-0">{{ $booking->special_request }}</p></div>@endif
             </div>
         </div>
+        <div class="px-4 pb-4">
+            @if($payment = $booking->payments->sortBy('id')->first())
+                <a class="btn btn-hotel" href="{{ route('customer.payments.show', $payment) }}">Payment: {{ $payment->status }}</a>
+            @elseif(in_array($booking->status, App\Models\Booking::ACTIVE_STATUSES, true))
+                <a class="btn btn-hotel" href="{{ route('customer.payments.booking', $booking) }}">Pay Now</a>
+            @endif
+        </div>
         @if($booking->canTransitionTo('Cancelled'))
             <div class="card-footer bg-white p-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                 <p class="text-muted small mb-0">You can cancel a Pending or Confirmed reservation.</p>

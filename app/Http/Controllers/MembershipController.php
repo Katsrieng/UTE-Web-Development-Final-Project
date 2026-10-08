@@ -23,7 +23,8 @@ class MembershipController extends Controller
             ->orderByDesc('start_date')->orderByDesc('id')
             ->first();
 
-        return view('memberships.index', compact('membershipTypes', 'currentMembership'));
+        $pendingPurchase = \App\Models\MembershipPurchase::with('payment')->where('user_id', Auth::id())->where('status', 'pending')->first();
+        return view('memberships.index', compact('membershipTypes', 'currentMembership', 'pendingPurchase'));
     }
 
     /**

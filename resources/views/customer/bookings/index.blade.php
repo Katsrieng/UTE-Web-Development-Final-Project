@@ -16,7 +16,7 @@
                             <td>{{ $booking->check_in_date }}</td><td>{{ $booking->check_out_date }}</td>
                             <td>${{ number_format($booking->total_amount, 2) }}</td>
                             <td><x-status-badge :status="$booking->status" /></td>
-                            <td class="pe-4"><a href="{{ route('customer.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">View details</a></td>
+                            <td class="pe-4"><a href="{{ route('customer.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">View details</a>@if(!$booking->payments->count() && in_array($booking->status, App\Models\Booking::ACTIVE_STATUSES, true)) <a class="btn btn-sm btn-hotel" href="{{ route('customer.payments.booking', $booking) }}">Pay Now</a>@endif</td>
                         </tr>
                     @empty
                         <tr><td colspan="7"><x-empty-state icon="bi-calendar-check" title="No bookings yet" message="Browse our rooms to plan your first stay." /></td></tr>

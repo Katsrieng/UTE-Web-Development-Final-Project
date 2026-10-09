@@ -7,24 +7,25 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Demo accounts. All passwords are "password" - change them before any real use!
-     * IDs 1-4 match the user_id values already used in PaymentSeeder.
-     */
+    public const DEMO_PASSWORD = 'UtopiaDemo2026!';
+
     public function run(): void
     {
         $users = [
-            ['name' => 'Hotel Admin',    'email' => 'admin@hotel.com',     'role' => User::ROLE_ADMIN,    'phone' => '012 000 001'],
-            ['name' => 'Front Desk',     'email' => 'staff@hotel.com',     'role' => User::ROLE_STAFF,    'phone' => '012 000 002'],
-            ['name' => 'Sokha Customer', 'email' => 'customer1@hotel.com', 'role' => User::ROLE_CUSTOMER, 'phone' => '012 000 003'],
-            ['name' => 'Dara Customer',  'email' => 'customer2@hotel.com', 'role' => User::ROLE_CUSTOMER, 'phone' => '012 000 004'], 
+            ['name' => 'Utopia Bay Demo Admin', 'email' => 'admin@utopiabay.test', 'role' => User::ROLE_ADMIN],
+            ['name' => 'Utopia Bay Demo Manager', 'email' => 'manager@utopiabay.test', 'role' => User::ROLE_MANAGER],
+            ['name' => 'Utopia Bay Front Desk', 'email' => 'staff@utopiabay.test', 'role' => User::ROLE_STAFF],
+            ['name' => 'Utopia Bay Demo Guest', 'email' => 'customer@utopiabay.test', 'role' => User::ROLE_CUSTOMER],
+            ['name' => 'Utopia Bay Stay Guest', 'email' => 'stay@utopiabay.test', 'role' => User::ROLE_CUSTOMER],
+            ['name' => 'Utopia Bay Past Guest', 'email' => 'history@utopiabay.test', 'role' => User::ROLE_CUSTOMER],
         ];
 
         foreach ($users as $data) {
-            User::updateOrCreate(
-                ['email' => $data['email']],
-                $data + ['password' => 'password', 'is_active' => true, 'email_verified_at' => now()]
-            );
+            User::firstOrCreate(['email' => $data['email']], $data + [
+                'password' => self::DEMO_PASSWORD,
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]);
         }
     }
 }

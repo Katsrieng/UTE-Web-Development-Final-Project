@@ -4,6 +4,7 @@
 @section('page-label', 'Bookings')
 
 @section('content')
+@php($linkedPayment = $booking->payments->first())
 <div class="mb-4 d-flex justify-content-between align-items-center">
 
 @staffroute('bookings.index')
@@ -54,11 +55,15 @@
                 <i class="bi bi-eye me-1"></i> Review Slip
             </a>
 
-@staffroute('payments.create')
-<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-sm btn-success">
-                <i class="bi bi-cash-coin me-1"></i> Record Payment
-            </a>
-@endstaffroute
+@if($linkedPayment)
+    @staffroute('payments.show')
+    <a href="{{ route('payments.show', $linkedPayment) }}" class="btn btn-sm btn-success"><i class="bi bi-cash-coin me-1"></i> Review Payment</a>
+    @endstaffroute
+@else
+    @staffroute('payments.create')
+    <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'ABA / KHQR']) }}" class="btn btn-sm btn-success"><i class="bi bi-cash-coin me-1"></i> Record Payment</a>
+    @endstaffroute
+@endif
 
         </div>
     </div>
@@ -241,11 +246,15 @@
                             <i class="bi bi-arrows-fullscreen me-1"></i> Open Full Size
                         </a>
 
-@staffroute('payments.create')
-<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Bank Transfer']) }}" class="btn btn-hotel">
-                            <i class="bi bi-check-circle me-1"></i> Record Official Payment
-                        </a>
-@endstaffroute
+@if($linkedPayment)
+    @staffroute('payments.show')
+    <a href="{{ route('payments.show', $linkedPayment) }}" class="btn btn-hotel"><i class="bi bi-check-circle me-1"></i> Review Payment</a>
+    @endstaffroute
+@else
+    @staffroute('payments.create')
+    <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'ABA / KHQR']) }}" class="btn btn-hotel"><i class="bi bi-check-circle me-1"></i> Record Payment</a>
+    @endstaffroute
+@endif
 
                     </div>
                 </div>
@@ -254,13 +263,17 @@
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body p-4">
                     <h2 class="h6 mb-2">Record Payment</h2>
-                    <p class="small text-muted mb-3">Record an official cash, card, or transfer payment for this booking.</p>
+                    <p class="small text-muted mb-3">Record a cash, card, or ABA/KHQR payment for this booking.</p>
 
-@staffroute('payments.create')
-<a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Cash']) }}" class="btn btn-outline-primary btn-sm w-100">
-                        <i class="bi bi-plus-lg me-1"></i> Add Payment Record
-                    </a>
-@endstaffroute
+@if($linkedPayment)
+    @staffroute('payments.show')
+    <a href="{{ route('payments.show', $linkedPayment) }}" class="btn btn-outline-primary btn-sm w-100">View Payment Record</a>
+    @endstaffroute
+@else
+    @staffroute('payments.create')
+    <a href="{{ route('payments.create', ['user_id' => $booking->user_id, 'booking_id' => $booking->id, 'amount' => $booking->total_amount, 'payment_method' => 'Cash at Hotel']) }}" class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-plus-lg me-1"></i> Add Payment Record</a>
+    @endstaffroute
+@endif
 
                 </div>
             </div>

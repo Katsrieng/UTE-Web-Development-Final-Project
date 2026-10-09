@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\PaymentSeeder;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Tests\TestCase;
@@ -15,6 +16,14 @@ use Tests\TestCase;
 class PaymentFeatureTest extends TestCase
 {
     use LazilyRefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // These tests exercise payment CRUD and refunds, which require grants
+        // beyond the final Front Desk defaults.
+        $this->grantStaffPermissions('manage_payments', 'refund_payments', 'delete_bookings');
+    }
 
     public function test_guest_cannot_access_payments(): void
     {
@@ -600,41 +609,35 @@ class PaymentFeatureTest extends TestCase
         $response->assertSee(route('payments.show', $refunded));
     }
 
-    public function test_demo_seeder_uses_reserved_reference_without_overwriting_an_existing_payment(): void
+    public function test_demo_seeder_preserves_an_existing_linked_payment(): void
     {
-        $customer = User::factory()->create();
-        $eventBooking = EventBooking::factory()->for($customer)->create();
-        $existingPayment = Payment::create($this->validPayload($customer, $eventBooking, [
-            'reference_number' => 'PAY-003',
-        ]));
+        $this->seed(DatabaseSeeder::class);
+        $booking = Booking::where('special_request', 'Utopia Bay demo: pending stay')->firstOrFail();
+        $existingPayment = $booking->payments()->firstOrFail();
+        $existingPayment->update(['transaction_reference' => 'LOCAL-DEMO-NOTE']);
+        $original = $existingPayment->fresh()->getRawOriginal();
+        $count = Payment::count();
 
         $this->seed(PaymentSeeder::class);
         $this->seed(PaymentSeeder::class);
 
-        $this->assertSame('150.00', $existingPayment->fresh()->amount);
-        $this->assertDatabaseHas('payments', [
-            'reference_number' => 'DEMO-EVENT-PAYMENT',
-            'user_id' => $customer->id,
-            'booking_id' => null,
-            'event_booking_id' => $eventBooking->id,
-        ]);
-        $this->assertDatabaseCount('payments', 2);
+        $this->assertSame($original, $existingPayment->fresh()->getRawOriginal());
+        $this->assertDatabaseCount('payments', $count);
     }
 
     public function test_demo_seeder_does_not_restore_a_refunded_payment_to_paid(): void
     {
-        $customer = User::factory()->create();
-        EventBooking::factory()->for($customer)->create();
-
-        $this->seed(PaymentSeeder::class);
-        $demoPayment = Payment::where('reference_number', 'DEMO-EVENT-PAYMENT')->firstOrFail();
+        $this->seed(DatabaseSeeder::class);
+        $booking = Booking::where('special_request', 'Utopia Bay demo: confirmed arrival')->firstOrFail();
+        $demoPayment = $booking->payments()->firstOrFail();
         $demoPayment->update(['status' => 'Refunded']);
         $original = $demoPayment->fresh()->getRawOriginal();
+        $count = Payment::count();
 
         $this->seed(PaymentSeeder::class);
 
         $this->assertSame($original, $demoPayment->fresh()->getRawOriginal());
-        $this->assertDatabaseCount('payments', 1);
+        $this->assertDatabaseCount('payments', $count);
     }
 
     public function test_receipt_explains_paid_pending_and_refunded_statuses(): void
@@ -686,8 +689,7 @@ class PaymentFeatureTest extends TestCase
         $response = $this->actingAs($staff)
             ->delete(route('bookings.destroy', $booking));
 
-        $response->assertRedirect(route('bookings.index'));
-        $response->assertSessionHas('error', 'Cannot delete Booking #' . $booking->id . ' because it has payment records attached. Please delete or refund the payment records first.');
+        $response->assertSessionHasErrors('booking');
 
         $this->assertDatabaseHas('bookings', ['id' => $booking->id]);
     }

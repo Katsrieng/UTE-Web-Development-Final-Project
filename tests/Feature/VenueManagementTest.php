@@ -14,6 +14,7 @@ class VenueManagementTest extends TestCase
 
     public function test_staff_can_create_a_venue(): void
     {
+        $this->grantStaffPermissions('manage_venues');
         $staff = User::factory()->staff()->create();
 
         $response = $this->actingAs($staff)->post(route('management.venues.store'), [
@@ -38,6 +39,7 @@ class VenueManagementTest extends TestCase
 
     public function test_archiving_venue_preserves_reservation_history(): void
     {
+        $this->grantStaffPermissions('manage_venues');
         $staff = User::factory()->staff()->create();
         $venue = Venue::factory()->create();
         $eventBooking = EventBooking::factory()->for($venue)->create();

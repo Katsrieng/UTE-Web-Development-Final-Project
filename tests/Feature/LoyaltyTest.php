@@ -31,6 +31,7 @@ class LoyaltyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->grantStaffPermissions('refund_payments', 'view_loyalty_activity');
         $this->travelTo('2026-10-09');
         $this->customer = User::factory()->create();
         $this->staff = User::factory()->staff()->create();

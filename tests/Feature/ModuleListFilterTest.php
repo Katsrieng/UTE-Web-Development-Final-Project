@@ -65,6 +65,7 @@ class ModuleListFilterTest extends TestCase
 
     public function test_event_search_filters_preserve_staff_actions_and_customer_ownership(): void
     {
+        $this->grantStaffPermissions('delete_event_reservations');
         $alice = User::factory()->create(['name'=>'Alice Coastal']);
         $venue = Venue::factory()->create(['name'=>'Ocean Hall']);
         $wanted = EventBooking::factory()->for($alice)->for($venue)->create(['status'=>'pending']);

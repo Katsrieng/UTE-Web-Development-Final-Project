@@ -18,6 +18,7 @@ class PaymentSettingsTest extends TestCase
 
     public function test_custom_qr_removal_falls_back_to_demo_without_disabling_payments(): void
     {
+        $this->grantStaffPermissions('manage_payment_settings');
         Storage::fake('public');
         Storage::disk('public')->put('payment-settings/custom.png', 'custom QR');
         $settings = PaymentSetting::create(['account_name' => 'Hotel Account', 'khqr_image' => 'payment-settings/custom.png', 'aba_khqr_enabled' => true]);
@@ -42,6 +43,7 @@ class PaymentSettingsTest extends TestCase
 
     public function test_management_can_update_single_settings_record_and_replace_qr_safely(): void
     {
+        $this->grantStaffPermissions('manage_payment_settings');
         Storage::fake('public');
         $customer = User::factory()->create();
         $this->actingAs($customer)->get(route('payment-settings.edit'))->assertForbidden();

@@ -23,7 +23,7 @@ class FacilityController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status'      => 'required|in:1,0',
+            'status'      => 'required|in:open,closed,maintenance',
         ]);
 
         Facility::create($validated);
@@ -46,7 +46,7 @@ class FacilityController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status'      => 'required|in:1,0',
+            'status'      => 'required|in:open,closed,maintenance',
         ]);
 
         $facility->update($validated);

@@ -23,4 +23,4 @@ The booking and payment examples use simulated Card payments and one Cash at Hot
 
 ## Local setup
 
-Copy `.env.example` to `.env`, configure the local database, then install PHP dependencies with Composer. Generate an application key and run the project's normal Laravel setup commands for your environment. Keep credentials in `.env`, not in this repository.
+Install PHP and Composer, run `composer install`, copy `.env.example` to `.env`, and configure the local database. Then run `php artisan key:generate`, `php artisan migrate`, and `php artisan storage:link` for uploaded room, venue, and payment images. Run `php artisan db:seed` only when setting up a local demo database as described above. Serve the application with `php artisan serve` or your configured local web server. Keep credentials in `.env`, not in this repository.

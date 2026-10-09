@@ -1,16 +1,31 @@
 :root {
-    --hotel-gold: #dfa974;
-    --hotel-gold-dark: #b88452;
-    --hotel-ink: #19191a;
-    --hotel-navy: #17212b;
-    --hotel-muted: #6b7280;
-    --hotel-cream: #f8f5f0;
-    --hotel-surface: #ffffff;
-    --hotel-border: #e8e5df;
-    --hotel-success: #27856a;
-    --hotel-danger: #bd4b4b;
-    --hotel-warning: #b67a1d;
-    --hotel-info: #3975a6;
+    --utopia-ocean: #1e4d5a;
+    --utopia-sea: #3e7c8c;
+    --utopia-hero: #2f7185;
+    --utopia-aqua: #7eb6b5;
+    --utopia-sand: #ddbf8a;
+    --utopia-sand-soft: #f0dfc2;
+    --utopia-ivory: #faf7f0;
+    --utopia-green: #4e6f5d;
+    --utopia-coral: #c86f55;
+    --utopia-text: #2a3438;
+    --utopia-white: #ffffff;
+    --hotel-primary: var(--utopia-sea);
+    --hotel-link: var(--utopia-hero);
+    --hotel-secondary: var(--utopia-sand);
+    --hotel-gold: var(--utopia-sand);
+    --hotel-gold-dark: #765329;
+    --hotel-ink: var(--utopia-text);
+    --hotel-navy: var(--utopia-ocean);
+    --hotel-muted: #5d6b70;
+    --hotel-cream: var(--utopia-ivory);
+    --hotel-surface: var(--utopia-white);
+    --hotel-surface-muted: var(--utopia-ivory);
+    --hotel-border: #dce4e4;
+    --hotel-success: var(--utopia-green);
+    --hotel-danger: #a74737;
+    --hotel-warning: #8a5b19;
+    --hotel-info: var(--utopia-sea);
     --hotel-shadow: 0 18px 45px rgba(26, 32, 44, .08);
     --hotel-radius: 6px;
 }
@@ -26,7 +41,7 @@ html {
 body {
     color: var(--hotel-ink);
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: #f7f8fa;
+    background: var(--hotel-cream);
 }
 
 h1, h2, h3, h4, h5, h6,
@@ -36,11 +51,11 @@ h1, h2, h3, h4, h5, h6,
 }
 
 a {
-    color: var(--hotel-gold-dark);
+    color: var(--hotel-link);
 }
 
 a:hover {
-    color: #8f6138;
+    color: var(--utopia-ocean);
 }
 
 .site-main {
@@ -80,9 +95,7 @@ a:hover {
     overflow: hidden;
     padding: 76px 0;
     color: #fff;
-    background:
-        linear-gradient(110deg, rgba(17, 25, 34, .96), rgba(27, 38, 49, .78)),
-        radial-gradient(circle at 85% 30%, rgba(223, 169, 116, .38), transparent 32%);
+    background: var(--utopia-ocean);
 }
 
 .page-hero::after {
@@ -91,7 +104,7 @@ a:hover {
     bottom: -120px;
     width: 360px;
     height: 360px;
-    border: 1px solid rgba(255, 255, 255, .14);
+    border: 1px solid rgba(126, 182, 181, .35);
     border-radius: 50%;
     content: "";
 }
@@ -102,7 +115,7 @@ a:hover {
 }
 
 .page-hero .section-kicker {
-    color: #f2c89e;
+    color: var(--utopia-sand-soft);
 }
 
 .page-hero h1 {
@@ -132,7 +145,7 @@ a:hover {
 .header-top {
     padding: 9px 0;
     color: rgba(255, 255, 255, .74);
-    background: #111820;
+    background: var(--utopia-ocean);
     font-size: .82rem;
 }
 
@@ -152,6 +165,15 @@ a:hover {
     color: var(--hotel-ink);
     text-decoration: none;
 }
+
+.hotel-brand:hover { color: var(--utopia-ocean); }
+.hotel-brand:focus-visible,
+.management-brand:focus-visible,
+.footer-brand:focus-visible,
+.sona-navbar a:focus-visible,
+.site-footer a:focus-visible,
+.management-nav-link:focus-visible,
+.btn:focus-visible { outline: 3px solid var(--utopia-sand); outline-offset: 3px; }
 
 .hotel-brand strong,
 .management-brand strong,
@@ -182,9 +204,18 @@ a:hover {
     place-items: center;
     color: #fff;
     border-radius: 50%;
-    background: var(--hotel-gold);
+    background: var(--hotel-primary);
     font-size: 1.15rem;
 }
+
+.brand-logo,
+.auth-brand-logo,
+.receipt-brand-logo,
+.confirmation-brand-logo { display: block; flex: 0 0 auto; object-fit: contain; }
+.brand-logo { width: 42px; height: 42px; }
+.auth-brand-logo { width: 68px; height: 68px; }
+.receipt-brand-logo { width: 54px; height: 54px; }
+.confirmation-brand-logo { width: 28px; height: 28px; }
 
 .sona-navbar .nav-link {
     position: relative;
@@ -201,7 +232,7 @@ a:hover {
     bottom: 20px;
     left: 0;
     height: 2px;
-    background: var(--hotel-gold);
+    background: var(--utopia-sand);
     content: "";
     opacity: 0;
     transform: scaleX(.35);
@@ -210,7 +241,7 @@ a:hover {
 
 .sona-navbar .nav-link:hover,
 .sona-navbar .nav-link.active {
-    color: var(--hotel-gold-dark);
+    color: var(--hotel-primary);
 }
 
 .sona-navbar .nav-link:hover::after,
@@ -247,25 +278,25 @@ a:hover {
     place-items: center;
     color: #fff;
     border-radius: 50%;
-    background: var(--hotel-gold-dark);
+    background: var(--hotel-primary);
     font-size: .78rem;
     font-weight: 700;
 }
 
 /* Buttons */
 .btn {
-    border-radius: 3px;
+    border-radius: var(--hotel-radius);
     font-weight: 600;
 }
 
 .btn-hotel,
 .btn-primary {
-    --bs-btn-bg: var(--hotel-gold);
-    --bs-btn-border-color: var(--hotel-gold);
-    --bs-btn-hover-bg: var(--hotel-gold-dark);
-    --bs-btn-hover-border-color: var(--hotel-gold-dark);
-    --bs-btn-active-bg: var(--hotel-gold-dark);
-    --bs-btn-active-border-color: var(--hotel-gold-dark);
+    --bs-btn-bg: var(--hotel-primary);
+    --bs-btn-border-color: var(--hotel-primary);
+    --bs-btn-hover-bg: var(--hotel-navy);
+    --bs-btn-hover-border-color: var(--hotel-navy);
+    --bs-btn-active-bg: var(--hotel-navy);
+    --bs-btn-active-border-color: var(--hotel-navy);
     --bs-btn-color: #fff;
     --bs-btn-hover-color: #fff;
     padding: .7rem 1.25rem;
@@ -273,10 +304,10 @@ a:hover {
 
 .btn-hotel-outline,
 .btn-outline-primary {
-    --bs-btn-color: var(--hotel-gold-dark);
-    --bs-btn-border-color: var(--hotel-gold);
-    --bs-btn-hover-bg: var(--hotel-gold);
-    --bs-btn-hover-border-color: var(--hotel-gold);
+    --bs-btn-color: var(--hotel-primary);
+    --bs-btn-border-color: var(--hotel-primary);
+    --bs-btn-hover-bg: var(--hotel-primary);
+    --bs-btn-hover-border-color: var(--hotel-primary);
     --bs-btn-hover-color: #fff;
 }
 
@@ -314,8 +345,8 @@ a:hover {
 .form-select,
 .input-group-text {
     min-height: 46px;
-    border-color: #d9d6d0;
-    border-radius: 3px;
+    border-color: var(--hotel-border);
+    border-radius: var(--hotel-radius);
 }
 
 textarea.form-control {
@@ -325,18 +356,18 @@ textarea.form-control {
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
-    border-color: var(--hotel-gold);
-    box-shadow: 0 0 0 .2rem rgba(223, 169, 116, .2);
+    border-color: var(--hotel-primary);
+    box-shadow: 0 0 0 .2rem rgba(47, 113, 133, .18);
 }
 
 .form-check-input:checked {
-    border-color: var(--hotel-gold-dark);
-    background-color: var(--hotel-gold-dark);
+    border-color: var(--hotel-primary);
+    background-color: var(--hotel-primary);
 }
 
 .form-label {
     margin-bottom: .45rem;
-    color: #343a40;
+    color: var(--hotel-ink);
     font-size: .9rem;
     font-weight: 600;
 }
@@ -362,7 +393,7 @@ textarea.form-control {
 }
 
 .table-card .table {
-    --bs-table-hover-bg: #fbfaf8;
+    --bs-table-hover-bg: #f0f7f7;
     margin: 0;
 }
 
@@ -370,9 +401,9 @@ textarea.form-control {
 .table thead th {
     padding-top: 14px;
     padding-bottom: 14px;
-    color: #5f6670;
+    color: var(--hotel-navy);
     border-bottom-width: 1px;
-    background: #f7f5f1;
+    background: var(--hotel-surface-muted);
     font-size: .74rem;
     font-weight: 700;
     letter-spacing: .07em;
@@ -382,11 +413,11 @@ textarea.form-control {
 .table-card tbody td {
     padding-top: 15px;
     padding-bottom: 15px;
-    border-color: #efede9;
+    border-color: var(--hotel-border);
 }
 
 .filter-panel {
-    padding: 20px;
+    padding: 18px 20px;
     border: 1px solid var(--hotel-border);
     border-radius: var(--hotel-radius);
     background: #fff;
@@ -471,11 +502,11 @@ textarea.form-control {
     background: currentColor;
 }
 
-.status-success { color: #176e56; background: #e4f5ef; }
-.status-warning { color: #946018; background: #fff3d8; }
-.status-danger { color: #a23c3c; background: #fdeaea; }
-.status-info { color: #2e648d; background: #e5f1fb; }
-.status-neutral { color: #626872; background: #eceef1; }
+.status-success { color: #27513f; background: #e7f1eb; }
+.status-warning { color: #76501a; background: #fbefd6; }
+.status-danger { color: #913d32; background: #f9e8e4; }
+.status-info { color: #225769; background: #e6f2f4; }
+.status-neutral { color: #4f5c60; background: #e9eeee; }
 
 .empty-state {
     padding: 58px 24px;
@@ -525,17 +556,20 @@ textarea.form-control {
     align-items: center;
     overflow: hidden;
     color: #fff;
-    background:
-        linear-gradient(90deg, rgba(13, 21, 29, .95) 0%, rgba(18, 29, 39, .82) 48%, rgba(18, 29, 39, .4) 100%),
-        radial-gradient(circle at 82% 42%, #79614f 0%, #273743 45%, #14202b 100%);
+    background: var(--utopia-hero);
+}
+
+.home-hero + .content-section {
+    border-top: 8px solid var(--utopia-sand-soft);
 }
 
 .home-hero::before,
 .home-hero::after {
     position: absolute;
-    border: 1px solid rgba(255, 255, 255, .13);
+    border: 1px solid rgba(126, 182, 181, .42);
     border-radius: 50%;
     content: "";
+    pointer-events: none;
 }
 
 .home-hero::before { width: 460px; height: 460px; right: 4%; top: 12%; }
@@ -555,9 +589,19 @@ textarea.form-control {
 
 .hero-content p {
     max-width: 600px;
-    color: rgba(255, 255, 255, .78);
+    color: rgba(255, 255, 255, .88);
     font-size: 1.14rem;
     line-height: 1.8;
+}
+
+.home-hero .section-kicker { color: var(--utopia-ivory); }
+.home-hero .btn-hotel {
+    --bs-btn-bg: var(--utopia-sand);
+    --bs-btn-border-color: var(--utopia-sand);
+    --bs-btn-color: var(--utopia-ocean);
+    --bs-btn-hover-bg: var(--utopia-sand-soft);
+    --bs-btn-hover-border-color: var(--utopia-sand-soft);
+    --bs-btn-hover-color: var(--utopia-ocean);
 }
 
 .hero-actions {
@@ -577,41 +621,56 @@ textarea.form-control {
     padding: 28px;
     color: var(--hotel-ink);
     border-radius: var(--hotel-radius);
-    background: rgba(255, 255, 255, .97);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, .22);
+    background: rgba(250, 247, 240, .98);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, .16);
 }
 
 .hero-quick-link {
     display: flex;
+    width: 100%;
     gap: 13px;
     align-items: center;
     padding: 14px 0;
     color: var(--hotel-ink);
     border-bottom: 1px solid var(--hotel-border);
     text-decoration: none;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease;
 }
 
 .hero-quick-link:last-child { border-bottom: 0; }
-.hero-quick-link i { color: var(--hotel-gold-dark); font-size: 1.3rem; }
+.hero-quick-link i { color: var(--utopia-sea); font-size: 1.3rem; }
 .hero-quick-link strong { display: block; }
 .hero-quick-link small { color: var(--hotel-muted); }
+.hero-quick-arrow { margin-left: auto; flex: 0 0 auto; transition: transform .18s ease; }
+.hero-quick-link:hover { color: var(--utopia-ocean); background: rgba(240, 223, 194, .35); }
+.hero-quick-link:hover .hero-quick-arrow { transform: translateX(4px); }
+.hero-quick-link:focus-visible { outline: 3px solid var(--utopia-ocean); outline-offset: 2px; background: rgba(240, 223, 194, .35); }
+.hero-quick-link:active { background: var(--utopia-sand-soft); }
+@media (prefers-reduced-motion: reduce) { .hero-quick-link, .hero-quick-arrow { transition: none; } }
 
 .service-card {
+    display: block;
     height: 100%;
     padding: 30px 24px;
+    color: var(--hotel-ink);
     text-align: center;
+    text-decoration: none;
     transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.service-card:hover {
-    transform: translateY(-5px);
+a.service-card:hover {
+    transform: translateY(-2px);
+    color: var(--utopia-ocean);
     box-shadow: var(--hotel-shadow);
 }
+
+a.service-card:focus-visible { outline: 3px solid var(--utopia-ocean); outline-offset: 3px; }
 
 .service-card i {
     display: block;
     margin-bottom: 18px;
-    color: var(--hotel-gold);
+    color: var(--utopia-sea);
     font-size: 2rem;
 }
 
@@ -629,12 +688,12 @@ textarea.form-control {
     min-height: 390px;
     color: #fff;
     border-radius: var(--hotel-radius);
-    background: linear-gradient(160deg, #425362 0%, #17212b 72%);
+    background: var(--utopia-ocean);
     box-shadow: var(--hotel-shadow);
 }
 
 .catalog-card.has-image {
-    background: #17212b;
+    background: var(--utopia-ocean);
 }
 
 .catalog-card-image {
@@ -647,8 +706,11 @@ textarea.form-control {
 
 .catalog-card::after {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 25%, rgba(9, 15, 21, .9) 100%);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 45%;
+    background: rgba(30, 77, 90, .86);
     content: "";
 }
 
@@ -710,7 +772,7 @@ textarea.form-control {
     overflow: hidden;
     min-height: 430px;
     border-radius: var(--hotel-radius);
-    background: linear-gradient(145deg, #dde2e5, #aeb8bf);
+    background: var(--utopia-sand-soft);
 }
 
 .detail-gallery-main img {
@@ -759,7 +821,7 @@ textarea.form-control {
     display: flex;
     align-items: center;
     padding: 64px 0;
-    background: linear-gradient(130deg, #f7f2ec 0%, #fff 62%);
+    background: var(--utopia-ivory);
 }
 
 .auth-card {
@@ -774,8 +836,11 @@ textarea.form-control {
     height: 100%;
     padding: 44px 36px;
     color: #fff;
-    background: linear-gradient(150deg, #17212b, #314454);
+    background: var(--utopia-ocean);
 }
+
+.staff-login-body .auth-section { background: var(--utopia-ocean); }
+.staff-login-body .auth-card { border: 1px solid rgba(255, 255, 255, .2); }
 
 .auth-card-aside i {
     color: var(--hotel-gold);
@@ -790,7 +855,7 @@ textarea.form-control {
 .site-footer {
     padding: 64px 0 24px;
     color: rgba(255, 255, 255, .72);
-    background: #111820;
+    background: var(--utopia-ocean);
 }
 
 .site-footer a {
@@ -801,17 +866,18 @@ textarea.form-control {
 }
 
 .site-footer a:hover { color: var(--hotel-gold); }
+.site-footer a:focus-visible { outline-color: var(--utopia-sand-soft); }
 .footer-brand { color: #fff !important; }
 .footer-brand small { color: rgba(255, 255, 255, .56); }
 .footer-copy { max-width: 480px; margin: 22px 0 0; line-height: 1.8; }
 .footer-title { margin-bottom: 18px; color: #fff; font-family: "Segoe UI", system-ui, sans-serif; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; }
 .footer-bottom { display: flex; gap: 14px; justify-content: space-between; margin-top: 48px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .1); font-size: .78rem; }
-.footer-bottom a { display: inline; color: var(--hotel-gold); }
+.footer-bottom a { display: inline; color: var(--utopia-sand-soft); }
 
 /* Management shell */
 .management-body {
     min-height: 100vh;
-    background: #f4f5f7;
+    background: var(--utopia-ivory);
 }
 
 .management-shell {
@@ -823,7 +889,7 @@ textarea.form-control {
     width: 270px !important;
     color: rgba(255, 255, 255, .76);
     border-right: 0 !important;
-    background-color: #151f29 !important;
+    background-color: var(--utopia-ocean) !important;
     box-shadow: 12px 0 32px rgba(10, 16, 22, .08);
 }
 
@@ -833,6 +899,8 @@ textarea.form-control {
 }
 
 .management-brand { color: #fff; }
+.management-brand strong { font-size: 1.02rem; }
+.management-brand .brand-logo { width: 40px; height: 40px; }
 .management-brand small { color: rgba(255, 255, 255, .55); }
 .management-brand:hover { color: #fff; }
 
@@ -864,8 +932,8 @@ textarea.form-control {
 
 .management-nav-link i { width: 20px; color: rgba(255, 255, 255, .48); font-size: 1.05rem; }
 .management-nav-link:hover { color: #fff; background: rgba(255, 255, 255, .07); }
-.management-nav-link.active { color: #fff; background: rgba(223, 169, 116, .17); }
-.management-nav-link.active i { color: var(--hotel-gold); }
+.management-nav-link.active { color: #fff; background: rgba(126, 182, 181, .2); box-shadow: inset 3px 0 var(--utopia-sand); }
+.management-nav-link.active i { color: var(--utopia-sand-soft); }
 
 .sidebar-footer {
     display: flex;
@@ -881,7 +949,7 @@ textarea.form-control {
 .management-content {
     min-width: 0;
     flex: 1;
-    background: #f4f5f7;
+    background: var(--utopia-ivory);
 }
 
 .management-topbar {
@@ -1031,7 +1099,7 @@ textarea.form-control {
 }
 
 .dashboard-stat--gold { color: #bf8954; }
-.dashboard-stat--blue { color: #4b78a4; }
+.dashboard-stat--blue { color: var(--utopia-sea); }
 .dashboard-stat--green { color: #2f856e; }
 .dashboard-stat--amber { color: #ca8b33; }
 
@@ -1175,7 +1243,7 @@ textarea.form-control {
     height: 42px;
     flex: 0 0 42px;
     place-items: center;
-    color: #4b78a4;
+    color: var(--utopia-sea);
     border-radius: 10px;
     background: #eaf2f9;
 }
@@ -1202,7 +1270,7 @@ textarea.form-control {
     background: #edf0f2;
 }
 
-.revenue-progress-room { background: #4b78a4; }
+.revenue-progress-room { background: var(--utopia-sea); }
 .revenue-progress-event { background: var(--hotel-gold); }
 
 .refund-summary {
@@ -1390,8 +1458,8 @@ textarea.form-control {
 }
 .room-gallery-thumbnails { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
 .room-gallery-thumbnails button { border: 2px solid transparent; border-radius: .5rem; padding: .15rem; background: transparent; }
-.room-gallery-thumbnails button[aria-pressed="true"] { border-color: var(--hotel-primary, #176b65); }
-.room-gallery-thumbnails button:focus-visible { outline: 2px solid #176b65; outline-offset: 3px; }
+.room-gallery-thumbnails button[aria-pressed="true"] { border-color: var(--hotel-primary, var(--utopia-sea)); }
+.room-gallery-thumbnails button:focus-visible { outline: 2px solid var(--utopia-sea); outline-offset: 3px; }
 .room-gallery-thumbnails img { display: block; width: 90px; height: 65px; object-fit: cover; border-radius: .35rem; }
 .room-management-photo { width: 100%; height: 180px; object-fit: cover; }
 .room-photos-count { padding: .25rem .7rem; border-radius: 999px; background: var(--hotel-cream); font-size: .85rem; font-weight: 600; }
@@ -1505,12 +1573,12 @@ textarea.form-control {
 .membership-plan-gold { border-top-color: var(--hotel-gold); }
 .membership-plan-platinum { border-top-color: var(--hotel-navy); }
 .membership-plan-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: #eef0f2; color: var(--hotel-navy); font-size: 1.3rem; }
-.membership-plan-gold .membership-plan-icon { background: var(--hotel-cream); color: #8f6138; }
+.membership-plan-gold .membership-plan-icon { background: var(--hotel-cream); color: var(--hotel-gold-dark); }
 .membership-plan-platinum .membership-plan-icon { background: var(--hotel-navy); color: #fff; }
 .membership-premium-label { padding: .3rem .55rem; border-radius: var(--hotel-radius); background: var(--hotel-cream); color: var(--hotel-navy); font-size: .7rem; font-weight: 600; }
 .membership-plan-price { font-size: clamp(2.25rem, 3vw, 2.75rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.15; color: var(--hotel-navy); }
 .membership-plan-discount { padding: .7rem 0; border-top: 1px solid var(--hotel-border); border-bottom: 1px solid var(--hotel-border); }
-.membership-plan-discount strong { display: block; font-size: 1.5rem; color: #8f6138; }
+.membership-plan-discount strong { display: block; font-size: 1.5rem; color: var(--hotel-gold-dark); }
 .membership-plan-discount > span { font-size: .85rem; color: var(--hotel-muted); }
 .membership-plan-benefits li { display: flex; gap: .65rem; align-items: flex-start; margin-bottom: .6rem; font-size: .875rem; }
 .membership-plan-benefits i { color: var(--hotel-success); flex-shrink: 0; }
@@ -1531,7 +1599,7 @@ textarea.form-control {
 .membership-plan .membership-purchase:disabled { opacity: 1; background: #efdfcf; border-color: #d4b695; color: #654629; cursor: not-allowed; pointer-events: auto; }
 .membership-plans .btn:focus-visible { outline: 3px solid var(--hotel-navy); outline-offset: 3px; }
 .membership-purchase-note { display: flex; align-items: flex-start; justify-content: center; gap: .5rem; max-width: 680px; margin-left: auto; margin-right: auto; color: #59616b; line-height: 1.5; }
-.membership-purchase-note > i { flex-shrink: 0; margin-top: .1rem; color: #8f6138; }
+.membership-purchase-note > i { flex-shrink: 0; margin-top: .1rem; color: var(--hotel-gold-dark); }
 .membership-current .metric-icon { flex-shrink: 0; }
 .membership-current h2 { overflow-wrap: anywhere; }
 .membership-loyalty-step { font-size: .875rem; }
@@ -1544,13 +1612,13 @@ textarea.form-control {
 .payment-method-tile { display: flex; align-items: center; gap: .65rem; padding: .85rem; border: 1px solid var(--hotel-border); border-radius: var(--hotel-radius); cursor: pointer; font-size: .9rem; }
 .payment-method-tile.is-selected, .payment-method-tile:has(input:checked) { border-color: var(--hotel-gold-dark); background: var(--hotel-cream); }
 .payment-method-tile:focus-within { outline: 2px solid var(--hotel-navy); outline-offset: 2px; }
-.payment-method-tile input { accent-color: #8f6138; flex-shrink: 0; }
-.payment-method-tile > i { color: #8f6138; }
+.payment-method-tile input { accent-color: var(--hotel-gold-dark); flex-shrink: 0; }
+.payment-method-tile > i { color: var(--hotel-gold-dark); }
 .payment-card-fields { padding: 1rem 0; border-top: 1px solid var(--hotel-border); }
 .payment-card-fields[hidden], #manualPaymentFields[hidden] { display: none; }
 .payment-card-fields legend { float: none; width: auto; }
 .payment-instructions { display: flex; gap: .7rem; padding: .85rem; background: var(--hotel-cream); border-radius: var(--hotel-radius); }
-.payment-instructions > i { flex-shrink: 0; color: #8f6138; }
+.payment-instructions > i { flex-shrink: 0; color: var(--hotel-gold-dark); }
 .payment-benefits li { margin-bottom: .75rem; }
 @media (max-width: 575px) { .payment-method-grid { grid-template-columns: minmax(0, 1fr); } .payment-checkout .checkout-summary > .d-flex { flex-wrap: wrap; } }
 
@@ -1591,45 +1659,76 @@ textarea.form-control {
 .operations-dashboard .dashboard-panel-header h2, .operations-finance-heading h2 { font-size: 1.1rem; margin: 0; }
 .operations-dashboard .dashboard-table th, .operations-dashboard .dashboard-table td { padding: 12px; }
 .operations-kpis { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; margin-bottom: 16px; }
-.operations-kpi { display: flex; flex-direction: column; padding: 16px 20px; border: 1px solid #e5dfd3; border-top: 3px solid #b68b50; border-radius: 10px; background: #fff; color: #253342; text-decoration: none; }
+.operations-kpi { display: flex; flex-direction: column; padding: 16px 20px; border: 1px solid var(--hotel-border); border-top: 3px solid var(--utopia-sand); border-radius: 10px; background: #fff; color: var(--hotel-ink); text-decoration: none; }
 .operations-kpi strong { font-size: 1.8rem; line-height: 1.3; }
-.operations-kpi small { color: #65717d; }
-.operations-attention { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 12px 16px; margin-bottom: 18px; background: #f4efe5; border-radius: 8px; }
-.operations-attention a { color: #554126; text-decoration: none; font-size: .85rem; }
+.operations-kpi small { color: var(--hotel-muted); }
+.operations-attention { display: flex; flex-wrap: wrap; gap: 10px 24px; padding: 12px 16px; margin-bottom: 18px; background: var(--utopia-sand-soft); border-radius: 8px; }
+.operations-attention a { color: var(--utopia-ocean); text-decoration: none; font-size: .85rem; }
 .operations-attention strong { margin-right: 5px; }
-.room-operations a { display: flex; justify-content: space-between; color: #253342; text-decoration: none; padding: 7px 0; border-bottom: 1px solid #eee; }
+.room-operations a { display: flex; justify-content: space-between; color: var(--hotel-ink); text-decoration: none; padding: 7px 0; border-bottom: 1px solid var(--hotel-border); }
 .room-operations p { margin-top: 12px; }
 .operations-finance-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
-.operations-finance-heading span { font-size: .8rem; color: #65717d; }
-.operations-kpi:focus-visible, .operations-attention a:focus-visible, .room-operations a:focus-visible { outline: 3px solid #b68b50; outline-offset: 3px; }
+.operations-finance-heading span { font-size: .8rem; color: var(--hotel-muted); }
+.operations-kpi:focus-visible, .operations-attention a:focus-visible, .room-operations a:focus-visible { outline: 3px solid var(--utopia-sand); outline-offset: 3px; }
 .status-complete { color: #46556a; background: #e9edf4; }
 .status-cancelled { color: #823c45; background: #f7e9eb; }
 .status-refunded { color: #674684; background: #eee8f5; }
 .booking-payment-state { font-size: .85rem; }
 .booking-state-message { color: #334b45; font-weight: 600; }
-.booking-history { padding: 20px 24px; border: 1px solid #e4ded3; border-radius: 10px; background: #fff; }
+.booking-history { padding: 20px 24px; border: 1px solid var(--hotel-border); border-radius: 10px; background: #fff; }
 .booking-history ol { display: flex; flex-wrap: wrap; gap: 16px 28px; margin: 16px 0 0; padding: 0; list-style: none; }
-.booking-history li { border-left: 3px solid #b68b50; padding-left: 12px; font-size: .85rem; }
-.booking-history time { display: block; color: #65717d; font-size: .8rem; }
+.booking-history li { border-left: 3px solid var(--utopia-sand); padding-left: 12px; font-size: .85rem; }
+.booking-history time { display: block; color: var(--hotel-muted); font-size: .8rem; }
 @media (max-width: 991px) { .operations-kpis { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 575px) { .operations-kpis { gap: 10px; } .operations-kpi { padding: 12px; } .operations-kpi span { font-size: .8rem; } .operations-kpi small { font-size: .7rem; } .booking-history ol { flex-direction: column; gap: 12px; } }
 
 /* Staff role and permission management. */
 .rbac-role-list { display: grid; gap: 10px; }
-.rbac-role { display: grid; gap: 6px; padding: 16px; border: 1px solid #e4ded3; border-radius: 8px; background: #fff; color: #283442; text-decoration: none; }
-.rbac-role small { color: #626d77; font-size: .8rem; }
-.rbac-role span { font-size: .75rem; color: #74603e; }
-.rbac-role.is-selected { border-color: #ae844b; box-shadow: inset 3px 0 #ae844b; background: #fcf9f3; }
+.rbac-role { display: grid; gap: 6px; padding: 16px; border: 1px solid var(--hotel-border); border-radius: 8px; background: #fff; color: var(--hotel-ink); text-decoration: none; }
+.rbac-role small { color: var(--hotel-muted); font-size: .8rem; }
+.rbac-role span { font-size: .75rem; color: var(--hotel-gold-dark); }
+.rbac-role.is-selected { border-color: var(--utopia-sea); box-shadow: inset 3px 0 var(--utopia-sea); background: var(--utopia-ivory); }
 .rbac-permission-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
 .rbac-permission-column { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.rbac-group { padding: 16px 18px; background: #fff; border: 1px solid #e4ded3; border-radius: 8px; }
+.rbac-group { padding: 16px 18px; background: #fff; border: 1px solid var(--hotel-border); border-radius: 8px; }
 .rbac-group h3 { font-size: 1rem; margin-bottom: 12px; }
-.rbac-permission { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 0; border-top: 1px solid #eee9df; }
+.rbac-permission { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 9px 0; border-top: 1px solid var(--hotel-border); }
 .rbac-permission label { font-size: .85rem; font-weight: 600; cursor: pointer; }
-.rbac-permission small { display: block; color: #626d77; font-size: .75rem; }
+.rbac-permission small { display: block; color: var(--hotel-muted); font-size: .75rem; }
 .rbac-permission .form-check { flex-shrink: 0; }
-.rbac-permission .form-check-input:checked { background-color: #8d6839; border-color: #8d6839; }
-.rbac-permission .form-check-input:focus { border-color: #8d6839; box-shadow: 0 0 0 .2rem #b68b5033; }
-.rbac-protected { background: #f4efe5; padding: 12px 16px; border-radius: 8px; color: #574327; font-size: .85rem; }
-.rbac-role:focus-visible { outline: 3px solid #ae844b; outline-offset: 3px; }
+.rbac-permission .form-check-input:checked { background-color: var(--utopia-sea); border-color: var(--utopia-sea); }
+.rbac-permission .form-check-input:focus { border-color: var(--utopia-sea); box-shadow: 0 0 0 .2rem rgba(47, 113, 133, .18); }
+.rbac-protected { background: var(--utopia-sand-soft); padding: 12px 16px; border-radius: 8px; color: var(--utopia-ocean); font-size: .85rem; }
+.rbac-role:focus-visible { outline: 3px solid var(--utopia-sand); outline-offset: 3px; }
 @media (max-width: 991.98px) { .rbac-permission-columns { grid-template-columns: minmax(0, 1fr); } }
+
+/* Customer booking, payment, and membership journey. */
+.booking-summary-room { color: var(--utopia-ocean); font-size: 1.05rem; }
+.reservation-checkout .checkout-summary { box-shadow: 0 10px 28px rgba(30, 77, 90, .07); }
+.reservation-checkout .checkout-price-line { color: var(--hotel-ink); }
+.reservation-checkout .checkout-total { align-items: center; border-top: 2px solid var(--utopia-sand); color: var(--utopia-ocean); }
+.reservation-checkout #bookRoomButton { font-size: 1rem; padding: .85rem 1.25rem; }
+.payment-method-tile { align-items: flex-start; background: #fff; line-height: 1.35; }
+.payment-method-tile > i { font-size: 1.3rem; line-height: 1; color: var(--utopia-sea); }
+.payment-method-tile:has(input:checked) { border-color: var(--utopia-sea); box-shadow: inset 0 0 0 1px var(--utopia-sea); background: var(--utopia-ivory); }
+.payment-method-tile:has(input[value="ABA / KHQR"]:checked) > i { color: var(--utopia-ocean); }
+.payment-method-tile:has(input[value="Cash at Hotel"]:checked) > i { color: var(--utopia-green); }
+.payment-khqr .payment-qr-card { background: var(--utopia-ivory); }
+.payment-khqr .payment-qr-card img { max-width: 220px; height: 220px; }
+.payment-qr-details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid var(--hotel-border); border-bottom: 1px solid var(--hotel-border); }
+.payment-qr-details > div { min-width: 0; overflow-wrap: anywhere; }
+.payment-detail-label { display: block; margin-bottom: 3px; color: var(--hotel-muted); font-size: .76rem; }
+.payment-qr-amount { color: var(--utopia-ocean); font-size: 1.15rem; }
+.payment-khqr input[type="file"] { border-style: dashed; background: var(--utopia-ivory); }
+.membership-booking-note { display: flex; align-items: flex-start; gap: 9px; padding: 11px 14px; border-left: 3px solid var(--utopia-sand); background: #fff; color: var(--utopia-ocean); }
+.membership-booking-note i { flex-shrink: 0; }
+.booking-confirmation { border-top: 3px solid var(--utopia-sand) !important; }
+.booking-confirmation-total { padding: 9px 12px; border-left: 3px solid var(--utopia-sand); background: var(--utopia-ivory); }
+.booking-confirmation-total strong { color: var(--utopia-ocean); font-size: 1.25rem; }
+.payment-confirmation .payment-total { color: var(--utopia-ocean); }
+.receipt-wrap { max-width: 760px; }
+.receipt-sheet { border-top: 3px solid var(--utopia-sand) !important; }
+.receipt-reference { min-width: 0; text-align: right; }
+.receipt-reference strong { color: var(--utopia-ocean); }
+@media (max-width: 575px) { .payment-qr-details { grid-template-columns: minmax(0, 1fr); } .payment-khqr .payment-qr-card img { max-width: 190px; height: 190px; } .receipt-reference { text-align: left; } }
+@media print { .receipt-wrap { max-width: none; padding: 0 !important; } .receipt-sheet { box-shadow: none !important; border: 1px solid #bbb !important; } .receipt-reference strong { color: #000; } }

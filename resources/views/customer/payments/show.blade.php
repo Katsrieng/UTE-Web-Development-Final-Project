@@ -2,7 +2,7 @@
 @section('title', 'Payment '.$payment->reference_number)
 @section('content')
 <section class="content-section compact"><div class="container" style="max-width:800px">
-    <article class="checkout-summary p-4 p-md-5">
+    <article class="checkout-summary payment-confirmation p-4 p-md-5">
         @php
             $paid = $payment->status === 'Paid';
             $refunded = $payment->status === 'Refunded';
@@ -12,7 +12,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
             <div class="d-flex align-items-center gap-3">
                 <span class="payment-result-icon {{ $paid ? 'is-paid' : '' }}"><i class="bi {{ $paid ? 'bi-check2-circle' : ($refunded ? 'bi-arrow-counterclockwise' : 'bi-clock') }}" aria-hidden="true"></i></span>
-                <div><p class="section-kicker mb-1">{{ $payment->purposeLabel() }}</p><h1 class="h3 mb-0">{{ $heading }}</h1></div>
+                <div><p class="section-kicker mb-1"><img class="confirmation-brand-logo d-inline-block me-1" src="{{ asset('images/brand/utopia_bay_logo_color.svg') }}" alt="" width="28" height="28">Utopia Bay · {{ $payment->purposeLabel() }}</p><h1 class="h3 mb-0">{{ $heading }}</h1></div>
             </div>
             <x-status-badge :status="$payment->status" />
         </div>

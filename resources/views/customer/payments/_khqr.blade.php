@@ -4,9 +4,10 @@
     @if($paymentSettings->khqrAvailable())
         <div class="payment-qr-card text-center mb-3"><img src="{{ $paymentSettings->qrUrl() }}" alt="Hotel ABA / KHQR payment code" class="img-fluid"></div>
     @endif
-    <div class="d-flex flex-wrap justify-content-between gap-2 small mb-3">
-        <div><strong>{{ $paymentSettings->account_name }}</strong>@if($paymentSettings->account_label)<span class="d-block text-muted">{{ $paymentSettings->account_label }}</span>@endif<span class="d-block text-muted">{{ $booking ? 'Booking #'.$booking->id : $plan->name.' Membership' }}</span></div>
-        <div class="text-end"><span class="text-muted d-block">Amount Due</span><strong>${{ number_format($amount, 2) }}</strong></div>
+    <div class="payment-qr-details mb-3">
+        <div><span class="payment-detail-label">Payment account</span><strong class="d-block">{{ $paymentSettings->account_name }}</strong>@if($paymentSettings->account_label)<span class="d-block small text-muted">{{ $paymentSettings->account_label }}</span>@endif</div>
+        <div><span class="payment-detail-label">{{ $booking ? 'Booking reference' : 'Membership' }}</span><strong class="d-block">{{ $booking ? '#'.$booking->id : $plan->name }}</strong></div>
+        <div><span class="payment-detail-label">Amount due</span><strong class="d-block payment-qr-amount">${{ number_format($amount, 2) }}</strong></div>
     </div>
     @if($booking)
         @if($booking->paymentSlip)<p class="small mb-2">Current slip: <a href="{{ $booking->paymentSlip->url() }}" target="_blank" rel="noopener">{{ $booking->paymentSlip->original_filename }}</a></p>@endif

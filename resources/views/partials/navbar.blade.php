@@ -5,15 +5,15 @@
                 <span><i class="bi bi-geo-alt me-2"></i>Phnom Penh, Cambodia</span>
                 <span><i class="bi bi-clock me-2"></i>Hospitality, every day</span>
             </div>
-            <div>Hotel &amp; Hospitality Management System</div>
+            <div>Utopia Bay</div>
         </div>
     </div>
 
     <nav class="navbar navbar-expand-lg sona-navbar" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand hotel-brand" href="{{ route('welcome') }}">
-                <span class="brand-mark"><i class="bi bi-buildings"></i></span>
-                <span><strong>Hotel</strong><small>&amp; Hospitality</small></span>
+                <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_color.svg') }}" alt="" width="42" height="42">
+                <span><strong>Utopia Bay</strong><small>Resort</small></span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation"
@@ -39,7 +39,9 @@
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('event-reservations.*') ? 'active' : '' }}" href="{{ route('event-reservations.index') }}">My Events</a></li>
                         @endif
                         @if(auth()->user()->hasRole('admin', 'manager', 'staff'))
+                            @staffroute('dashboard')
                             <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Management</a></li>
+                            @endstaffroute
                         @endif
                     @endauth
                 </ul>

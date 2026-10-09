@@ -11,9 +11,9 @@
                     <div class="row g-0">
                         <div class="col-lg-5 d-none d-lg-block">
                             <div class="auth-card-aside">
-                                <i class="bi bi-buildings"></i>
+                                <img class="auth-brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="Utopia Bay" width="68" height="68">
                                 <h1 class="h2 mt-4">Welcome back</h1>
-                                <p class="text-white-50 lh-lg">Sign in to manage your bookings and stay.</p>
+                                <p class="text-white-50 lh-lg">Sign in to manage your Utopia Bay bookings and stay.</p>
                                 <hr class="border-light border-opacity-25 my-4">
                                 <p class="small text-white-50 mb-0">Comfort, service, and hospitality—all in one place.</p>
                             </div>

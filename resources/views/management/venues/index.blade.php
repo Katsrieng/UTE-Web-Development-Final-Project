@@ -18,7 +18,7 @@
 
 
 @staffroute('management.venues.index')
-<form method="GET" action="{{ route('management.venues.index') }}" class="card card-body mb-4">
+<form method="GET" action="{{ route('management.venues.index') }}" class="filter-panel mb-4" role="search" aria-label="Search and filter venues">
     <div class="row g-2 align-items-end">
         <div class="col-lg-4">
             <label for="search" class="form-label">Search</label>
@@ -45,8 +45,8 @@
             </select>
         </div>
         <div class="col-lg-2 d-flex gap-2">
-            <button type="submit" class="btn btn-secondary flex-grow-1">Filter</button>
-            <a href="{{ route('management.venues.index') }}" class="btn btn-outline-secondary">Reset</a>
+            <button type="submit" class="btn btn-hotel flex-grow-1">Apply</button>
+            <a href="{{ route('management.venues.index') }}" class="btn btn-outline-secondary">Clear</a>
         </div>
     </div>
 </form>
@@ -112,7 +112,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">No venues match the selected filters.</td>
+                        <td colspan="6"><x-list-no-results module="venues" :clear="route('management.venues.index')" /></td>
                     </tr>
                 @endforelse
             </tbody>

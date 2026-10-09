@@ -23,7 +23,7 @@ class CustomerPaymentTest extends TestCase
         parent::setUp();
         \Illuminate\Support\Facades\Storage::fake('public');
         \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
-        \App\Models\PaymentSetting::create(['account_name' => 'Beach Resort Management', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
+        \App\Models\PaymentSetting::create(['account_name' => 'Utopia Bay Resort', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
         $this->customer = User::factory()->create();
         $type = RoomType::create(['name' => 'Suite', 'capacity' => 2, 'base_price' => 75]);
         $room = Room::create(['room_type_id' => $type->id, 'room_number' => '101', 'floor' => 1, 'price_per_night' => 75, 'status' => 'available']);

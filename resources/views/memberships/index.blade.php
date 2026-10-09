@@ -2,7 +2,7 @@
 @section('title', 'Membership')
 @section('content')
 <section class="page-hero membership-hero text-center"><div class="container">
-    <p class="section-kicker">Hotel membership</p>
+    <p class="section-kicker">Utopia Bay membership</p>
     <h1>Choose Your Membership</h1>
     <p class="mx-auto">Enjoy exclusive booking discounts and earn loyalty rewards with every stay.</p>
 </div></section>
@@ -26,6 +26,7 @@
         </section>
     @endif
     @include('loyalty._panel')
+    <p class="membership-booking-note small mb-4"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Membership discounts apply to new bookings made after membership activation.</span></p>
     @if($pendingPurchase?->payment)<div class="payment-instructions mb-4"><i class="bi bi-clock" aria-hidden="true"></i><div><strong>Your membership purchase is pending.</strong><a class="d-block" href="{{ route('customer.payments.show', $pendingPurchase->payment) }}">View payment details</a></div></div>@endif
     <div class="row g-4 justify-content-center">
         @forelse($membershipTypes as $type)

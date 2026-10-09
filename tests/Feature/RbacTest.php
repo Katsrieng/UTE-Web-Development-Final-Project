@@ -53,7 +53,10 @@ class RbacTest extends TestCase
     public function test_staff_defaults_protect_mutations_and_hide_forbidden_actions(): void
     {
         $staff = User::factory()->staff()->create();
-        $this->actingAs($staff)->get(route('dashboard'))->assertOk()->assertDontSee('Roles &amp; Permissions',false);
+        $this->actingAs($staff)->get(route('dashboard'))->assertOk()
+            ->assertDontSee('Roles &amp; Permissions', false)
+            ->assertDontSee('Payment Settings')
+            ->assertDontSee('Room Types');
         $this->get(route('payment-settings.edit'))->assertForbidden();
         $this->get(route('management.rooms.create'))->assertForbidden();
         $this->get(route('admin.membership-types.index'))->assertForbidden();

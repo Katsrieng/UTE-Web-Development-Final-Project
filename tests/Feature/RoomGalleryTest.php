@@ -125,6 +125,7 @@ class RoomGalleryTest extends TestCase
         $this->delete('/management/rooms/'.$room->id.'/images/'.$image->id)->assertForbidden();
         auth()->logout();
         $this->upload($room)->assertRedirect(route('staff.login'));
+        $this->grantStaffPermissions('manage_room_gallery');
         $this->actingAs(User::factory()->staff()->create());
         $this->upload($room)->assertRedirect();
     }

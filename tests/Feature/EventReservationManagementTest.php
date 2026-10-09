@@ -15,6 +15,7 @@ class EventReservationManagementTest extends TestCase
 
     public function test_staff_edit_and_safe_delete_preserve_validation_payments_and_history(): void
     {
+        $this->grantStaffPermissions('delete_event_reservations');
         $this->travelTo('2026-10-09 09:00:00');
         $staff = User::factory()->staff()->create();
         $venue = Venue::factory()->create(['capacity'=>50, 'price'=>500, 'event_types'=>[Venue::EVENT_TYPE_MEETING]]);

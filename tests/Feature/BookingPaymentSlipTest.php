@@ -192,6 +192,7 @@ class BookingPaymentSlipTest extends TestCase
 
     public function test_staff_can_view_uploaded_payment_slip_on_booking_details(): void
     {
+        $this->grantStaffPermissions('manage_payments');
         $staff = User::factory()->staff()->create();
         $booking = $this->createBooking($this->customer, 'Confirmed');
 
@@ -215,7 +216,7 @@ class BookingPaymentSlipTest extends TestCase
             'user_id' => $booking->user_id,
             'booking_id' => $booking->id,
             'amount' => $booking->total_amount,
-            'payment_method' => 'Bank Transfer',
+            'payment_method' => 'ABA / KHQR',
         ]));
     }
 

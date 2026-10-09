@@ -111,7 +111,7 @@ class FrontendSmokeTest extends TestCase
         $this->actingAs($admin)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Welcome back, '.$admin->name)
+            ->assertSee('Hotel Operations')
             ->assertSee('No payment data yet')
             ->assertSee('Quick actions');
 

@@ -151,6 +151,7 @@ class CustomerPaymentTest extends TestCase
 
     public function test_staff_verification_confirms_once_refund_does_not_cancel_booking(): void
     {
+        $this->grantStaffPermissions('refund_payments');
         $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'Cash at Hotel']);
         $payment = Payment::sole();
         $this->actingAs(User::factory()->staff()->create());
@@ -189,6 +190,7 @@ class CustomerPaymentTest extends TestCase
 
     public function test_staff_linked_payment_create_and_edit_ignore_forged_amounts(): void
     {
+        $this->grantStaffPermissions('manage_payments');
         $this->actingAs(User::factory()->staff()->create());
         $payload = ['user_id' => $this->customer->id, 'booking_id' => $this->booking->id, 'amount' => 1,
             'payment_method' => 'Cash', 'payment_date' => today()->toDateString(), 'status' => 'Pending', 'reference_number' => 'STAFF-BOOKING'];
@@ -240,9 +242,10 @@ class CustomerPaymentTest extends TestCase
 
     public function test_staff_cannot_delete_a_booking_with_a_payment(): void
     {
+        $this->grantStaffPermissions('delete_bookings');
         $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'Cash at Hotel']);
         $this->actingAs(User::factory()->staff()->create());
-        $this->delete(route('bookings.destroy', $this->booking))->assertSessionHasErrors('payment');
+        $this->delete(route('bookings.destroy', $this->booking))->assertSessionHasErrors('booking');
         $this->assertDatabaseHas('bookings', ['id' => $this->booking->id]);
         $this->assertDatabaseCount('payments', 1);
     }

@@ -90,8 +90,8 @@
                             </a>
 @endstaffroute
 
-                            @if(($booking->payments_count ?? 0) > 0)
-                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Cannot delete: payment records attached">
+                            @if(($booking->payments_count ?? 0) > 0 || ($booking->status_logs_count ?? 0) > 0)
+                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Cannot delete: payment or status history attached">
                                     <i class="bi bi-lock"></i>
                                 </button>
                             @else

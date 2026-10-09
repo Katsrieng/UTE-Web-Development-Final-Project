@@ -23,7 +23,7 @@ class BookingController extends Controller
     public function index(Request $request)
     {
         $bookings = Booking::with(['user', 'room.roomType', 'paymentSlip'])
-            ->withCount('payments')
+            ->withCount(['payments', 'statusLogs'])
             ->when(is_string($request->query('arrival_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('arrival_date')), fn ($query) => $query->whereDate('check_in_date', $request->query('arrival_date')))
             ->when(is_string($request->query('departure_date')) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $request->query('departure_date')), fn ($query) => $query->whereDate('check_out_date', $request->query('departure_date')))
             ->tap(fn ($query) => \App\Support\ListFilters::bookings($query, $request, true))
@@ -74,6 +74,7 @@ class BookingController extends Controller
             'bookingPackages.package',
             'statusLogs.changedBy',
             'paymentSlip',
+            'payments',
         ])->findOrFail($id);
 
         return view('bookings.show', compact('booking'));
@@ -196,9 +197,9 @@ class BookingController extends Controller
     {
         DB::transaction(function () use ($id) {
             $booking = Booking::lockForUpdate()->findOrFail($id);
-            if ($booking->payments()->exists()) {
+            if ($booking->payments()->exists() || $booking->statusLogs()->exists()) {
                 throw ValidationException::withMessages([
-                    'payment' => 'Bookings with payment records cannot be deleted.',
+                    'booking' => 'Bookings with payment or status history cannot be deleted.',
                 ]);
             }
             $booking->delete();

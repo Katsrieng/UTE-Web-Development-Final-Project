@@ -105,16 +105,23 @@ class RoomTypeController extends Controller
      */
     public function destroy(RoomType $roomType, RoomGalleryService $gallery)
     {
-        if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
-        }
-
         DB::transaction(function () use ($roomType, $gallery) {
             $locked = RoomType::whereKey($roomType->id)->lockForUpdate()->firstOrFail();
             $rooms = $locked->rooms()->orderBy('id')->lockForUpdate()->get();
+            if (\App\Models\Booking::whereIn('room_id', $rooms->pluck('id'))->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'room_type' => 'This room type has booking history and cannot be deleted.',
+                ]);
+            }
             $paths = RoomImage::whereIn('room_id', $rooms->pluck('id'))->pluck('image_path')->all();
+            $typeImage = $locked->image;
             $locked->delete();
-            DB::afterCommit(fn () => $gallery->cleanup($paths));
+            DB::afterCommit(function () use ($gallery, $paths, $typeImage) {
+                $gallery->cleanup($paths);
+                if ($typeImage && str_starts_with($typeImage, '/storage/')) {
+                    Storage::disk('public')->delete(substr($typeImage, strlen('/storage/')));
+                }
+            });
         });
 
         return redirect()->route('management.room-types.index')->with('success', 'Room Type deleted successfully.');

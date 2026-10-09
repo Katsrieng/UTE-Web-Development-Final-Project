@@ -13,23 +13,31 @@ class VenueSeeder extends Seeder
             [
                 'name' => 'Grand Ballroom',
                 'description' => 'An elegant ballroom for wedding receptions, gala dinners, and large celebrations.',
-                'location' => 'Ground Floor, East Wing',
+                'location' => 'Utopia Bay, Main Resort',
                 'capacity' => 350,
                 'price' => 2500,
                 'event_types' => [Venue::EVENT_TYPE_WEDDING, Venue::EVENT_TYPE_PARTY],
             ],
             [
-                'name' => 'Mekong Meeting Room',
-                'description' => 'A quiet meeting venue suited to workshops, presentations, and executive meetings.',
-                'location' => 'Second Floor',
+                'name' => 'Sunset Beach Pavilion',
+                'description' => 'An open-air coastal space for ceremonies and private celebrations.',
+                'location' => 'Beachfront',
+                'capacity' => 100,
+                'price' => 1500,
+                'event_types' => [Venue::EVENT_TYPE_WEDDING, Venue::EVENT_TYPE_PARTY],
+            ],
+            [
+                'name' => 'Conference Room',
+                'description' => 'A quiet space for presentations, workshops, and small meetings.',
+                'location' => 'Utopia Bay, Meeting Wing',
                 'capacity' => 60,
                 'price' => 450,
                 'event_types' => [Venue::EVENT_TYPE_MEETING],
             ],
             [
-                'name' => 'Sky Garden Terrace',
-                'description' => 'An open-air rooftop venue with city views for intimate weddings and private parties.',
-                'location' => 'Rooftop',
+                'name' => 'Garden Terrace',
+                'description' => 'A garden-side terrace for intimate celebrations and gatherings.',
+                'location' => 'Utopia Bay, Garden',
                 'capacity' => 120,
                 'price' => 1200,
                 'event_types' => [Venue::EVENT_TYPE_WEDDING, Venue::EVENT_TYPE_PARTY],
@@ -37,7 +45,7 @@ class VenueSeeder extends Seeder
         ];
 
         foreach ($venues as $venue) {
-            Venue::updateOrCreate(
+            Venue::firstOrCreate(
                 ['name' => $venue['name']],
                 $venue + ['images' => [], 'is_active' => true],
             );

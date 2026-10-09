@@ -12,106 +12,47 @@ class RoomModuleSeeder extends Seeder
     public function run(): void
     {
         $facilities = [
-            ['name' => 'High-Speed Wi-Fi', 'description' => 'Complimentary wireless internet throughout the room.', 'status' => 'open'],
-            ['name' => 'Air Conditioning', 'description' => 'Individually controlled climate cooling.', 'status' => 'open'],
-            ['name' => 'Mini Refrigerator', 'description' => 'A compact refrigerator for drinks and snacks.', 'status' => 'open'],
-            ['name' => 'Flat Screen TV', 'description' => 'Smart television with international channels.', 'status' => 'open'],
-            ['name' => 'Work Desk', 'description' => 'A comfortable workspace with convenient charging points.', 'status' => 'open'],
-            ['name' => 'In-Room Safe', 'description' => 'Secure storage for valuables and travel documents.', 'status' => 'open'],
+            'High-Speed Wi-Fi' => 'Complimentary Wi-Fi throughout the resort.',
+            'Swimming Pool' => 'Outdoor pool with a relaxed coastal setting.',
+            'Breakfast' => 'Breakfast service available at the resort restaurant.',
+            'Air Conditioning' => 'Individually controlled room cooling.',
+            'Parking' => 'Convenient on-site guest parking.',
+            'Beach Access' => 'Easy access to the resort beach.',
         ];
-
-        $facilityModels = [];
-
-        foreach ($facilities as $facility) {
-            $facilityModels[$facility['name']] = Facility::firstOrCreate(
-                ['name' => $facility['name']],
-                $facility
-            );
+        foreach ($facilities as $name => $description) {
+            Facility::firstOrCreate(['name' => $name], ['description' => $description, 'status' => 'open']);
         }
 
-        $roomTypes = [
-            [
-                'name' => 'Standard Single',
-                'description' => 'A calm, practical room for solo travellers with a dedicated work area and warm city views.',
-                'base_price' => 35.00,
-                'capacity' => 1,
-                'bed_type' => '1 Single Bed',
-            ],
-            [
-                'name' => 'Deluxe Suite',
-                'description' => 'A spacious king suite with a relaxing lounge corner and refined Cambodian-inspired details.',
-                'base_price' => 75.00,
-                'capacity' => 2,
-                'bed_type' => '1 King Bed',
-            ],
-            [
-                'name' => 'Executive Family Suite',
-                'description' => 'A bright family suite with two queen beds, generous storage, and a comfortable seating area.',
-                'base_price' => 120.00,
-                'capacity' => 4,
-                'bed_type' => '2 Queen Beds',
-            ],
+        $types = [
+            ['name' => 'Deluxe Ocean Room', 'description' => 'A comfortable king room with a coastal outlook and room to unwind.', 'base_price' => 120, 'capacity' => 2, 'bed_type' => '1 King Bed'],
+            ['name' => 'Garden Room', 'description' => 'A restful room near the gardens for a relaxed Utopia Bay stay.', 'base_price' => 70, 'capacity' => 2, 'bed_type' => '1 Queen Bed'],
+            ['name' => 'Family Suite', 'description' => 'A spacious suite with room for the whole family.', 'base_price' => 165, 'capacity' => 4, 'bed_type' => '2 Queen Beds'],
+            ['name' => 'Ocean Villa', 'description' => 'A private villa with generous living space and a coastal view.', 'base_price' => 245, 'capacity' => 4, 'bed_type' => '2 King Beds'],
         ];
-
-        $roomTypeModels = [];
-
-        foreach ($roomTypes as $type) {
-            $roomTypeModels[$type['name']] = RoomType::firstOrCreate(
-                ['name' => $type['name']],
-                $type
-            );
+        foreach ($types as $type) {
+            RoomType::firstOrCreate(['name' => $type['name']], $type);
         }
 
         $rooms = [
-            [
-                'room_type' => 'Standard Single',
-                'room_number' => '101',
-                'floor' => 1,
-                'price_per_night' => 35.00,
-                'status' => 'available',
-                'description' => 'A peaceful single room with a comfortable bed, writing desk, and warm natural finishes.',
-                'image' => 'images/rooms/standard-single.jpg',
-                'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Flat Screen TV', 'Work Desk'],
-            ],
-            [
-                'room_type' => 'Deluxe Suite',
-                'room_number' => '204',
-                'floor' => 2,
-                'price_per_night' => 85.00,
-                'status' => 'available',
-                'description' => 'An elegant king suite with extra living space, a city view, and upgraded guest amenities.',
-                'image' => 'images/rooms/deluxe-suite.jpg',
-                'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Mini Refrigerator', 'Flat Screen TV', 'Work Desk', 'In-Room Safe'],
-            ],
-            [
-                'room_type' => 'Executive Family Suite',
-                'room_number' => '305',
-                'floor' => 3,
-                'price_per_night' => 135.00,
-                'status' => 'available',
-                'description' => 'A generous two-bed suite designed for families, with a shared lounge area and plenty of storage.',
-                'image' => 'images/rooms/executive-family-suite.jpg',
-                'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Mini Refrigerator', 'Flat Screen TV', 'Work Desk', 'In-Room Safe'],
-            ],
+            ['room_number' => 'UB-101', 'type' => 'Deluxe Ocean Room', 'floor' => 1, 'rate' => 120, 'image' => 'images/rooms/deluxe-suite.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Breakfast', 'Air Conditioning', 'Beach Access']],
+            ['room_number' => 'UB-102', 'type' => 'Garden Room', 'floor' => 1, 'rate' => 70, 'image' => 'images/rooms/standard-single.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Parking']],
+            ['room_number' => 'UB-201', 'type' => 'Family Suite', 'floor' => 2, 'rate' => 165, 'image' => 'images/rooms/executive-family-suite.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Swimming Pool', 'Air Conditioning', 'Beach Access']],
+            ['room_number' => 'UB-202', 'type' => 'Garden Room', 'floor' => 2, 'rate' => 70, 'image' => 'images/rooms/standard-single.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Parking']],
+            ['room_number' => 'UB-301', 'type' => 'Ocean Villa', 'floor' => 3, 'rate' => 245, 'image' => 'images/rooms/deluxe-suite.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Swimming Pool', 'Breakfast', 'Air Conditioning', 'Beach Access', 'Parking']],
+            ['room_number' => 'UB-302', 'type' => 'Deluxe Ocean Room', 'floor' => 3, 'rate' => 120, 'image' => 'images/rooms/deluxe-suite.jpg', 'facilities' => ['High-Speed Wi-Fi', 'Air Conditioning', 'Beach Access']],
         ];
-
-        foreach ($rooms as $roomData) {
-            $facilityNames = $roomData['facilities'];
-            $roomType = $roomTypeModels[$roomData['room_type']];
-
-            unset($roomData['facilities'], $roomData['room_type']);
-
-            $room = Room::firstOrCreate(
-                ['room_number' => $roomData['room_number']],
-                ['room_type_id' => $roomType->id, ...$roomData]
-            );
-
-            $room->facilities()->syncWithoutDetaching(
-                array_map(
-                    fn (string $name): int => $facilityModels[$name]->id,
-                    $facilityNames
-                )
-            );
+        foreach ($rooms as $data) {
+            $type = RoomType::where('name', $data['type'])->firstOrFail();
+            $room = Room::firstOrCreate(['room_number' => $data['room_number']], [
+                'room_type_id' => $type->id,
+                'floor' => $data['floor'],
+                'price_per_night' => $data['rate'],
+                'status' => 'available',
+                'description' => $type->description,
+                'image' => $data['image'],
+            ]);
+            $facilityIds = Facility::whereIn('name', $data['facilities'])->pluck('id')->all();
+            $room->facilities()->syncWithoutDetaching($facilityIds);
         }
     }
 }

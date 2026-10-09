@@ -3,9 +3,14 @@
 
 @staffroute('dashboard')
 <a class="management-brand" href="{{ route('dashboard') }}">
-            <span class="brand-mark"><i class="bi bi-buildings"></i></span>
-            <span><strong>Hotel</strong><small>Management</small></span>
+            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="" width="42" height="42">
+            <span><strong>Utopia Bay</strong><small>Resort Management</small></span>
         </a>
+@else
+<div class="management-brand">
+            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="" width="42" height="42">
+            <span><strong>Utopia Bay</strong><small>Resort Management</small></span>
+        </div>
 @endstaffroute
 
         <button type="button" class="btn-close btn-close-white d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#managementSidebar" aria-label="Close"></button>
@@ -13,18 +18,38 @@
 
     <div class="offcanvas-body d-flex flex-column p-0">
         <nav class="management-nav flex-grow-1">
+            @staffroute('dashboard')
             <p class="nav-section-label">Overview</p>
             <a class="management-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+            @endstaffroute
 
-            <p class="nav-section-label">Hotel operations</p>
+            @if(collect(['bookings.index', 'management.rooms.index', 'management.room-types.index', 'management.facilities.index', 'management.venues.index', 'management.event-reservations.index', 'payments.index', 'payment-settings.edit'])->contains(fn ($route) => App\Support\RbacCatalog::allowsRoute(auth()->user(), $route)))
+                <p class="nav-section-label">Hotel operations</p>
+            @endif
+            @staffroute('bookings.index')
             <a class="management-nav-link {{ request()->routeIs('bookings.*') ? 'active' : '' }}" href="{{ route('bookings.index') }}"><i class="bi bi-calendar-check"></i><span>Bookings</span></a>
+            @endstaffroute
+            @staffroute('management.rooms.index')
             <a class="management-nav-link {{ request()->routeIs('management.rooms.*') ? 'active' : '' }}" href="{{ route('management.rooms.index') }}"><i class="bi bi-door-open"></i><span>Rooms</span></a>
+            @endstaffroute
+            @staffroute('management.room-types.index')
             <a class="management-nav-link {{ request()->routeIs('management.room-types.*') ? 'active' : '' }}" href="{{ route('management.room-types.index') }}"><i class="bi bi-house-door"></i><span>Room Types</span></a>
+            @endstaffroute
+            @staffroute('management.facilities.index')
             <a class="management-nav-link {{ request()->routeIs('management.facilities.*') ? 'active' : '' }}" href="{{ route('management.facilities.index') }}"><i class="bi bi-stars"></i><span>Facilities</span></a>
+            @endstaffroute
+            @staffroute('management.venues.index')
             <a class="management-nav-link {{ request()->routeIs('management.venues.*') ? 'active' : '' }}" href="{{ route('management.venues.index') }}"><i class="bi bi-building"></i><span>Venues</span></a>
+            @endstaffroute
+            @staffroute('management.event-reservations.index')
             <a class="management-nav-link {{ request()->routeIs('management.event-reservations.*') ? 'active' : '' }}" href="{{ route('management.event-reservations.index') }}"><i class="bi bi-calendar2-check"></i><span>Event Reservations</span></a>
+            @endstaffroute
+            @staffroute('payments.index')
             <a class="management-nav-link {{ request()->routeIs('payments.*') ? 'active' : '' }}" href="{{ route('payments.index') }}"><i class="bi bi-credit-card"></i><span>Payments</span></a>
+            @endstaffroute
+            @staffroute('payment-settings.edit')
             <a class="management-nav-link {{ request()->routeIs('payment-settings.*') ? 'active' : '' }}" href="{{ route('payment-settings.edit') }}"><i class="bi bi-qr-code"></i><span>Payment Settings</span></a>
+            @endstaffroute
 
             @if(auth()->user()->hasPermission('manage_users') || auth()->user()->hasPermission('manage_roles_permissions'))
                 <p class="nav-section-label">Administration</p>

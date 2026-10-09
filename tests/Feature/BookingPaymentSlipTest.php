@@ -24,7 +24,7 @@ class BookingPaymentSlipTest extends TestCase
         parent::setUp();
         \Illuminate\Support\Facades\Storage::fake('public');
         \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
-        \App\Models\PaymentSetting::create(['account_name' => 'Beach Resort Management', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
+        \App\Models\PaymentSetting::create(['account_name' => 'Utopia Bay Resort', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
 
         $this->customer = User::factory()->create();
         $roomType = RoomType::create([

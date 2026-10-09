@@ -11,7 +11,7 @@
                     <div class="row g-0">
                         <div class="col-lg-4 d-none d-lg-block">
                             <div class="auth-card-aside">
-                                <i class="bi bi-stars"></i>
+                                <img class="auth-brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="Utopia Bay" width="68" height="68">
                                 <h1 class="h2 mt-4">Your stay starts here</h1>
                                 <p class="text-white-50 lh-lg">Create a customer account to request event venues, manage reservations, and access membership benefits.</p>
                             </div>

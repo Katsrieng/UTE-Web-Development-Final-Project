@@ -24,6 +24,43 @@ class FrontendSmokeTest extends TestCase
         $this->get('/venues')->assertOk()->assertSee('A venue for every occasion');
     }
 
+    public function test_homepage_links_have_distinct_customer_destinations_without_overlays(): void
+    {
+        $html = $this->get(route('welcome'))->assertOk()->getContent();
+        $document = new \DOMDocument;
+        @$document->loadHTML($html);
+        $links = new \DOMXPath($document);
+
+        foreach ([
+            'Explore rooms' => 'rooms.index',
+            'Plan an event' => 'venues.index',
+            'Find a room' => 'rooms.index',
+            'Host an event' => 'venues.index',
+            'Discover facilities' => 'facilities.index',
+            'Comfortable stays' => 'rooms.index',
+            'Memorable events' => 'venues.index',
+            'Guest facilities' => 'facilities.index',
+            'Member benefits' => 'memberships.index',
+            'Create account' => 'register',
+            'Sign in' => 'login',
+        ] as $label => $routeName) {
+            $matches = $links->query('//main//a[contains(normalize-space(.), "'.$label.'")]');
+            $this->assertCount(1, $matches, "Expected one homepage link labeled {$label}.");
+            $this->assertSame(route($routeName), $matches->item(0)->getAttribute('href'));
+        }
+
+        $this->assertCount(0, $links->query('//a//a'));
+        $this->assertCount(0, $links->query('//main//a[contains(concat(" ", normalize-space(@class), " "), " stretched-link ")]'));
+
+        $staff = User::factory()->staff()->create();
+        $this->actingAs($staff)->get(route('welcome'))->assertOk()
+            ->assertDontSee('href="'.route('memberships.index').'"', false);
+
+        $inactiveCustomer = User::factory()->inactive()->create();
+        $this->actingAs($inactiveCustomer)->get(route('welcome'))->assertOk()
+            ->assertDontSee('href="'.route('customer.bookings.index').'"', false);
+    }
+
     public function test_public_room_and_facility_detail_pages_render(): void
     {
         $roomType = RoomType::create([
@@ -59,7 +96,7 @@ class FrontendSmokeTest extends TestCase
         $this->actingAs($customer)
             ->get(route('memberships.index'))
             ->assertOk()
-            ->assertSee('Hotel membership');
+            ->assertSee('Utopia Bay membership');
 
         $this->actingAs($customer)
             ->get(route('profile.edit'))

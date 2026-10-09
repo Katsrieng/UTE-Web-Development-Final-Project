@@ -14,7 +14,7 @@
 
 <x-list-toolbar :action="route('management.customers.index')" placeholder="Name, email or phone" :fields="['active'=>['label'=>'Account status','all'=>'All customers','options'=>['1'=>'Active','0'=>'Inactive']]]" />
 
-<div class="table-card"><div class="card-body">
+<div class="table-card">
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
             <thead><tr><th class="ps-4">ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Bookings</th><th>Actions</th></tr></thead>
@@ -40,6 +40,6 @@
             </tbody>
         </table>
     </div>
-    {{ $customers->links('pagination::bootstrap-5') }}
-</div></div>
+    <div class="px-3 pt-3">{{ $customers->links('pagination::bootstrap-5') }}</div>
+</div>
 @endsection

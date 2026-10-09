@@ -1,6 +1,6 @@
 @extends('layouts.management')
 
-@section('title', 'Dashboard')
+@section('title', 'Staff Dashboard')
 @section('page-label', 'Dashboard')
 
 @section('content')

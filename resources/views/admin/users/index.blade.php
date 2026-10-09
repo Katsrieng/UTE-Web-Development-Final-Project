@@ -21,7 +21,6 @@
 <x-list-toolbar :action="route('admin.users.index')" placeholder="Name, email or phone" :fields="['role'=>['label'=>'Staff role','all'=>'All staff roles','options'=>['admin'=>'Admin','manager'=>'Manager','staff'=>'Staff / Front Desk']], 'active'=>['label'=>'Account status','all'=>'All accounts','options'=>['1'=>'Active','0'=>'Inactive']]]" />
 
 <div class="table-card">
-    <div class="card-body">
         <div class="table-responsive">
             <table class="table table-bordered table-hover align-middle">
                 <thead>
@@ -90,8 +89,7 @@
             </table>
         </div>
 
-        {{ $users->links('pagination::bootstrap-5') }}
-    </div>
+        <div class="px-3 pt-3">{{ $users->links('pagination::bootstrap-5') }}</div>
 </div>
 
 @endsection

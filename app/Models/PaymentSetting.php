@@ -16,7 +16,7 @@ class PaymentSetting extends Model
 
     public static function current(): self
     {
-        return static::find(1) ?? new static(['account_name' => 'Beach Resort Management', 'aba_khqr_enabled' => false]);
+        return static::find(1) ?? new static(['account_name' => 'Utopia Bay Resort', 'aba_khqr_enabled' => false]);
     }
 
     public function khqrAvailable(): bool

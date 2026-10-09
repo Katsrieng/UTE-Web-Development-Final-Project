@@ -45,7 +45,7 @@
                 <div class="col-lg-4">
                     <aside id="bookingSummary" class="checkout-summary" aria-labelledby="booking-summary-heading">
                         <h2 id="booking-summary-heading" class="h5 mb-3">Your Booking</h2>
-                        <p class="fw-semibold mb-1">Room {{ $room->room_number }} · {{ $room->roomType->name }}</p>
+                        <p class="booking-summary-room fw-semibold mb-1">Room {{ $room->room_number }} · {{ $room->roomType->name }}</p>
                         <p class="small text-muted mb-3">${{ number_format($room->price_per_night, 2) }} / night · Up to {{ $room->roomType->capacity }} guests</p>
                         @isset($totalAmount)
                             <div id="availabilityResult" class="checkout-availability" role="status"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Available for your selected dates</div>
@@ -59,7 +59,7 @@
                                     <div class="checkout-price-line"><span>{{ $membershipPricing['membership_name'] }} Member · {{ number_format($membershipPricing['membership_discount_percentage'], 2) }}% discount</span><span id="liveMembershipDiscount" class="text-success">−${{ number_format($membershipPricing['membership_discount_amount'], 2) }}</span></div>
                                     <p class="small text-success mb-2">You save <span id="liveMembershipSaving">${{ number_format($membershipPricing['membership_discount_amount'], 2) }}</span></p>
                                 @endif
-                                <div class="checkout-total"><span>Total</span><strong id="liveBookingTotal">${{ number_format($totalAmount, 2) }}</strong></div>
+                                <div class="checkout-total"><span>Booking total</span><strong id="liveBookingTotal">${{ number_format($totalAmount, 2) }}</strong></div>
                             </div>
                             <p id="staleTotalNotice" class="checkout-stale small" role="status" hidden>Your dates or guests changed. Check availability again before booking.</p>
                             <button type="submit" id="bookRoomButton" class="btn btn-hotel w-100 mt-3">Book Room</button>

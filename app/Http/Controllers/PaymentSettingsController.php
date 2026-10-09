@@ -33,7 +33,7 @@ class PaymentSettingsController extends Controller
                 $data['khqr_image'] = $path;
             }
             DB::transaction(function () use ($data, $path) {
-                PaymentSetting::firstOrCreate(['id' => 1], ['account_name' => 'Beach Resort Management']);
+                PaymentSetting::firstOrCreate(['id' => 1], ['account_name' => 'Utopia Bay Resort']);
                 $settings = PaymentSetting::lockForUpdate()->findOrFail(1);
                 $oldPath = $settings->khqr_image;
                 $settings->update($data);

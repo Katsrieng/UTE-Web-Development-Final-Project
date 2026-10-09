@@ -2,19 +2,7 @@
 @section('title', 'Membership Types')
 @section('page-label', 'Membership Types')
 @section('content')
-<div class="page-heading"><div><p class="section-kicker">Guest loyalty</p><h1>Membership Types</h1><p>Manage customer discount tiers and membership duration.</p></div>
-@staffroute('admin.membership-types.create')
-<a href="{{ route('admin.membership-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> New Membership Type</a>
-@endstaffroute
-</div>
-<div class="table-card"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th class="ps-4">Membership</th><th>Annual price</th><th>Upgrade points</th><th>Discount</th><th>Duration</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody>@forelse($membershipTypes as $type)<tr><td class="ps-4"><strong>{{ $type->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($type->description ?: 'No description',70) }}</small></td><td>{{ $type->price !== null ? '$'.number_format($type->price, 2) : 'Not configured' }}</td><td>{{ $type->loyalty_upgrade_points ?? '—' }}</td><td class="fw-semibold">{{ number_format($type->discount_percentage,2) }}%</td><td>{{ $type->duration_months }} months</td><td><x-status-badge :status="$type->status" /></td><td class="text-end pe-4">
-@staffroute('admin.membership-types.edit')
-<a href="{{ route('admin.membership-types.edit',$type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-@endstaffroute
-
-@staffroute('admin.membership-types.destroy')
-<form action="{{ route('admin.membership-types.destroy',$type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete membership type {{ $type->name }}?"><i class="bi bi-trash"></i></button></form>
-@endstaffroute
-</td></tr>@empty<tr><td colspan="5"><x-empty-state icon="bi-award" title="No membership types" message="Create the first loyalty tier for hotel customers." /></td></tr>@endforelse</tbody></table></div></div>
+<div class="page-heading"><div><p class="section-kicker">Guest loyalty</p><h1>Membership Types</h1><p>Manage customer discount tiers and membership duration.</p></div><a href="{{ route('admin.membership-types.create') }}" class="btn btn-hotel"><i class="bi bi-plus-lg me-1"></i> New Membership Type</a></div>
+<div class="table-card"><div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th class="ps-4">Membership</th><th>Discount</th><th>Price</th><th>Duration</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody>@forelse($membershipTypes as $type)<tr><td class="ps-4"><strong>{{ $type->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($type->description ?: 'No description',70) }}</small></td><td class="fw-semibold">{{ number_format($type->discount_percentage,2) }}%</td><td class="fw-semibold">${{ number_format($type->price,2) }}</td><td>{{ $type->duration_months }} months</td><td><x-status-badge :status="$type->status" /></td><td class="text-end pe-4"><a href="{{ route('admin.membership-types.edit',$type) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a> <form action="{{ route('admin.membership-types.destroy',$type) }}" method="POST" class="d-inline">@csrf @method('DELETE')<button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Delete membership type {{ $type->name }}?"><i class="bi bi-trash"></i></button></form></td></tr>@empty<tr><td colspan="6"><x-empty-state icon="bi-award" title="No membership types" message="Create the first loyalty tier for hotel customers." /></td></tr>@endforelse</tbody></table></div></div>
 @if($membershipTypes->hasPages())<div class="mt-4">{{ $membershipTypes->links('pagination::bootstrap-5') }}</div>@endif
 @endsection

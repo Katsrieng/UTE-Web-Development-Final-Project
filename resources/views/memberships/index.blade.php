@@ -1,85 +1,24 @@
 @extends('layouts.app')
 @section('title', 'Membership')
 @section('content')
-<section class="page-hero membership-hero text-center"><div class="container">
-    <p class="section-kicker">Hotel membership</p>
-    <h1>Choose Your Membership</h1>
-    <p class="mx-auto">Enjoy exclusive booking discounts and earn loyalty rewards with every stay.</p>
-</div></section>
-<section class="content-section compact membership-plans"><div class="container">
-    @if($currentMembership)
-        <section class="hotel-card membership-current p-3 p-md-4 mb-4" aria-labelledby="your-membership-heading">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div class="d-flex align-items-center gap-3">
-                    <span class="metric-icon mb-0" aria-hidden="true"><i class="bi bi-award"></i></span>
-                    <div><p class="section-kicker mb-1">Active membership</p><h2 id="your-membership-heading" class="h5 mb-1">Your Membership · {{ $currentMembership->membershipType->name }}</h2>
-                        @if($currentMembership->discountPercentage() > 0)
-                            <p class="mb-1">{{ $currentMembership->discountPercentage() }}% booking discount</p>
-                        @else
-                            <p class="mb-1 text-muted">A booking discount is not currently available for this plan.</p>
-                        @endif
-                        <p class="small text-muted mb-0">Valid until {{ $currentMembership->end_date->format('F j, Y') }}</p>
-                    </div>
-                </div>
-                <form action="{{ route('memberships.cancel', $currentMembership) }}" method="POST">@csrf<button type="submit" class="btn btn-outline-danger btn-sm" data-confirm="Cancel your active membership?">Cancel Membership</button></form>
+<section class="page-hero"><div class="container"><p class="section-kicker">More value, every visit</p><h1>Hotel membership</h1><p>Enjoy member recognition and savings designed for guests who return.</p></div></section>
+<section class="content-section"><div class="container">
+    @if($currentMembership && $currentMembership->isActive())
+        <div class="row justify-content-center"><div class="col-xl-9"><div class="hotel-card p-4 p-lg-5"><div class="row align-items-center g-4"><div class="col-md-auto"><span class="empty-state-icon m-0" style="width:100px;height:100px;font-size:2.4rem"><i class="bi bi-award"></i></span></div><div class="col"><p class="section-kicker">Active membership</p><div class="d-flex flex-wrap justify-content-between gap-3 align-items-start"><h1 class="section-title mb-2">{{ $currentMembership->membershipType->name }} Member</h1><x-status-badge status="active" /></div><p class="section-copy">Enjoy {{ $currentMembership->discountPercentage() }}% off eligible bookings through {{ $currentMembership->end_date->format('F j, Y') }}.</p>
+            <div class="row g-3 mt-1 mb-2">
+                <div class="col-sm-4"><small class="text-muted d-block">Member since</small><strong>{{ $currentMembership->start_date->format('M j, Y') }}</strong></div>
+                <div class="col-sm-4"><small class="text-muted d-block">Valid until</small><strong>{{ $currentMembership->end_date->format('M j, Y') }}</strong></div>
+                @if($currentMembership->payment)
+                    <div class="col-sm-4"><small class="text-muted d-block">Paid</small><strong>${{ number_format($currentMembership->payment->amount, 2) }}</strong><small class="d-block text-muted">{{ $currentMembership->payment->payment_method }} · {{ $currentMembership->payment->reference_number }}</small></div>
+                @endif
             </div>
-        </section>
+            <form action="{{ route('memberships.cancel',$currentMembership) }}" method="POST" class="mt-4">@csrf<button type="submit" class="btn btn-outline-danger" data-confirm="Cancel your active membership?">Cancel Membership</button></form></div></div></div></div></div>
+    @else
+        @if($currentMembership)
+            <div class="alert alert-secondary d-flex align-items-center gap-2 mb-4" role="status"><i class="bi bi-info-circle"></i><span>Your {{ $currentMembership->membershipType->name }} membership was <strong>{{ $currentMembership->status === 'cancelled' ? 'cancelled' : 'not renewed' }}</strong>. You can join again below.</span></div>
+        @endif
+        <div class="text-center mb-5"><p class="section-kicker">Choose your level</p><h1 class="section-title">Membership made rewarding</h1><p class="section-copy mx-auto">Select the tier that matches how you stay and enjoy benefits throughout its membership period.</p></div>
+        <div class="row g-4 justify-content-center">@forelse($membershipTypes as $type)<div class="col-md-6 col-lg-4"><article class="hotel-card p-4 p-lg-5 d-flex flex-column"><span class="metric-icon"><i class="bi bi-gem"></i></span><p class="section-kicker">{{ $type->duration_months }} months</p><h2 class="h3">{{ $type->name }}</h2><p class="text-muted flex-grow-1">{{ $type->description ?: 'Extra value for returning hotel guests.' }}</p><p class="display-6 font-display mb-1">{{ number_format($type->discount_percentage, 0) }}%</p><p class="text-muted mb-2">off eligible bookings</p><p class="fw-semibold mb-0">{{ $type->price > 0 ? '$'.number_format($type->price, 2) : 'Free' }}</p><a href="{{ route('memberships.checkout', $type) }}" class="btn btn-hotel w-100 mt-3">Join {{ $type->name }}</a></article></div>@empty<div class="col-12"><x-empty-state icon="bi-award" title="Memberships coming soon" message="No active membership tiers are currently available." /></div>@endforelse</div>
     @endif
-    @include('loyalty._panel')
-    @if($pendingPurchase?->payment)<div class="payment-instructions mb-4"><i class="bi bi-clock" aria-hidden="true"></i><div><strong>Your membership purchase is pending.</strong><a class="d-block" href="{{ route('customer.payments.show', $pendingPurchase->payment) }}">View payment details</a></div></div>@endif
-    <div class="row g-4 justify-content-center">
-        @forelse($membershipTypes as $type)
-            @php
-                $fallbackDescriptions = ['silver' => 'Essential savings for occasional stays.', 'gold' => 'More value for returning guests.', 'platinum' => 'Maximum savings for frequent stays.'];
-                $tierStyle = in_array(strtolower($type->name), ['silver', 'gold', 'platinum'], true) ? strtolower($type->name) : 'standard';
-            @endphp
-            <div class="col-md-6 col-lg-4">
-                <article class="hotel-card membership-plan membership-plan-{{ $tierStyle }} p-4 d-flex flex-column h-100" aria-labelledby="membership-plan-{{ $type->id }}">
-                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
-                        <span class="membership-plan-icon" aria-hidden="true"><i class="bi {{ $tierStyle === 'platinum' ? 'bi-gem' : 'bi-award' }}"></i></span>
-                        @if($tierStyle === 'gold')<span class="membership-premium-label membership-popular-label">Most Popular</span>@endif
-                        @if($tierStyle === 'platinum')<span class="membership-premium-label">Highest tier</span>@endif
-                    </div>
-                    <h2 id="membership-plan-{{ $type->id }}" class="h3 mb-1">{{ $type->name }}</h2>
-                    <p class="membership-plan-description small text-muted mb-3" title="{{ $type->description ?: ($fallbackDescriptions[$tierStyle] ?? 'Extra value for your next stay.') }}">{{ $type->description ?: ($fallbackDescriptions[$tierStyle] ?? 'Extra value for your next stay.') }}</p>
-                    @if($type->price !== null)
-                        <p class="membership-plan-price mb-0">${{ number_format($type->price, 2) }}</p>
-                        <p class="small text-muted mb-3">{{ $type->duration_months == 12 ? 'per year' : 'per '.$type->duration_months.' months' }}</p>
-                    @else
-                        <p class="membership-plan-price membership-price-pending mb-0">Price coming soon</p><p class="small text-muted mb-3">{{ $type->duration_months }}-month membership</p>
-                    @endif
-                    <div class="membership-plan-discount mb-3">
-                        <strong>{{ rtrim(rtrim(number_format($type->discount_percentage, 2), '0'), '.') }}% OFF</strong>
-                        <span>room and package bookings</span>
-                    </div>
-                    <ul class="membership-plan-benefits list-unstyled flex-grow-1 mb-4">
-                        <li><i class="bi bi-check2" aria-hidden="true"></i><span>1 point per $1 actually paid on eligible stays</span></li>
-                        @if($type->loyalty_upgrade_points !== null)
-                            <li><i class="bi bi-check2" aria-hidden="true"></i><span>{{ number_format($type->loyalty_upgrade_points) }} points toward your next tier</span></li>
-                        @elseif($tierStyle === 'platinum')
-                            <li><i class="bi bi-check2" aria-hidden="true"></i><span>Enjoy our highest membership tier</span></li>
-                        @endif
-                        <li><i class="bi bi-check2" aria-hidden="true"></i><span>Valid for {{ $type->duration_months }} months</span></li>
-                    </ul>
-                    @if(!$currentMembership && !$pendingPurchase && $type->price !== null && (float) $type->price > 0 && $type->duration_months == 12)
-                        <a class="btn btn-hotel membership-purchase w-100" href="{{ route('customer.payments.membership', $type) }}">Purchase Membership</a>
-                    @else
-                        <button type="button" class="btn btn-hotel membership-purchase w-100" disabled aria-describedby="membership-purchase-note">{{ $currentMembership ? 'Current membership active' : ($pendingPurchase ? 'Purchase pending' : 'Plan unavailable') }}</button>
-                    @endif
-                </article>
-            </div>
-        @empty
-            <div class="col-12"><x-empty-state icon="bi-award" title="Memberships coming soon" message="No active membership tiers are currently available." /></div>
-        @endforelse
-    </div>
-    @if($membershipTypes->isNotEmpty())<p id="membership-purchase-note" class="membership-purchase-note small mt-3 mb-0" role="note"><i class="bi bi-info-circle" aria-hidden="true"></i><span>Cash and transfers require hotel verification. Card checkout is a demo simulation, with no real charge.</span></p>@endif
-    <section class="membership-loyalty mt-4 p-3 p-md-4" aria-labelledby="loyalty-heading">
-        <div class="d-flex flex-wrap align-items-baseline justify-content-between gap-2 mb-3"><h2 id="loyalty-heading" class="h5 mb-0">How loyalty works</h2><p class="small text-muted mb-0">Earn on Paid stays. Keep your rewards through renewal.</p></div>
-        <ol class="row g-3 list-unstyled mb-0">
-            <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">1</span><div><h3 class="h6 mb-1">Join</h3><p class="small text-muted mb-0">Choose a membership and complete your payment.</p></div></li>
-            <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">2</span><div><h3 class="h6 mb-1">Stay &amp; Earn</h3><p class="small text-muted mb-0">Active members earn 1 point per $1 actually paid on eligible stays.</p></div></li>
-            <li class="col-md-4 d-flex align-items-start gap-2"><span class="membership-loyalty-step">3</span><div><h3 class="h6 mb-1">Upgrade</h3><p class="small text-muted mb-0">Use the required points to upgrade; keep the rest.</p></div></li>
-        </ol>
-    </section>
 </div></section>
 @endsection

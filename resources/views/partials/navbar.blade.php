@@ -34,11 +34,11 @@
                                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('customer.bookings.index', 'customer.bookings.show') ? 'active' : '' }}" href="{{ route('customer.bookings.index') }}">My Bookings</a></li>
                             @endif
                             @if(Route::has('memberships.index'))
-                                <li class="nav-item"><a class="nav-link {{ request()->routeIs('memberships.*') ? 'active' : '' }}" href="{{ route('memberships.index') }}">Membership</a></li>
+                                <li class="nav-item"><a class="nav-link {{ request()->routeIs('memberships.*') ? 'active' : '' }}" href="{{ route('memberships.index') }}">Membership @if($activeMembership = auth()->user()->activeMembership())<span class="badge rounded-pill text-bg-warning ms-1">{{ $activeMembership->membershipType->name }}</span>@endif</a></li>
                             @endif
                             <li class="nav-item"><a class="nav-link {{ request()->routeIs('event-reservations.*') ? 'active' : '' }}" href="{{ route('event-reservations.index') }}">My Events</a></li>
                         @endif
-                        @if(auth()->user()->hasRole('admin', 'manager', 'staff'))
+                        @if(auth()->user()->hasRole('admin', 'staff'))
                             <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Management</a></li>
                         @endif
                     @endauth

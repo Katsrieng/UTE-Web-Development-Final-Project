@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Payment extends Model
 {
@@ -15,8 +14,7 @@ class Payment extends Model
         'user_id',
         'booking_id',
         'event_booking_id',
-        'membership_purchase_id',
-        'transaction_reference',
+        'membership_id',
         'amount',
         'payment_method',
         'payment_date',
@@ -32,30 +30,18 @@ class Payment extends Model
         ];
     }
 
-    public function loyaltyTransactions(): HasMany { return $this->hasMany(LoyaltyTransaction::class); }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function booking(): BelongsTo
+    public function membership(): BelongsTo
     {
-        return $this->belongsTo(Booking::class);
+        return $this->belongsTo(Membership::class);
     }
 
     public function eventBooking(): BelongsTo
     {
         return $this->belongsTo(EventBooking::class);
-    }
-
-    public function membershipPurchase(): BelongsTo { return $this->belongsTo(MembershipPurchase::class); }
-
-    public const CUSTOMER_METHODS = ['Card', 'ABA / KHQR', 'Cash at Hotel'];
-    public const METHODS = ['Cash', 'Cash at Hotel', 'Card', 'ABA / KHQR'];
-
-    public function purposeLabel(): string
-    {
-        return $this->membership_purchase_id ? 'Membership Purchase' : ($this->booking_id ? 'Hotel Booking' : 'Event Booking');
     }
 }

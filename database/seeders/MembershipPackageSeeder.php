@@ -10,55 +10,44 @@ class MembershipPackageSeeder extends Seeder
 {
     public function run(): void
     {
-        MembershipType::insert([
+        $membershipTypes = [
             [
                 'name' => 'Silver',
-                'price' => 30,
-                'loyalty_upgrade_points' => 300,
                 'description' => 'Entry-level membership with a small booking discount.',
                 'discount_percentage' => 5,
                 'duration_months' => 12,
+                'price' => 99.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Gold',
-                'price' => 60,
-                'loyalty_upgrade_points' => 700,
                 'description' => 'Mid-tier membership with a solid discount on stays.',
                 'discount_percentage' => 10,
                 'duration_months' => 12,
+                'price' => 199.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Platinum',
-                'price' => 100,
-                'loyalty_upgrade_points' => null,
                 'description' => 'Top-tier membership with the best resort discount.',
                 'discount_percentage' => 15,
                 'duration_months' => 12,
+                'price' => 299.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+        ];
 
-        foreach (['Silver' => 'Gold', 'Gold' => 'Platinum', 'Platinum' => null] as $name => $next) {
-            MembershipType::where('name', $name)->update(['next_membership_type_id' => $next ? MembershipType::where('name', $next)->orderBy('id')->value('id') : null]);
+        foreach ($membershipTypes as $type) {
+            MembershipType::updateOrCreate(['name' => $type['name']], $type);
         }
 
-        Package::insert([
+        $packages = [
             [
                 'name' => 'Breakfast Buffet Package',
                 'type' => 'buffet',
                 'description' => 'Daily breakfast buffet for the length of the stay.',
                 'price' => 15.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Romantic Getaway Package',
@@ -66,8 +55,6 @@ class MembershipPackageSeeder extends Seeder
                 'description' => 'Room decoration, champagne, and a couples spa session.',
                 'price' => 80.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Family Fun Package',
@@ -75,8 +62,6 @@ class MembershipPackageSeeder extends Seeder
                 'description' => 'Kids club access and a family beach activity set.',
                 'price' => 50.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'All-Inclusive Accommodation Package',
@@ -84,9 +69,11 @@ class MembershipPackageSeeder extends Seeder
                 'description' => 'Room upgrade with late checkout and welcome drinks.',
                 'price' => 40.00,
                 'status' => 'active',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
-        ]);
+        ];
+
+        foreach ($packages as $package) {
+            Package::updateOrCreate(['name' => $package['name']], $package);
+        }
     }
 }

@@ -66,9 +66,8 @@ class MembershipTypeController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
             'discount_percentage' => 'required|numeric|min:0|max:100',
-            'duration_months' => 'required|integer|in:12',
-            'price' => 'required|numeric|min:0.01|max:99999999.99|decimal:0,2',
-            'loyalty_upgrade_points' => 'nullable|integer|min:1|max:4294967295',
+            'duration_months' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
             'status' => 'required|in:active,inactive',
         ]);
     }

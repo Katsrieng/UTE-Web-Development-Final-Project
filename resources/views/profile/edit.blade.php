@@ -15,6 +15,22 @@
             <x-status-badge :status="$user->is_active ? 'active' : 'disabled'" />
         </div>
 
+        @if(auth()->user()->isCustomer())
+            @php($membership = auth()->user()->activeMembership())
+            <div class="card shadow-sm border-0 mb-4"><div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-3"><span class="avatar-circle" style="width:48px;height:48px"><i class="bi bi-award"></i></span><div>
+                    @if($membership)
+                        <h2 class="h5 mb-1">{{ $membership->membershipType->name }} Member</h2>
+                        <p class="text-muted mb-0">{{ number_format($membership->membershipType->discount_percentage, 0) }}% off eligible bookings until {{ $membership->end_date->format('F j, Y') }}</p>
+                    @else
+                        <h2 class="h5 mb-1">No active membership</h2>
+                        <p class="text-muted mb-0">Join a tier to save on every stay.</p>
+                    @endif
+                </div></div>
+                <a href="{{ route('memberships.index') }}" class="btn btn-hotel-outline">{{ $membership ? 'Manage membership' : 'View memberships' }}</a>
+            </div></div>
+        @endif
+
         <div class="row g-4">
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0">

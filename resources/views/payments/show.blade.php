@@ -2,44 +2,14 @@
 @section('title', 'Payment '.$payment->reference_number)
 @section('page-label', 'Payments')
 @section('content')
-<div class="mb-4">
-@staffroute('payments.index')
-<a href="{{ route('payments.index') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Back to payments</a>
-@endstaffroute
-</div>
-<div class="row g-4"><div class="col-lg-8"><div class="card shadow-sm border-0"><div class="card-header bg-white p-4 d-flex justify-content-between gap-3 align-items-center"><div><p class="section-kicker">Payment #{{ $payment->id }}</p><h1 class="h3 mb-0">{{ $payment->reference_number }}</h1></div><x-status-badge :status="$payment->status" class="fs-6 px-3 py-2" /></div><div class="card-body p-4"><div class="row g-4"><div class="col-md-6"><small class="text-muted d-block">Amount</small><strong class="fs-4">${{ number_format($payment->amount,2) }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Payment date</small><strong>{{ $payment->payment_date?->format('M j, Y') }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Payment method</small><strong>{{ $payment->payment_method }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Customer</small><strong>{{ $payment->user?->name ?? 'User #'.$payment->user_id }}</strong>@if($payment->user?->email)<small class="d-block text-muted">{{ $payment->user->email }}</small>@else<small class="d-block text-muted">Record unavailable</small>@endif</div>@if($payment->event_booking_id)<div class="col-md-6"><small class="text-muted d-block">Event booking ID</small><strong>#{{ $payment->event_booking_id }}</strong>@unless($payment->eventBooking)<small class="d-block text-muted">Record unavailable</small>@endunless</div>@if($payment->eventBooking)<div class="col-md-6"><small class="text-muted d-block">Venue name</small><strong>{{ $payment->eventBooking->venue?->name ?? 'Venue unavailable' }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Event start</small><strong>{{ $payment->eventBooking->starts_at?->format('M j, Y g:i A') ?? 'Date unavailable' }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Event status</small><strong>{{ $payment->eventBooking->status }}</strong></div>@endif @elseif($payment->booking_id)<div class="col-md-6"><small class="text-muted d-block">Room booking ID</small><strong>#{{ $payment->booking_id }}</strong></div>@endif</div></div></div></div><div class="col-lg-4"><div class="card shadow-sm border-0"><div class="card-body p-4">@include('payments._purpose')
-@if($payment->transaction_reference)<p class="small text-muted text-break">Transaction reference: {{ $payment->transaction_reference }}</p>@endif
-<h2 class="h5 mb-3">Payment actions</h2><div class="d-grid gap-2">
-
-@staffroute('payments.receipt')
-<a href="{{ route('payments.receipt',$payment) }}" class="btn btn-hotel"><i class="bi bi-receipt me-1"></i> View Receipt</a>
-@endstaffroute
-
+<div class="mb-4"><a href="{{ route('payments.index') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Back to payments</a></div>
+<div class="row g-4"><div class="col-lg-8"><div class="card shadow-sm border-0"><div class="card-header bg-white p-4 d-flex justify-content-between gap-3 align-items-center"><div><p class="section-kicker">Payment #{{ $payment->id }}</p><h1 class="h3 mb-0">{{ $payment->reference_number }}</h1></div><x-status-badge :status="$payment->status" class="fs-6 px-3 py-2" /></div><div class="card-body p-4"><div class="row g-4"><div class="col-md-6"><small class="text-muted d-block">Amount</small><strong class="fs-4">${{ number_format($payment->amount,2) }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Payment date</small><strong>{{ $payment->payment_date?->format('M j, Y') }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Payment method</small><strong>{{ $payment->payment_method }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Customer</small><strong>{{ $payment->user?->name ?? 'User #'.$payment->user_id }}</strong>@if($payment->user?->email)<small class="d-block text-muted">{{ $payment->user->email }}</small>@else<small class="d-block text-muted">Record unavailable</small>@endif</div>@if($payment->event_booking_id)<div class="col-md-6"><small class="text-muted d-block">Event booking ID</small><strong>#{{ $payment->event_booking_id }}</strong>@unless($payment->eventBooking)<small class="d-block text-muted">Record unavailable</small>@endunless</div>@if($payment->eventBooking)<div class="col-md-6"><small class="text-muted d-block">Venue name</small><strong>{{ $payment->eventBooking->venue?->name ?? 'Venue unavailable' }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Event start</small><strong>{{ $payment->eventBooking->starts_at?->format('M j, Y g:i A') ?? 'Date unavailable' }}</strong></div><div class="col-md-6"><small class="text-muted d-block">Event status</small><strong>{{ $payment->eventBooking->status }}</strong></div>@endif @elseif($payment->membership_id)<div class="col-md-6"><small class="text-muted d-block">Membership</small><strong>{{ $payment->membership?->membershipType?->name ?? 'Type unavailable' }} (#{{ $payment->membership_id }})</strong></div>@elseif($payment->booking_id)<div class="col-md-6"><small class="text-muted d-block">Room booking ID</small><strong>#{{ $payment->booking_id }}</strong></div>@endif</div></div></div></div><div class="col-lg-4"><div class="card shadow-sm border-0"><div class="card-body p-4"><h2 class="h5 mb-3">Payment actions</h2><div class="d-grid gap-2">
+    <a href="{{ route('payments.receipt',$payment) }}" class="btn btn-hotel"><i class="bi bi-receipt me-1"></i> View Receipt</a>
     @if($payment->status === 'Pending')
-
-@staffroute('payments.verify')
-<form action="{{ route('payments.verify', $payment) }}" method="POST">@csrf<button class="btn btn-hotel w-100" type="submit" data-confirm="Record this payment as Paid after verifying collection?">Verify / Mark Paid</button></form>
-@endstaffroute
-
-
-@staffroute('payments.edit')
-<a href="{{ route('payments.edit',$payment) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i> Edit Payment</a>
-@endstaffroute
-
-
-@staffroute('payments.destroy')
-<form action="{{ route('payments.destroy',$payment) }}" method="POST">@csrf @method('DELETE')<button class="btn btn-outline-danger w-100" data-confirm="Delete payment {{ $payment->reference_number }}?" type="submit"><i class="bi bi-trash me-1"></i> Delete Payment</button></form>
-@endstaffroute
-
+        <a href="{{ route('payments.edit',$payment) }}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i> Edit Payment</a>
+        <form action="{{ route('payments.destroy',$payment) }}" method="POST">@csrf @method('DELETE')<button class="btn btn-outline-danger w-100" data-confirm="Delete payment {{ $payment->reference_number }}?" type="submit"><i class="bi bi-trash me-1"></i> Delete Payment</button></form>
     @elseif($payment->status === 'Paid')
-
-@staffroute('payments.refund')
-<form action="{{ route('payments.refund',$payment) }}" method="POST">@csrf<button class="btn btn-outline-warning w-100" data-confirm="Mark payment {{ $payment->reference_number }} as refunded?" type="submit">Mark as Refunded</button></form>
-@endstaffroute
-
+        <form action="{{ route('payments.refund',$payment) }}" method="POST">@csrf<button class="btn btn-outline-warning w-100" data-confirm="Mark payment {{ $payment->reference_number }} as refunded?" type="submit">Mark as Refunded</button></form>
     @endif
 </div></div></div></div></div>
-@if($loyalty && auth()->user()->hasPermission('view_loyalty_activity'))
-    <div class="mt-4">@include('loyalty._panel', ['staffContext' => true])</div>
-@endif
 @endsection

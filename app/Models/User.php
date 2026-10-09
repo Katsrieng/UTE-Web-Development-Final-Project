@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -21,15 +20,12 @@ class User extends Authenticatable
 
     public const ROLE_ADMIN = 'admin';
 
-    public const ROLE_MANAGER = 'manager';
-
     public const ROLE_STAFF = 'staff';
 
     public const ROLE_CUSTOMER = 'customer';
 
     public const ROLES = [
         self::ROLE_ADMIN,
-        self::ROLE_MANAGER,
         self::ROLE_STAFF,
         self::ROLE_CUSTOMER,
     ];
@@ -50,18 +46,35 @@ class User extends Authenticatable
 
     /* ---------- Relationships ---------- */
 
-    public function bookings(): HasMany { return $this->hasMany(Booking::class); }
-
-    public function loyaltyAccount(): HasOne { return $this->hasOne(LoyaltyAccount::class); }
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
     }
 
-    public function payments(): HasMany
+    /**
+     * The customer's current active membership (or null). Cached on the model
+     * instance so the navbar and pages can call it repeatedly for free.
+     */
+    public function activeMembership(): ?Membership
     {
-        return $this->hasMany(Payment::class);
+        if (! $this->relationLoaded('activeMembership')) {
+            $this->setRelation(
+                'activeMembership',
+                $this->memberships()
+                    ->with('membershipType')
+                    ->where('status', 'active')
+                    ->where('end_date', '>', now()->toDateString())
+                    ->latest('end_date')
+                    ->first()
+            );
+        }
+
+        return $this->getRelation('activeMembership');
     }
 
     public function eventBookings(): HasMany
@@ -74,25 +87,6 @@ class User extends Authenticatable
     public function hasRole(string ...$roles): bool
     {
         return in_array($this->role, $roles, true);
-    }
-
-    public function staffRole(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'role', 'slug');
-    }
-
-    public function hasPermission(string $slug): bool
-    {
-        if (! $this->is_active) { return false; }
-        if ($this->isAdmin()) { return true; }
-        if (! $this->hasRole(self::ROLE_MANAGER, self::ROLE_STAFF)
-            || in_array($slug, \App\Support\RbacCatalog::ADMIN_ONLY, true)) { return false; }
-        return $this->staffRole()->whereHas('permissions', fn ($query) => $query->where('permissions.slug', $slug))->exists();
-    }
-
-    public function roleLabel(): string
-    {
-        return $this->role === self::ROLE_STAFF ? 'Staff / Front Desk' : ucfirst($this->role);
     }
 
     public function isAdmin(): bool
@@ -116,7 +110,7 @@ class User extends Authenticatable
      */
     public function homeRoute(): string
     {
-        return $this->hasRole(self::ROLE_ADMIN, self::ROLE_MANAGER, self::ROLE_STAFF)
+        return $this->hasRole(self::ROLE_ADMIN, self::ROLE_STAFF)
             ? 'dashboard'
             : 'customer.bookings.index';
     }

@@ -9,6 +9,7 @@ use App\Models\EventBooking;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\MembershipPurchase;
+use App\Notifications\PaymentStatusUpdatedNotification;
 use App\Services\PaymentService;
 use App\Services\LoyaltyService;
 use Illuminate\Http\Request;
@@ -167,6 +168,8 @@ class PaymentController extends Controller
             $payment->update(['status' => 'Refunded']);
             $this->payments->refundMembership($payment);
             $this->payments->reverseLoyalty($payment);
+            $notification = PaymentStatusUpdatedNotification::forPayment($payment);
+            DB::afterCommit(fn () => User::find($payment->user_id)?->notify($notification));
 
             return back()->with('success', 'Payment marked as refunded.');
         });

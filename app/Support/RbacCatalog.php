@@ -45,6 +45,7 @@ class RbacCatalog
     public static function routePermission(?string $name): ?string
     {
         if ($name === 'dashboard') { return 'view_dashboard'; }
+        if (str_starts_with((string) $name, 'staff.notifications.')) { return 'view_bookings'; }
         if (str_starts_with((string) $name, 'management.customers.')) {
             return match (substr($name, strlen('management.customers.'))) {
                 'index', 'show' => 'view_customers',

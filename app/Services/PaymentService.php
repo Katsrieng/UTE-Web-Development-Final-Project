@@ -9,6 +9,8 @@ use App\Models\MembershipType;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
 use App\Models\User;
+use App\Notifications\MembershipActivatedNotification;
+use App\Notifications\PaymentStatusUpdatedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -127,6 +129,8 @@ class PaymentService
             $membership = Membership::create(['user_id' => $purchase->user_id, 'membership_type_id' => $type->id,
                 'start_date' => today()->toDateString(), 'end_date' => today()->addYearNoOverflow()->toDateString(), 'status' => 'active']);
             $purchase->update(['status' => 'completed', 'membership_id' => $membership->id]);
+            $notification = MembershipActivatedNotification::forPurchase($purchase);
+            DB::afterCommit(fn () => User::find($purchase->user_id)?->notify($notification));
         }
     }
 
@@ -141,6 +145,10 @@ class PaymentService
             $payment->status = 'Paid';
             $payment->save();
             $this->applyPaid($payment, $actor);
+            if (! $payment->membership_purchase_id) {
+                $notification = PaymentStatusUpdatedNotification::forPayment($payment);
+                DB::afterCommit(fn () => User::find($payment->user_id)?->notify($notification));
+            }
             return $payment;
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\EventReservationStatusUpdatedNotification;
 use Carbon\CarbonInterface;
 use Database\Factories\EventBookingFactory;
 use DomainException;
@@ -179,6 +180,8 @@ class EventBooking extends Model
                 'processed_by' => $staff->getKey(),
                 'processed_at' => now(),
             ]);
+            $notification = EventReservationStatusUpdatedNotification::forReservation($booking);
+            DB::afterCommit(fn () => User::find($booking->user_id)?->notify($notification));
         }, 5);
 
         $this->refresh();
@@ -200,6 +203,8 @@ class EventBooking extends Model
                 'processed_by' => $staff->getKey(),
                 'processed_at' => now(),
             ]);
+            $notification = EventReservationStatusUpdatedNotification::forReservation($booking);
+            DB::afterCommit(fn () => User::find($booking->user_id)?->notify($notification));
         }, 5);
 
         $this->refresh();
@@ -226,6 +231,10 @@ class EventBooking extends Model
                 'processed_at' => now(),
                 'cancelled_at' => now(),
             ]);
+            if (! $cancelledBy->isCustomer()) {
+                $notification = EventReservationStatusUpdatedNotification::forReservation($booking);
+                DB::afterCommit(fn () => User::find($booking->user_id)?->notify($notification));
+            }
         }, 5);
 
         $this->refresh();

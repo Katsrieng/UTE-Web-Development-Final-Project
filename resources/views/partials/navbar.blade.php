@@ -48,6 +48,9 @@
 
                 <div class="navbar-actions d-flex flex-column flex-lg-row align-items-lg-center gap-2 mt-3 mt-lg-0">
                     @auth
+                        @if(auth()->user()->isCustomer() && auth()->user()->is_active)
+                            @include('partials.customer-notifications')
+                        @endif
                         <a class="profile-link {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.edit') }}">
                             <span class="avatar-circle">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
                             <span class="d-lg-none d-xl-inline">{{ auth()->user()->name }}</span>

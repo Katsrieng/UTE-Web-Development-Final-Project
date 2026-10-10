@@ -29,6 +29,9 @@
                     <a href="{{ route('welcome') }}" class="topbar-link d-none d-sm-inline-flex">
                         <i class="bi bi-box-arrow-up-right"></i> Public site
                     </a>
+                    @if(auth()->user()->hasPermission('view_bookings'))
+                        @include('partials.staff-notifications')
+                    @endif
                     <div class="dropdown">
                         <button class="btn user-menu dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="avatar-circle">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>

@@ -40,6 +40,12 @@ Route::middleware('guest')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
+        Route::middleware('role:customer')->group(function () {
+        Route::get('/memberships', [App\Http\Controllers\MembershipController::class, 'index'])->name('memberships.index');
+        Route::get('/memberships/{membershipType}/checkout', [App\Http\Controllers\MembershipController::class, 'checkout'])->name('memberships.checkout');
+        Route::post('/memberships/subscribe', [App\Http\Controllers\MembershipController::class, 'subscribe'])->name('memberships.subscribe');
+        Route::post('/memberships/{membership}/cancel', [App\Http\Controllers\MembershipController::class, 'cancel'])->name('memberships.cancel');
+    });
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/home', HomeController::class)->name('home');
 
@@ -57,7 +63,6 @@ Route::middleware('auth')->group(function () {
             ->name('payments.receipt');
 
         Route::resource('payments', PaymentController::class);
-
         Route::get('/dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
     });
@@ -65,5 +70,7 @@ Route::middleware('auth')->group(function () {
    
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class)->except('show');
+        Route::resource('membership-types', App\Http\Controllers\Admin\MembershipTypeController::class)->except(['show']);
+        Route::resource('packages', App\Http\Controllers\Admin\PackageController::class)->except(['show']);
     });
 });

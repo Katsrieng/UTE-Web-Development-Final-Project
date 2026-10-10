@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Notifications\BookingStatusUpdatedNotification;
+
 use App\Models\Booking;
 use App\Models\BookingStatusLog;
 use App\Models\Membership;
@@ -197,6 +199,12 @@ class BookingService
                 'new_status' => $newStatus,
                 'note' => null,
             ]);
+
+            if (! $actor->isCustomer() && in_array($newStatus, ['Confirmed', 'Cancelled'], true)) {
+                $notification = BookingStatusUpdatedNotification::forBooking($booking);
+                $customerId = $booking->user_id;
+                DB::afterCommit(fn () => User::find($customerId)?->notify($notification));
+            }
 
             return $booking;
         });

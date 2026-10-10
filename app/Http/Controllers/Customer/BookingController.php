@@ -7,10 +7,13 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Models\Booking;
 use App\Models\Package;
 use App\Models\Room;
+use App\Models\User;
+use App\Notifications\NewBookingNotification;
 use App\Services\BookingService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -65,6 +68,14 @@ class BookingController extends Controller
                     'check_in_date', 'check_out_date', 'number_of_guests', 'special_request', 'packages',
                 ]));
         }
+
+        $notification = NewBookingNotification::forBooking($booking);
+        DB::afterCommit(function () use ($notification): void {
+            User::query()->whereIn('role', [User::ROLE_ADMIN, User::ROLE_MANAGER, User::ROLE_STAFF])
+                ->where('is_active', true)->get()
+                ->filter(fn (User $user) => $user->hasPermission('view_bookings'))
+                ->each(fn (User $user) => $user->notify($notification));
+        });
 
         return redirect()->route('customer.bookings.show', $booking)
             ->with('success', 'Your booking request has been received.');

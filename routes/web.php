@@ -105,6 +105,14 @@ Route::middleware('auth')->group(function () {
         Route::delete('/my-bookings/{booking}/payment-slip', [PaymentSlipController::class, 'destroy'])->name('payment-slip.destroy');
     });
 
+    Route::middleware(['role:customer', EnsureActiveCustomer::class])
+        ->prefix('my-notifications')->name('customer.notifications.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Customer\NotificationController::class, 'index'])->name('index');
+            Route::post('/read-all', [\App\Http\Controllers\Customer\NotificationController::class, 'markAllRead'])->name('read-all');
+            Route::post('/{notification}/open', [\App\Http\Controllers\Customer\NotificationController::class, 'open'])->name('open');
+            Route::post('/{notification}/read', [\App\Http\Controllers\Customer\NotificationController::class, 'markRead'])->name('read');
+        });
+
     Route::middleware(['role:customer', EnsureActiveCustomer::class])->name('customer.payments.')->group(function () {
         Route::get('/my-bookings/{booking}/payment', [CustomerPaymentController::class, 'booking'])->name('booking');
         Route::post('/my-bookings/{booking}/payment', [CustomerPaymentController::class, 'storeBooking'])->name('booking.store');
@@ -119,6 +127,13 @@ Route::middleware('auth')->group(function () {
     // ======================================
 
     Route::middleware(['role:admin,manager,staff', \App\Http\Middleware\EnsureStaffPermission::class])->group(function () {
+
+        Route::prefix('staff/notifications')->name('staff.notifications.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Management\BookingNotificationController::class, 'index'])->name('index');
+            Route::post('/read-all', [\App\Http\Controllers\Management\BookingNotificationController::class, 'markAllRead'])->name('read-all');
+            Route::post('/{notification}/open', [\App\Http\Controllers\Management\BookingNotificationController::class, 'open'])->name('open');
+            Route::post('/{notification}/read', [\App\Http\Controllers\Management\BookingNotificationController::class, 'markRead'])->name('read');
+        });
 
         // Room management uses dedicated URLs so public catalogue links keep
         // the public navigation even for signed-in admin and staff users.

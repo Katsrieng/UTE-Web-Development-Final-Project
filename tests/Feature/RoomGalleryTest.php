@@ -87,12 +87,12 @@ class RoomGalleryTest extends TestCase
     public function test_public_gallery_fallback_and_reservation_link(): void
     {
         $room = $this->room();
-        $this->get(route('rooms.show', $room))->assertOk()->assertSee(asset($room->image), false);
+        $this->get(route('rooms.show', $room))->assertOk()->assertSee(asset($room->image), false)->assertDontSee('data-room-prev', false);
         $this->upload($room, 2);
         $images = $room->images()->get();
         $this->actingAs(User::factory()->create());
         $response = $this->get(route('rooms.show', $room));
-        $response->assertOk()->assertSee('data-room-thumbnail', false)->assertDontSee(asset($room->image), false)->assertSee(route('customer.bookings.create', $room), false);
+        $response->assertOk()->assertSee('data-room-slide', false)->assertSee('data-room-prev', false)->assertSee('data-room-next', false)->assertSee('1 / 2')->assertDontSee('data-room-thumbnail', false)->assertDontSee(asset($room->image), false)->assertSee(route('customer.bookings.create', $room), false);
         foreach ($images as $image) {
             $response->assertSee($image->url(), false);
         }
@@ -104,9 +104,50 @@ class RoomGalleryTest extends TestCase
         foreach ($images as $image) {
             $this->delete('/management/rooms/'.$room->id.'/images/'.$image->id)->assertRedirect();
         }
-        $this->get(route('rooms.show', $room))->assertSee(asset($room->image), false);
+        $this->get(route('rooms.show', $room))->assertSee(asset($room->image), false)->assertDontSee('data-room-prev', false);
         $room->update(['image' => null]);
-        $this->get(route('rooms.show', $room))->assertOk()->assertSee('detail-placeholder', false);
+        $this->get(route('rooms.show', $room))->assertOk()->assertSee('detail-placeholder', false)->assertDontSee('data-room-prev', false);
+    }
+
+    public function test_public_listing_uses_primary_cover_while_details_show_only_that_rooms_ordered_gallery(): void
+    {
+        $room = $this->room();
+        $other = $this->room();
+        $first = $room->images()->create(['image_path' => 'rooms/first.jpg', 'sort_order' => 1, 'is_primary' => false]);
+        $cover = $room->images()->create(['image_path' => 'rooms/cover.jpg', 'sort_order' => 2, 'is_primary' => true]);
+        $last = $room->images()->create(['image_path' => 'rooms/last.jpg', 'sort_order' => 3, 'is_primary' => false]);
+        $otherPhoto = $other->images()->create(['image_path' => 'rooms/other.jpg', 'sort_order' => 1, 'is_primary' => true]);
+
+        $listing = $this->get(route('rooms.index'));
+        $listing->assertOk()->assertSee($cover->url(), false)->assertDontSee($first->url(), false)
+            ->assertDontSee($last->url(), false)->assertDontSee('data-room-thumbnail', false);
+
+        $this->actingAs(User::factory()->create());
+        $details = $this->get(route('rooms.show', $room));
+        $details->assertOk()->assertSee('data-room-main src="'.$cover->url().'"', false)
+            ->assertSeeInOrder([
+                'data-image-src="'.$cover->url().'"',
+                'data-image-src="'.$first->url().'"',
+                'data-image-src="'.$last->url().'"',
+            ], false)
+            ->assertDontSee($otherPhoto->url(), false)
+            ->assertSee('data-room-prev', false)
+            ->assertSee('1 / 3')
+            ->assertDontSee('data-room-thumbnail', false)
+            ->assertSee('data-room-zoom-image', false)
+            ->assertSee(route('customer.bookings.create', $room), false);
+    }
+
+    public function test_single_gallery_photo_has_no_carousel_controls(): void
+    {
+        $room = $this->room();
+        $photo = $room->images()->create(['image_path' => 'rooms/only.jpg', 'sort_order' => 1, 'is_primary' => true]);
+
+        $this->get(route('rooms.show', $room))->assertOk()
+            ->assertSee($photo->url(), false)
+            ->assertDontSee('data-room-prev', false)
+            ->assertDontSee('data-room-next', false)
+            ->assertDontSee('data-room-counter', false);
     }
 
     public function test_authorization_and_cross_room_protection(): void

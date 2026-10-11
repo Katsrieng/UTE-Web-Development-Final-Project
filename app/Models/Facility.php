@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Facility extends Model
 {
@@ -20,6 +21,17 @@ class Facility extends Model
         'status',
         'image',
     ];
+
+    public function imageUrl(): ?string
+    {
+        if (! $this->image) {
+            return null;
+        }
+
+        return str_starts_with($this->image, 'images/')
+            ? asset($this->image)
+            : Storage::disk('public')->url($this->image);
+    }
 
     /**
      * A facility can be linked to multiple rooms as an amenity.

@@ -1,6 +1,6 @@
 <footer class="site-footer">
     <div class="container">
-        <div class="row g-4 align-items-start">
+        <div class="row gx-4 gy-3 align-items-start">
             <div class="col-lg-5">
                 <a class="footer-brand" href="{{ route('welcome') }}">
                     <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="" width="42" height="42">

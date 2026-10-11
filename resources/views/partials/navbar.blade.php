@@ -1,14 +1,4 @@
 <header class="site-header">
-    <div class="header-top d-none d-lg-block">
-        <div class="container d-flex align-items-center justify-content-between">
-            <div class="d-flex gap-4">
-                <span><i class="bi bi-geo-alt me-2"></i>Phnom Penh, Cambodia</span>
-                <span><i class="bi bi-clock me-2"></i>Hospitality, every day</span>
-            </div>
-            <div>Utopia Bay</div>
-        </div>
-    </div>
-
     <nav class="navbar navbar-expand-lg sona-navbar" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand hotel-brand" href="{{ route('welcome') }}">

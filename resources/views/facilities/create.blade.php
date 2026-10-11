@@ -5,7 +5,7 @@
 <div class="page-heading"><div><p class="section-kicker">Guest experience</p><h1>Add a facility</h1><p>Create an amenity that can be assigned to hotel rooms.</p></div></div>
 
 @staffroute('management.facilities.store')
-<form action="{{ route('management.facilities.store') }}" method="POST">@csrf @include('facilities._form')</form>
+<form action="{{ route('management.facilities.store') }}" method="POST" enctype="multipart/form-data">@csrf @include('facilities._form')</form>
 @endstaffroute
 
 @endsection

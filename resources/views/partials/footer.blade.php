@@ -34,8 +34,12 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <span>&copy; {{ now()->year }} Utopia Bay Resort Management System</span>
-            <span>Design inspired by <a href="https://colorlib.com/wp/template/sona/" target="_blank" rel="noopener">Sona by Colorlib</a>, distributed by ThemeWagon.</span>
+            <div class="footer-credits">
+                <span>&copy; {{ now()->year }} Utopia Bay Resort Management System</span>
+                <span class="footer-team">Project Team: Lay Katsrieng · Hay Ravanmonyvan · Thai Sokchea · Vichet Thody · Heang Sovannara</span>
+                <span class="footer-project">UTE Web Development II Final Project</span>
+                <span>Design inspired by <a href="https://colorlib.com/wp/template/sona/" target="_blank" rel="noopener">Sona by Colorlib</a>, distributed by ThemeWagon.</span>
+            </div>
             <a href="{{ route('staff.login') }}" class="footer-staff-access"><i class="bi bi-buildings" aria-hidden="true"></i><span>Staff Access</span><i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
         </div>
     </div>

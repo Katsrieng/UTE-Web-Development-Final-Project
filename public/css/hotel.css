@@ -892,6 +892,9 @@ a.service-card:focus-visible { outline: 3px solid var(--utopia-ocean); outline-o
 .footer-copy { max-width: 480px; margin: 12px 0 0; line-height: 1.55; }
 .footer-title { margin-bottom: 12px; color: #fff; font-family: "Segoe UI", system-ui, sans-serif; font-size: .8rem; letter-spacing: .13em; text-transform: uppercase; }
 .footer-bottom { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .1); font-size: .78rem; }
+.footer-credits { display: flex; flex: 1 1 520px; flex-direction: column; gap: 2px; min-width: 0; max-width: 90ch; }
+.footer-team { color: rgba(255, 255, 255, .62); font-size: .73rem; line-height: 1.45; }
+.footer-project { color: rgba(255, 255, 255, .54); font-size: .7rem; }
 .footer-bottom a { display: inline; color: var(--utopia-sand-soft); }
 
 /* Management shell */

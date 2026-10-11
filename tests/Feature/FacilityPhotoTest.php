@@ -24,20 +24,24 @@ class FacilityPhotoTest extends TestCase
     {
         $this->post(route('management.facilities.store'), $this->details([
             'image' => UploadedFile::fake()->image('pool.jpg'),
+            'location' => 'Poolside',
+            'opening_time' => '07:00',
+            'closing_time' => '21:00',
+            'price' => '12.00',
         ]))->assertRedirect(route('management.facilities.index'));
 
         $facility = Facility::sole();
-        $facility->update([
-            'location' => 'Poolside',
-            'opening_time' => '07:00:00',
-            'closing_time' => '21:00:00',
-            'price' => 12,
-        ]);
+        $this->assertSame('Poolside', $facility->location);
+        $this->assertSame('07:00', substr($facility->opening_time, 0, 5));
+        $this->assertSame('21:00', substr($facility->closing_time, 0, 5));
+        $this->assertEquals(12, $facility->price);
         $this->assertStringStartsWith('facilities/'.$facility->id.'/', $facility->image);
         Storage::disk('public')->assertExists($facility->image);
         $url = $facility->imageUrl();
         $this->get(route('management.facilities.index'))->assertOk()->assertSee($url, false);
-        $this->get(route('management.facilities.edit', $facility))->assertOk()->assertSee($url, false);
+        $this->get(route('management.facilities.edit', $facility))->assertOk()->assertSee($url, false)
+            ->assertSee('value="Poolside"', false)->assertSee('value="07:00"', false)
+            ->assertSee('value="21:00"', false);
         $this->get(route('management.facilities.show', $facility))->assertOk()->assertSee($url, false);
         $this->get(route('facilities.index'))->assertOk()->assertSee($url, false)->assertSee('Learn more');
         $this->get(route('facilities.show', $facility))->assertOk()->assertSee($url, false)
@@ -52,8 +56,15 @@ class FacilityPhotoTest extends TestCase
         $facility = Facility::sole();
         $first = $facility->image;
 
-        $this->put(route('management.facilities.update', $facility), $this->details(['name' => 'Updated Pool']))->assertRedirect();
+        $this->put(route('management.facilities.update', $facility), $this->details([
+            'name' => 'Updated Pool', 'location' => 'Garden', 'opening_time' => '08:30',
+            'closing_time' => '20:15', 'price' => '18.50',
+        ]))->assertRedirect();
         $this->assertSame($first, $facility->fresh()->image);
+        $this->assertSame('Garden', $facility->fresh()->location);
+        $this->assertSame('08:30', substr($facility->fresh()->opening_time, 0, 5));
+        $this->assertSame('20:15', substr($facility->fresh()->closing_time, 0, 5));
+        $this->assertEquals(18.50, $facility->fresh()->price);
         $this->put(route('management.facilities.update', $facility), $this->details([
             'image' => UploadedFile::fake()->create('not-an-image.txt'),
         ]))->assertSessionHasErrors('image');
@@ -74,6 +85,21 @@ class FacilityPhotoTest extends TestCase
         $this->delete(route('management.facilities.destroy', $facility))->assertRedirect();
         Storage::disk('public')->assertMissing($second);
         $this->assertDatabaseCount('facilities', 0);
+    }
+
+    public function test_business_field_validation_and_customer_status_labels(): void
+    {
+        $this->post(route('management.facilities.store'), $this->details([
+            'price' => '-1', 'opening_time' => 'invalid', 'closing_time' => '25:00',
+        ]))->assertSessionHasErrors(['price', 'opening_time', 'closing_time']);
+
+        foreach (['open' => 'Open', 'closed' => 'Closed', 'maintenance' => 'Maintenance'] as $status => $label) {
+            $facility = Facility::create($this->details(['name' => 'Status '.$label, 'status' => $status]));
+            $this->get(route('facilities.show', $facility))->assertOk()->assertSee('>'.$label.'</span>', false);
+        }
+        $this->get(route('facilities.index'))->assertOk()
+            ->assertSee('>Open</span>', false)->assertSee('>Closed</span>', false)
+            ->assertSee('>Maintenance</span>', false)->assertDontSee('>Available</span>', false);
     }
 
     public function test_missing_image_placeholder_and_shared_or_legacy_files_are_preserved(): void

@@ -27,10 +27,15 @@ class FacilityController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
+            'location'    => 'nullable|string|max:255',
+            'price'       => ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'opening_time' => ['nullable', 'date_format:H:i'],
+            'closing_time' => ['nullable', 'date_format:H:i'],
             'status'      => 'required|in:open,closed,maintenance',
             'image'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
         unset($validated['image']);
+        $validated['price'] = $validated['price'] ?? 0;
         $path = null;
         try {
             DB::transaction(function () use ($request, $validated, &$path): void {
@@ -66,10 +71,15 @@ class FacilityController extends Controller
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
+            'location'    => 'nullable|string|max:255',
+            'price'       => ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'opening_time' => ['nullable', 'date_format:H:i'],
+            'closing_time' => ['nullable', 'date_format:H:i'],
             'status'      => 'required|in:open,closed,maintenance',
             'image'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
         unset($validated['image']);
+        $validated['price'] = $validated['price'] ?? 0;
         $path = null;
         try {
             DB::transaction(function () use ($request, $facility, $validated, &$path): void {

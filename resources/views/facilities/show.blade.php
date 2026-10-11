@@ -15,7 +15,7 @@
             <div class="facility-detail-body">
                 <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
                     <div><p class="section-kicker">Hotel amenity</p><h1 class="section-title">{{ $facility->name }}</h1></div>
-                    <x-status-badge :status="match((string) $facility->status) { '1', 'open' => 'available', 'maintenance' => 'maintenance', default => 'unavailable' }" />
+                    <x-status-badge :status="$facility->status" />
                 </div>
                 <p class="section-copy">{{ $facility->description ?: 'This facility supports a comfortable and convenient hotel experience.' }}</p>
                 <dl class="facility-detail-facts">

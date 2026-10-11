@@ -29,7 +29,7 @@
                         <strong>{{ $facility->name }}</strong>
                     </div></td>
                     <td class="text-muted">{{ Illuminate\Support\Str::limit($facility->description ?: 'No description provided.', 110) }}</td>
-                    <td><x-status-badge :status="match((string) $facility->status) { '1', 'open' => 'available', 'maintenance' => 'maintenance', default => 'inactive' }" /></td>
+                    <td><x-status-badge :status="$facility->status" /></td>
                     <td class="text-end pe-4 text-nowrap">
                         @staffroute('management.facilities.show')<a href="{{ route('management.facilities.show', $facility) }}" class="btn btn-sm btn-outline-primary" aria-label="View {{ $facility->name }}"><i class="bi bi-eye"></i></a>@endstaffroute
                         @staffroute('management.facilities.edit')<a href="{{ route('management.facilities.edit', $facility) }}" class="btn btn-sm btn-outline-secondary" aria-label="Edit {{ $facility->name }}"><i class="bi bi-pencil"></i></a>@endstaffroute
@@ -48,7 +48,7 @@
                     @if($facility->imageUrl())<img class="facility-card-photo" src="{{ $facility->imageUrl() }}" alt="{{ $facility->name }}" loading="lazy">
                     @else<div class="facility-card-photo facility-photo-placeholder"><i class="bi bi-stars" aria-hidden="true"></i></div>@endif
                     <div class="facility-card-body">
-                        <div class="d-flex justify-content-between align-items-start gap-2"><h2 class="h4 mb-2">{{ $facility->name }}</h2><x-status-badge :status="match((string) $facility->status) { '1', 'open' => 'available', 'maintenance' => 'maintenance', default => 'unavailable' }" /></div>
+                        <div class="d-flex justify-content-between align-items-start gap-2"><h2 class="h4 mb-2">{{ $facility->name }}</h2><x-status-badge :status="$facility->status" /></div>
                         <p>{{ $facility->description ?: 'Available to support a comfortable hotel experience.' }}</p>
                         <a href="{{ route('facilities.show', $facility) }}" class="btn btn-sm btn-outline-primary mt-auto align-self-start">Learn more</a>
                     </div>

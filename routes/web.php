@@ -49,7 +49,7 @@ Route::resource('facilities', FacilityController::class)
 
 Route::middleware('guest')->group(function () {
     Route::get('/staff/login', [LoginController::class, 'staffCreate'])->name('staff.login');
-    Route::post('/staff/login', [LoginController::class, 'staffStore'])->middleware('throttle:5,1')->name('staff.login.store');
+    Route::post('/staff/login', [LoginController::class, 'staffStore'])->middleware('throttle:login')->name('staff.login.store');
 
     Route::get('/register', [RegisterController::class, 'create'])
         ->name('register');
@@ -60,7 +60,7 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('/login', [LoginController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:login');
 
 });
 

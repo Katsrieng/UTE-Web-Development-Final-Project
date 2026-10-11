@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 class PortalSeparationTest extends TestCase
@@ -23,7 +22,6 @@ class PortalSeparationTest extends TestCase
     {
         foreach (['customer', 'staff', 'admin'] as $role) {
             foreach (['/login', '/staff/login'] as $portal) {
-                RateLimiter::clear(sha1('|127.0.0.1'));
                 $user = User::factory()->create(['role' => $role]);
                 $allowed = ($role === 'customer') === ($portal === '/login');
                 $response = $this->post($portal, ['email' => $user->email, 'password' => 'password']);
@@ -75,7 +73,6 @@ class PortalSeparationTest extends TestCase
             $this->withSession(['url.intended' => $target])->post($portal, ['email' => $user->email, 'password' => 'password'])->assertRedirect($target);
             $this->post('/logout');
             foreach (['https://evil.example/steal', '//evil.example/steal', route($role === 'customer' ? 'dashboard' : 'customer.bookings.index')] as $unsafe) {
-                RateLimiter::clear(sha1('|127.0.0.1'));
                 $this->withSession(['url.intended' => $unsafe])->post($portal, ['email' => $user->email, 'password' => 'password'])->assertRedirect(route($user->homeRoute()));
                 $this->post('/logout');
             }
@@ -108,11 +105,14 @@ class PortalSeparationTest extends TestCase
     public function test_both_login_posts_are_throttled(): void
     {
         foreach (['/login', '/staff/login'] as $path) {
-            RateLimiter::clear(sha1('|127.0.0.1'));
-            for ($i = 0; $i < 5; $i++) {
-                $this->post($path, ['email' => 'missing@example.com', 'password' => 'wrong']);
+            $email = $path === '/login' ? 'missing-customer@example.com' : 'missing-staff@example.com';
+
+            for ($i = 0; $i < 10; $i++) {
+                $this->post($path, ['email' => $email, 'password' => 'wrong'])->assertStatus(302);
             }
-            $this->post($path, ['email' => 'missing@example.com', 'password' => 'wrong'])->assertStatus(429);
+
+            $this->post($path, ['email' => $email, 'password' => 'wrong'])->assertStatus(429);
+            $this->post($path, ['email' => 'another-'.$email, 'password' => 'wrong'])->assertStatus(302);
         }
     }
 

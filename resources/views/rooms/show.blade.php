@@ -62,7 +62,7 @@
 @endstaffroute
 
                 @elseif(auth()->guest())
-                    <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Sign in to reserve this room</a>
+                    <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Log in to reserve this room</a>
                 @elseif(auth()->user()->isCustomer() && auth()->user()->is_active)
                     <a href="{{ route('customer.bookings.create', $room) }}" class="btn btn-hotel w-100">Reserve this room</a>
                 @elseif(auth()->user()->isCustomer())

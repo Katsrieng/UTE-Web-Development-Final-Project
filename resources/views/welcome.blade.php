@@ -81,10 +81,10 @@
     <div class="container text-center">
         <p class="section-kicker">Make it yours</p>
         <h2 class="section-title">Ready to plan your next stay or event?</h2>
-        <p class="section-copy mx-auto mb-4">Create an account to manage reservations, membership benefits, and your Utopia Bay experience.</p>
+        <p class="section-copy mx-auto mb-4">Sign up to manage reservations, membership benefits, and your Utopia Bay experience.</p>
         @guest
-            <a href="{{ route('register') }}" class="btn btn-hotel me-2">Create account</a>
-            <a href="{{ route('login') }}" class="btn btn-outline-dark">Sign in</a>
+            <a href="{{ route('register') }}" class="btn btn-hotel me-2">Sign up</a>
+            <a href="{{ route('login') }}" class="btn btn-outline-dark">Log in</a>
         @else
             <a href="{{ route('home') }}" class="btn btn-hotel">Open my dashboard</a>
         @endguest

@@ -41,8 +41,8 @@ class FrontendSmokeTest extends TestCase
             'Memorable events' => 'venues.index',
             'Guest facilities' => 'facilities.index',
             'Member benefits' => 'memberships.index',
-            'Create account' => 'register',
-            'Sign in' => 'login',
+            'Sign up' => 'register',
+            'Log in' => 'login',
         ] as $label => $routeName) {
             $matches = $links->query('//main//a[contains(normalize-space(.), "'.$label.'")]');
             $this->assertCount(1, $matches, "Expected one homepage link labeled {$label}.");

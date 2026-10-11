@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Account')
+@section('title', 'Sign Up')
 
 @section('content')
 <section class="auth-section">
@@ -51,9 +51,9 @@
                                             <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required autocomplete="new-password">
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-hotel w-100 mt-4">Create account</button>
+                                    <button type="submit" class="btn btn-hotel w-100 mt-4">Sign up</button>
                                 </form>
-                                <p class="text-center text-muted mt-4 mb-0">Already registered? <a href="{{ route('login') }}" class="fw-semibold">Sign in</a></p>
+                                <p class="text-center text-muted mt-4 mb-0">Already registered? <a href="{{ route('login') }}" class="fw-semibold">Log in</a></p>
                             </div>
                         </div>
                     </div>

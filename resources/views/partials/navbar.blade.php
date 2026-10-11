@@ -50,8 +50,8 @@
                             <button type="submit" class="btn btn-hotel-outline btn-sm w-100">Logout</button>
                         </form>
                     @else
-                        <a class="nav-auth-link" href="{{ route('login') }}">Sign in</a>
-                        <a class="btn btn-hotel btn-sm" href="{{ route('register') }}">Create account</a>
+                        <a class="nav-auth-link" href="{{ route('login') }}">Log in</a>
+                        <a class="btn btn-hotel btn-sm" href="{{ route('register') }}">Sign up</a>
                     @endauth
                 </div>
             </div>

@@ -28,8 +28,8 @@
                         @endstaffroute
                     @endif
                 @else
-                    <a href="{{ route('login') }}">Sign in</a>
-                    <a href="{{ route('register') }}">Create an account</a>
+                    <a href="{{ route('login') }}">Log in</a>
+                    <a href="{{ route('register') }}">Sign up</a>
                 @endauth
             </div>
         </div>

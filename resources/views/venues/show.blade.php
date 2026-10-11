@@ -18,7 +18,7 @@
         <dl class="detail-list"><div><dt>Capacity</dt><dd>Up to {{ number_format($venue->capacity) }} guests</dd></div><div><dt>Venue price</dt><dd>{{ $venue->price !== null ? '$'.number_format((float)$venue->price, 2) : 'Contact hotel' }}</dd></div></dl>
         @auth
             @if(auth()->user()->isCustomer())<a href="{{ route('event-reservations.create', ['venue' => $venue->id]) }}" class="btn btn-hotel w-100"><i class="bi bi-calendar-plus me-1"></i> Request this venue</a>@elseif(auth()->user()->hasRole('admin','staff'))<a href="{{ route('management.venues.show', $venue) }}" class="btn btn-hotel w-100">Open management view</a>@endif
-        @else<a href="{{ route('login') }}" class="btn btn-hotel w-100">Sign in to reserve</a><p class="text-muted small text-center mt-3 mb-0">Customer accounts can submit event requests online.</p>@endauth
+        @else<a href="{{ route('login') }}" class="btn btn-hotel w-100">Log in to reserve</a><p class="text-muted small text-center mt-3 mb-0">Customer accounts can submit event requests online.</p>@endauth
     </aside></div>
 </div></div></section>
 @endsection

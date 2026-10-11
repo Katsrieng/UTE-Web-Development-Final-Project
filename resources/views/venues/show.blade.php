@@ -5,8 +5,8 @@
 <section class="content-section compact"><div class="container"><div class="row g-5 align-items-start">
     <div class="col-lg-7">
         @if(!empty($venue->images))
-            <div class="detail-gallery-main mb-3"><img src="{{ asset('storage/'.$venue->images[0]) }}" alt="{{ $venue->name }}"></div>
-            @if(count($venue->images) > 1)<div class="row g-3">@foreach(array_slice($venue->images, 1) as $image)<div class="col-6"><img src="{{ asset('storage/'.$image) }}" class="img-fluid rounded w-100" style="height:180px;object-fit:cover" alt="{{ $venue->name }} image {{ $loop->iteration + 1 }}"></div>@endforeach</div>@endif
+            <div class="detail-gallery-main mb-3"><img src="{{ $venue->imageUrl($venue->images[0]) }}" alt="{{ $venue->name }}"></div>
+            @if(count($venue->images) > 1)<div class="row g-3">@foreach(array_slice($venue->images, 1) as $image)<div class="col-6"><img src="{{ $venue->imageUrl($image) }}" class="img-fluid rounded w-100" style="height:180px;object-fit:cover" alt="{{ $venue->name }} image {{ $loop->iteration + 1 }}"></div>@endforeach</div>@endif
         @else
             <div class="detail-gallery-main"><div class="detail-placeholder"><i class="bi bi-building"></i></div></div>
         @endif

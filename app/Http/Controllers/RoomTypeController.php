@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\RoomImage;
 use App\Models\RoomType;
 use App\Services\RoomGalleryService;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class RoomTypeController extends Controller
 {
+    public function __construct(private MediaStorage $media) {}
     /**
      * Display a listing of room types.
      */
@@ -43,12 +44,18 @@ class RoomTypeController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        $path = null;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('room_types', 'public');
-            $validated['image'] = '/storage/'.$path;
+            $path = $this->media->storePublic($request->file('image'), 'room_types');
+            $validated['image'] = $this->media->isCloudinary($path) ? $path : '/storage/'.$path;
         }
 
-        RoomType::create($validated);
+        try {
+            RoomType::create($validated);
+        } catch (\Throwable $exception) {
+            if ($path) { $this->media->deletePublic($path); }
+            throw $exception;
+        }
 
         return redirect()->route('management.room-types.index')->with('success', 'Room Type created successfully.');
     }
@@ -85,17 +92,24 @@ class RoomTypeController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        $path = null;
+        $oldPath = $roomType->image;
         if ($request->hasFile('image')) {
-            // Delete the previous uploaded file if one exists
-            if ($roomType->image && str_starts_with($roomType->image, '/storage/')) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $roomType->image));
-            }
-
-            $path = $request->file('image')->store('room_types', 'public');
-            $validated['image'] = '/storage/'.$path;
+            $path = $this->media->storePublic($request->file('image'), 'room_types');
+            $validated['image'] = $this->media->isCloudinary($path) ? $path : '/storage/'.$path;
         }
 
-        $roomType->update($validated);
+        try {
+            DB::transaction(function () use ($roomType, $validated, $path, $oldPath): void {
+                $roomType->update($validated);
+                if ($path && $oldPath && $this->ownedImage($oldPath)) {
+                    DB::afterCommit(fn () => $this->media->deletePublic($oldPath));
+                }
+            });
+        } catch (\Throwable $exception) {
+            if ($path) { $this->media->deletePublic($path); }
+            throw $exception;
+        }
 
         return redirect()->route('management.room-types.index')->with('success', 'Room Type updated successfully.');
     }
@@ -118,12 +132,17 @@ class RoomTypeController extends Controller
             $locked->delete();
             DB::afterCommit(function () use ($gallery, $paths, $typeImage) {
                 $gallery->cleanup($paths);
-                if ($typeImage && str_starts_with($typeImage, '/storage/')) {
-                    Storage::disk('public')->delete(substr($typeImage, strlen('/storage/')));
+                if ($typeImage && $this->ownedImage($typeImage)) {
+                    $this->media->deletePublic($typeImage);
                 }
             });
         });
 
         return redirect()->route('management.room-types.index')->with('success', 'Room Type deleted successfully.');
+    }
+
+    private function ownedImage(string $path): bool
+    {
+        return (bool) preg_match('~^(?:/storage/room_types/[A-Za-z0-9]+\.(?:jpg|jpeg|png|webp)|cloudinary:utopia-bay/room_types/[A-Za-z0-9-]+\.(?:jpg|jpeg|png|webp))$~i', $path);
     }
 }

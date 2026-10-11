@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
+use App\Services\MediaStorage;
 
 class RoomImage extends Model
 {
@@ -22,6 +22,6 @@ class RoomImage extends Model
 
     public function url(): string
     {
-        return Storage::disk('public')->url($this->image_path);
+        return app(MediaStorage::class)->publicUrl($this->image_path);
     }
 }

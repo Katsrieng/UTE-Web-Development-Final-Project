@@ -6,15 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVenueRequest;
 use App\Http\Requests\UpdateVenueRequest;
 use App\Models\Venue;
+use App\Services\MediaStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class VenueController extends Controller
 {
+    public function __construct(private MediaStorage $media) {}
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', Venue::class);
@@ -71,7 +72,12 @@ class VenueController extends Controller
         $data['images'] = $this->storeImages($request);
         $data['is_active'] = true;
 
-        $venue = Venue::create($data);
+        try {
+            $venue = Venue::create($data);
+        } catch (\Throwable $exception) {
+            foreach ($data['images'] as $image) { $this->media->deletePublic($image); }
+            throw $exception;
+        }
 
         return redirect()
             ->route('management.venues.show', $venue)
@@ -108,23 +114,28 @@ class VenueController extends Controller
         $validated = $request->validated();
         $removedImages = $validated['remove_images'] ?? [];
         $images = array_values(array_diff($venue->images ?? [], $removedImages));
-        $images = [...$images, ...$this->storeImages($request)];
+        $newImages = $this->storeImages($request);
+        $images = [...$images, ...$newImages];
 
-        $venue->update([
-            ...Arr::only($validated, [
-                'name',
-                'description',
-                'location',
-                'capacity',
-                'price',
-                'event_types',
-            ]),
-            'images' => $images,
-            'is_active' => $request->boolean('is_active'),
-        ]);
+        try {
+            $venue->update([
+                ...Arr::only($validated, [
+                    'name', 'description', 'location', 'capacity', 'price', 'event_types',
+                ]),
+                'images' => $images,
+                'is_active' => $request->boolean('is_active'),
+            ]);
+        } catch (\Throwable $exception) {
+            foreach ($newImages as $image) { $this->media->deletePublic($image); }
+            throw $exception;
+        }
 
         if ($removedImages !== []) {
-            Storage::disk('public')->delete($removedImages);
+            foreach ($removedImages as $image) {
+                if (preg_match('~^(?:venues/[A-Za-z0-9]+\.(?:jpg|jpeg|png|webp)|cloudinary:utopia-bay/venues/[A-Za-z0-9-]+\.(?:jpg|jpeg|png|webp))$~i', $image)) {
+                    $this->media->deletePublic($image);
+                }
+            }
         }
 
         return redirect()
@@ -150,8 +161,13 @@ class VenueController extends Controller
     {
         $paths = [];
 
-        foreach (Arr::wrap($request->file('images', [])) as $image) {
-            $paths[] = $image->store('venues', 'public');
+        try {
+            foreach (Arr::wrap($request->file('images', [])) as $image) {
+                $paths[] = $this->media->storePublic($image, 'venues');
+            }
+        } catch (\Throwable $exception) {
+            foreach ($paths as $path) { $this->media->deletePublic($path); }
+            throw $exception;
         }
 
         return $paths;

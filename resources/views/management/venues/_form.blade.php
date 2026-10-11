@@ -74,7 +74,7 @@
                 @foreach($venue->images as $image)
                     <div class="col-6 col-md-4">
                         <div class="border rounded p-2">
-                            <img src="{{ asset('storage/'.$image) }}" class="img-fluid rounded object-fit-cover w-100"
+                            <img src="{{ $venue->imageUrl($image) }}" class="img-fluid rounded object-fit-cover w-100"
                                  style="height: 130px;" alt="{{ $venue->name }} image">
                             <div class="form-check mt-2">
                                 <input id="remove_{{ $loop->index }}" type="checkbox" name="remove_images[]"

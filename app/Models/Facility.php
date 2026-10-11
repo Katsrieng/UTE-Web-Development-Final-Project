@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Support\Facades\Storage;
+use App\Services\MediaStorage;
 
 class Facility extends Model
 {
@@ -30,7 +30,7 @@ class Facility extends Model
 
         return str_starts_with($this->image, 'images/')
             ? asset($this->image)
-            : Storage::disk('public')->url($this->image);
+            : app(MediaStorage::class)->publicUrl($this->image);
     }
 
     /**

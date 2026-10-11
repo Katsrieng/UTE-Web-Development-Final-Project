@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\BookingPaymentSlip;
 use App\Services\BookingPaymentSlipService;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Http\RedirectResponse;
 
 class BookingPaymentSlipController extends Controller
 {
-    public function show(Request $request, BookingPaymentSlip $paymentSlip): StreamedResponse
+    public function show(Request $request, BookingPaymentSlip $paymentSlip, MediaStorage $media): StreamedResponse|RedirectResponse
     {
         $user = $request->user();
         $booking = $paymentSlip->booking;
@@ -21,6 +23,11 @@ class BookingPaymentSlipController extends Controller
         ), 403);
 
         $path = $paymentSlip->file_path;
+        if ($media->isCloudinary($path)) {
+            abort_unless($media->slipExists($path), 404);
+
+            return redirect()->away($media->slipDownloadUrl($path));
+        }
         $disk = BookingPaymentSlipService::diskFor($path);
         abort_unless($disk && Storage::disk($disk)->exists($path), 404);
 

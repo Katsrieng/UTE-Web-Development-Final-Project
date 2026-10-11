@@ -57,7 +57,7 @@
             <div class="card-body p-4">
                 <h2 class="h5">Images</h2>
                 @forelse($venue->images ?? [] as $image)
-                    <img src="{{ asset('storage/'.$image) }}" class="img-fluid rounded mb-2 object-fit-cover w-100"
+                    <img src="{{ $venue->imageUrl($image) }}" class="img-fluid rounded mb-2 object-fit-cover w-100"
                          style="height: 150px;" alt="{{ $venue->name }} image">
                 @empty
                     <p class="text-muted mb-0">No venue images uploaded.</p>

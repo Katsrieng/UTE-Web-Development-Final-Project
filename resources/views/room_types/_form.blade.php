@@ -1,8 +1,6 @@
 @php
     $editing = isset($roomType);
-    $roomTypeImage = $editing && $roomType->image
-        ? (str_starts_with($roomType->image, '/storage/') ? asset(ltrim($roomType->image, '/')) : asset('storage/'.$roomType->image))
-        : null;
+    $roomTypeImage = $editing ? $roomType->imageUrl() : null;
 @endphp
 
 @if($errors->any())

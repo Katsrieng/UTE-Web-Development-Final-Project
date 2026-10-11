@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\PaymentSetting;
+use App\Services\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class PaymentSettingsController extends Controller
 {
+    public function __construct(private MediaStorage $media) {}
     public function edit()
     {
         return view('payments.settings', ['settings' => PaymentSetting::current()]);
@@ -26,7 +27,7 @@ class PaymentSettingsController extends Controller
         $path = null;
         try {
             if ($request->hasFile('khqr_image')) {
-                $path = $request->file('khqr_image')->store('payment-settings', 'public');
+                $path = $this->media->storePublic($request->file('khqr_image'), 'payment-settings');
                 if (! $path) {
                     throw new \RuntimeException('Unable to store the QR image. Please try again.');
                 }
@@ -37,12 +38,12 @@ class PaymentSettingsController extends Controller
                 $settings = PaymentSetting::lockForUpdate()->findOrFail(1);
                 $oldPath = $settings->khqr_image;
                 $settings->update($data);
-                if ($path && $oldPath && str_starts_with($oldPath, 'payment-settings/')) {
-                    DB::afterCommit(fn () => Storage::disk('public')->delete($oldPath));
+                if ($path && $oldPath && $this->ownedQr($oldPath)) {
+                    DB::afterCommit(fn () => $this->media->deletePublic($oldPath));
                 }
             });
         } catch (\Throwable $exception) {
-            if ($path) { Storage::disk('public')->delete($path); }
+            if ($path) { $this->media->deletePublic($path); }
             throw $exception;
         }
 
@@ -56,11 +57,16 @@ class PaymentSettingsController extends Controller
             if (! $settings || ! $settings->khqr_image) { return; }
             $oldPath = $settings->khqr_image;
             $settings->update(['khqr_image' => null]);
-            if (str_starts_with($oldPath, 'payment-settings/')) {
-                DB::afterCommit(fn () => Storage::disk('public')->delete($oldPath));
+            if ($this->ownedQr($oldPath)) {
+                DB::afterCommit(fn () => $this->media->deletePublic($oldPath));
             }
         });
 
         return redirect()->route('payment-settings.edit')->with('success', 'Custom QR removed. The default demo QR is now used.');
+    }
+
+    private function ownedQr(string $path): bool
+    {
+        return (bool) preg_match('~^(?:payment-settings/[A-Za-z0-9]+\.(?:jpg|jpeg|png|webp)|cloudinary:utopia-bay/payment-settings/[A-Za-z0-9-]+\.(?:jpg|jpeg|png|webp))$~i', $path);
     }
 }

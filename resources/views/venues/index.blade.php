@@ -13,7 +13,7 @@
     <div class="row g-4">
         @forelse($venues as $venue)
             <div class="col-md-6 col-lg-4">
-                <article class="catalog-card {{ !empty($venue->images) ? 'has-image' : '' }}" @if(!empty($venue->images)) style="background-image:url('{{ asset('storage/'.$venue->images[0]) }}')" @endif>
+                <article class="catalog-card {{ !empty($venue->images) ? 'has-image' : '' }}" @if(!empty($venue->images)) style="background-image:url('{{ $venue->imageUrl($venue->images[0]) }}')" @endif>
                     @if(empty($venue->images))<div class="catalog-card-placeholder"><i class="bi bi-building"></i></div>@endif
                     <div class="catalog-card-content">
                         <div class="d-flex flex-wrap gap-2 mb-3">@foreach($venue->event_types as $eventType)<span class="badge rounded-pill text-bg-light">{{ ucfirst($eventType) }}</span>@endforeach</div>

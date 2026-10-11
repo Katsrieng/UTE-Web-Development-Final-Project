@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use App\Services\MediaStorage;
 
 class Room extends Model
 {
@@ -24,7 +24,7 @@ class Room extends Model
         }
 
         return $this->image
-            ? (str_starts_with($this->image, 'images/') ? asset($this->image) : Storage::disk('public')->url($this->image))
+            ? (str_starts_with($this->image, 'images/') ? asset($this->image) : app(MediaStorage::class)->publicUrl($this->image))
             : null;
     }
 

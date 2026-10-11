@@ -3,7 +3,7 @@
 @section('page-label', 'Room Types')
 @section('content')
 @php($managing = request()->routeIs('management.room-types.*'))
-@php($roomTypeImage = $roomType->image ? (str_starts_with($roomType->image, '/storage/') ? asset(ltrim($roomType->image, '/')) : asset('storage/'.$roomType->image)) : null)
+@php($roomTypeImage = $roomType->imageUrl())
 <section class="{{ $managing ? '' : 'content-section compact' }}"><div class="{{ $managing ? '' : 'container' }}">
     <div class="mb-4"><a href="{{ route($managing ? 'management.room-types.index' : 'room-types.index') }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Back to room types</a></div>
     @if($roomTypeImage)<div class="detail-gallery-main mb-4"><img src="{{ $roomTypeImage }}" alt="{{ $roomType->name }}"></div>@endif

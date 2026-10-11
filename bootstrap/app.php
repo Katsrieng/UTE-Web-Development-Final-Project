@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RoleMiddleware;
+use App\Console\Commands\MigrateMediaToCloudinary;
 use App\Support\PortalRedirect;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([MigrateMediaToCloudinary::class])
     ->withMiddleware(function (Middleware $middleware): void {
         // Short name so routes can say ->middleware('role:admin,staff')
         $middleware->alias([

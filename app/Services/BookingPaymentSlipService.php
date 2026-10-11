@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class BookingPaymentSlipService
 {
+    public function __construct(private MediaStorage $media) {}
     public const PRIVATE_DIRECTORY = 'booking-payment-slips';
 
     public static function diskFor(string $path): ?string
@@ -31,7 +32,7 @@ class BookingPaymentSlipService
     public function replace(Booking $booking, UploadedFile $file): void
     {
         $existing = $booking->paymentSlip()->first();
-        $path = $file->storeAs(self::PRIVATE_DIRECTORY, 'booking-'.$booking->id.'-'.\Illuminate\Support\Str::ulid().'.'.$file->extension(), 'local');
+        $path = $this->media->storeSlip($file, 'booking-'.$booking->id.'-'.\Illuminate\Support\Str::ulid().'.'.$file->extension());
         if (! $path) {
             throw new \RuntimeException('Unable to store the payment slip. Please try again.');
         }
@@ -46,7 +47,7 @@ class BookingPaymentSlipService
                 DB::afterCommit(fn () => $this->cleanup($existing->file_path));
             }
         } catch (\Throwable $exception) {
-            Storage::disk('local')->delete($path);
+            $this->media->deleteSlip($path);
             throw $exception;
         }
     }
@@ -60,8 +61,12 @@ class BookingPaymentSlipService
 
     private function cleanup(string $path): void
     {
-        $disk = self::diskFor($path);
-        if ($disk && ! BookingPaymentSlip::where('file_path', $path)->exists()) {
+        if (BookingPaymentSlip::where('file_path', $path)->exists()) {
+            return;
+        }
+        if ($this->media->isCloudinary($path) && preg_match('~^cloudinary:utopia-bay/payment-slips/[A-Za-z0-9-]+\.(?:jpg|jpeg|png)$~i', $path)) {
+            $this->media->deleteSlip($path);
+        } elseif ($disk = self::diskFor($path)) {
             Storage::disk($disk)->delete($path);
         }
     }

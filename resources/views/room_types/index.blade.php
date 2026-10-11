@@ -32,7 +32,7 @@
                         <thead><tr><th class="ps-4">Room type</th><th>Base Price</th><th>Capacity</th><th>Bed Type</th><th>Rooms</th><th class="text-end pe-4">Actions</th></tr></thead>
                         <tbody>
                             @forelse($roomTypes as $type)
-                                @php($typeImage = $type->image ? (str_starts_with($type->image, '/storage/') ? asset(ltrim($type->image, '/')) : asset('storage/'.$type->image)) : null)
+                                @php($typeImage = $type->imageUrl())
                                 <tr>
                                     <td class="ps-4"><div class="d-flex align-items-center gap-3">@if($typeImage)<img src="{{ $typeImage }}" alt="" class="table-thumb" loading="lazy">@else<span class="table-thumb table-thumb-placeholder"><i class="bi bi-house-door"></i></span>@endif<div><strong>{{ $type->name }}</strong><small class="d-block text-muted">{{ Illuminate\Support\Str::limit($type->description, 55) }}</small></div></div></td>
                                     <td class="fw-semibold">${{ number_format($type->base_price, 2) }}</td>
@@ -63,7 +63,7 @@
         @else
             <div class="row g-4">
                 @forelse($roomTypes as $type)
-                    @php($typeImage = $type->image ? (str_starts_with($type->image, '/storage/') ? asset(ltrim($type->image, '/')) : asset('storage/'.$type->image)) : null)
+                    @php($typeImage = $type->imageUrl())
                     <div class="col-md-6 col-lg-4">
                         <article class="hotel-card room-type-card overflow-hidden">
                             @if($typeImage)<img src="{{ $typeImage }}" alt="{{ $type->name }}" class="room-type-card-image" loading="lazy" decoding="async">@endif

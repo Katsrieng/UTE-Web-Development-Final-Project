@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Models\Room;
 use App\Models\RoomImage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
 class RoomGalleryService
 {
+    public function __construct(private MediaStorage $media) {}
     // The caller supplies its room changes so uploads and those changes commit together.
     public function save(callable $saveRoom, array $files): Room
     {
@@ -26,7 +26,7 @@ class RoomGalleryService
                 }
                 $order = ($room->images()->max('sort_order') ?? -1) + 1;
                 foreach ($files as $index => $file) {
-                    $path = $file->store('rooms/gallery/'.$room->id, 'public');
+                    $path = $this->media->storePublic($file, 'rooms/gallery/'.$room->id);
                     if (! $path) {
                         throw new RuntimeException('Unable to store room image.');
                     }
@@ -73,7 +73,8 @@ class RoomGalleryService
     {
         foreach (array_unique($paths) as $path) {
             // Only generated gallery filenames are owned by this feature.
-            if (! preg_match('~^rooms/gallery/[0-9]+/[A-Za-z0-9]+\.(jpg|jpeg|png|webp)$~i', $path)) {
+            if (! preg_match('~^rooms/gallery/[0-9]+/[A-Za-z0-9]+\.(jpg|jpeg|png|webp)$~i', $path)
+                && ! preg_match('~^cloudinary:utopia-bay/rooms/gallery/[0-9]+/[A-Za-z0-9-]+\.(jpg|jpeg|png|webp)$~i', $path)) {
                 continue;
             }
             if (RoomImage::where('image_path', $path)->exists() || Room::where('image', $path)->exists()) {
@@ -86,7 +87,7 @@ class RoomGalleryService
     private function removeFile(string $path): void
     {
         try {
-            if (! Storage::disk('public')->delete($path)) {
+            if (! $this->media->deletePublic($path)) {
                 report(new RuntimeException('Unable to remove gallery file: '.$path));
             }
         } catch (Throwable $exception) {

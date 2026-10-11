@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MediaStorage;
 use Database\Factories\VenueFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -60,5 +61,10 @@ class Venue extends Model
     public function supportsEventType(string $eventType): bool
     {
         return in_array($eventType, $this->event_types ?? [], true);
+    }
+
+    public function imageUrl(string $path): string
+    {
+        return app(MediaStorage::class)->publicUrl($path);
     }
 }

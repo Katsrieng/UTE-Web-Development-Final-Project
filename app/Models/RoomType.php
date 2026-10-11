@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MediaStorage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,5 +25,10 @@ class RoomType extends Model
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class);
+    }
+
+    public function imageUrl(): ?string
+    {
+        return $this->image ? app(MediaStorage::class)->publicUrl($this->image) : null;
     }
 }

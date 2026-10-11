@@ -857,7 +857,8 @@ a.service-card:focus-visible { outline: 3px solid var(--utopia-ocean); outline-o
     background: var(--utopia-ocean);
 }
 
-.staff-login-body .auth-section { background: var(--utopia-ocean); }
+.staff-login-body { min-height: 100vh; min-height: 100dvh; background: var(--utopia-ocean); }
+.staff-login-body .auth-section { min-height: 100vh; min-height: 100dvh; background: var(--utopia-ocean); }
 .staff-login-body .auth-card { border: 1px solid rgba(255, 255, 255, .2); }
 
 .auth-card-aside i {

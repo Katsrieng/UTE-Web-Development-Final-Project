@@ -3,12 +3,12 @@
 
 @staffroute('dashboard')
 <a class="management-brand" href="{{ route('dashboard') }}">
-            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="" width="42" height="42">
+            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_color.svg') }}" alt="" width="42" height="42">
             <span><strong>Utopia Bay</strong><small>Resort Management</small></span>
         </a>
 @else
 <div class="management-brand">
-            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_wb.svg') }}" alt="" width="42" height="42">
+            <img class="brand-logo" src="{{ asset('images/brand/utopia_bay_logo_color.svg') }}" alt="" width="42" height="42">
             <span><strong>Utopia Bay</strong><small>Resort Management</small></span>
         </div>
 @endstaffroute

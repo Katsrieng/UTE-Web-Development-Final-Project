@@ -27,11 +27,9 @@ class BookingPaymentSlip extends Model
         return $this->belongsTo(Booking::class);
     }
 
-    /**
-     * Public URL for displaying the slip image in the browser.
-     */
+    /** Protected route for displaying the slip to its owner or authorized staff. */
     public function url(): string
     {
-        return asset('storage/' . $this->file_path);
+        return route('booking-payment-slips.show', $this);
     }
 }

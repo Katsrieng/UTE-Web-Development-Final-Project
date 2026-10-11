@@ -23,6 +23,7 @@ class BookingPaymentSlipTest extends TestCase
     {
         parent::setUp();
         \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::fake('local');
         \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
         \App\Models\PaymentSetting::create(['account_name' => 'Utopia Bay Resort', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
 
@@ -86,7 +87,7 @@ class BookingPaymentSlipTest extends TestCase
 
         $slip = BookingPaymentSlip::where('booking_id', $booking->id)->first();
         $this->assertNotNull($slip);
-        Storage::disk('public')->assertExists($slip->file_path);
+        Storage::disk('local')->assertExists($slip->file_path);
     }
 
     public function test_customer_cannot_upload_invalid_file_type(): void
@@ -145,7 +146,7 @@ class BookingPaymentSlipTest extends TestCase
 
         $firstSlip = BookingPaymentSlip::where('booking_id', $booking->id)->first();
         $firstPath = $firstSlip->file_path;
-        Storage::disk('public')->assertExists($firstPath);
+        Storage::disk('local')->assertExists($firstPath);
 
         // Upload replacement
         $secondFile = UploadedFile::fake()->image('new-aba-slip.jpg', 600, 600)->size(400);
@@ -162,9 +163,9 @@ class BookingPaymentSlipTest extends TestCase
         ]);
 
         // Old file deleted, new file exists
-        Storage::disk('public')->assertMissing($firstPath);
+        Storage::disk('local')->assertMissing($firstPath);
         $newSlip = BookingPaymentSlip::where('booking_id', $booking->id)->first();
-        Storage::disk('public')->assertExists($newSlip->file_path);
+        Storage::disk('local')->assertExists($newSlip->file_path);
     }
 
     public function test_customer_can_delete_payment_slip(): void
@@ -178,7 +179,7 @@ class BookingPaymentSlipTest extends TestCase
             ]);
 
         $slip = BookingPaymentSlip::where('booking_id', $booking->id)->first();
-        Storage::disk('public')->assertExists($slip->file_path);
+        Storage::disk('local')->assertExists($slip->file_path);
 
         $response = $this->actingAs($this->customer)
             ->delete(route('customer.bookings.payment-slip.destroy', $booking));
@@ -187,7 +188,7 @@ class BookingPaymentSlipTest extends TestCase
         $response->assertSessionHas('success', 'Payment slip removed. You can now upload a new one.');
 
         $this->assertDatabaseEmpty('booking_payment_slips');
-        Storage::disk('public')->assertMissing($slip->file_path);
+        Storage::disk('local')->assertMissing($slip->file_path);
     }
 
     public function test_staff_can_view_uploaded_payment_slip_on_booking_details(): void
@@ -218,6 +219,65 @@ class BookingPaymentSlipTest extends TestCase
             'amount' => $booking->total_amount,
             'payment_method' => 'ABA / KHQR',
         ]));
+    }
+
+    public function test_private_slip_route_requires_owner_or_staff_view_permission(): void
+    {
+        $booking = $this->createBooking($this->customer, 'Pending');
+        $path = 'booking-payment-slips/booking-'.$booking->id.'-TEST123.png';
+        Storage::disk('local')->put($path, 'private image');
+        $slip = $booking->paymentSlip()->create([
+            'file_path' => $path, 'original_filename' => 'receipt.png',
+            'mime_type' => 'image/png', 'reviewed' => false,
+        ]);
+        $url = route('booking-payment-slips.show', $slip);
+
+        $this->assertNotSame(200, $this->get('/storage/'.$path)->getStatusCode());
+        $this->get($url)->assertRedirect(route('login'));
+        $this->actingAs($this->customer)->get($url)->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->actingAs(User::factory()->create())->get($url)->assertForbidden();
+        $this->actingAs(User::factory()->staff()->create())->get($url)->assertOk();
+        \App\Models\Role::where('slug', 'staff')->firstOrFail()->permissions()->detach();
+        $this->get($url)->assertForbidden();
+        $this->actingAs(User::factory()->admin()->create())->get($url)->assertOk();
+        $this->get('/booking-payment-slips/999999')->assertNotFound();
+
+        Storage::disk('local')->delete($path);
+        $this->get($url)->assertNotFound();
+        $slip->update(['file_path' => '../outside.png']);
+        $this->get($url)->assertNotFound();
+    }
+
+    public function test_customer_and_staff_pages_use_protected_slip_url(): void
+    {
+        $booking = $this->createBooking($this->customer, 'Pending');
+        $slip = $booking->paymentSlip()->create([
+            'file_path' => 'booking-payment-slips/booking-'.$booking->id.'-TEST123.png',
+            'original_filename' => 'receipt.png', 'mime_type' => 'image/png', 'reviewed' => false,
+        ]);
+        $url = route('booking-payment-slips.show', $slip);
+        $this->actingAs($this->customer)->get(route('customer.payments.booking', $booking))
+            ->assertOk()->assertSee($url, false)->assertDontSee('/storage/payment-slips/', false);
+        $this->actingAs(User::factory()->staff()->create())->get(route('bookings.show', $booking))
+            ->assertOk()->assertSee($url, false)->assertDontSee('/storage/payment-slips/', false);
+    }
+
+    public function test_legacy_public_slip_can_be_moved_to_private_storage(): void
+    {
+        $booking = $this->createBooking($this->customer, 'Pending');
+        $old = 'payment-slips/booking-'.$booking->id.'-TEST123.png';
+        Storage::disk('public')->put($old, 'legacy image');
+        $slip = $booking->paymentSlip()->create([
+            'file_path' => $old, 'original_filename' => 'receipt.png',
+            'mime_type' => 'image/png', 'reviewed' => false,
+        ]);
+        $this->actingAs($this->customer)->get(route('booking-payment-slips.show', $slip))->assertOk();
+        $this->artisan('payment-slips:privatize')->assertExitCode(0);
+        Storage::disk('public')->assertMissing($old);
+        $new = $slip->fresh()->file_path;
+        $this->assertStringStartsWith('booking-payment-slips/', $new);
+        Storage::disk('local')->assertExists($new);
+        $this->get(route('booking-payment-slips.show', $slip))->assertOk();
     }
 
     private function createBooking(User $customer, string $status): Booking

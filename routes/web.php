@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BookingPaymentSlipController;
 use App\Http\Controllers\Customer\BookingController as CustomerBookingController;
 use App\Http\Controllers\Customer\PaymentController as CustomerPaymentController;
 use App\Http\Controllers\Customer\PaymentSlipController;
@@ -68,6 +69,9 @@ Route::middleware('guest')->group(function () {
 // ==========================================
 
 Route::middleware('auth')->group(function () {
+
+    Route::get('/booking-payment-slips/{paymentSlip}', [BookingPaymentSlipController::class, 'show'])
+        ->whereNumber('paymentSlip')->name('booking-payment-slips.show');
 
     Route::post('/logout', [LoginController::class, 'destroy'])
         ->name('logout');

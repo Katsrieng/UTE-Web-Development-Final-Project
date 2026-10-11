@@ -95,7 +95,13 @@ class FacilityPhotoTest extends TestCase
 
         foreach (['open' => 'Open', 'closed' => 'Closed', 'maintenance' => 'Maintenance'] as $status => $label) {
             $facility = Facility::create($this->details(['name' => 'Status '.$label, 'status' => $status]));
-            $this->get(route('facilities.show', $facility))->assertOk()->assertSee('>'.$label.'</span>', false);
+            $expectedClass = match ($status) {
+                'open' => 'status-success',
+                'closed' => 'status-danger',
+                'maintenance' => 'status-warning',
+            };
+            $this->get(route('facilities.show', $facility))->assertOk()
+                ->assertSee($expectedClass, false)->assertSee('>'.$label.'</span>', false);
         }
         $this->get(route('facilities.index'))->assertOk()
             ->assertSee('>Open</span>', false)->assertSee('>Closed</span>', false)

@@ -22,6 +22,7 @@ class CustomerPaymentTest extends TestCase
     {
         parent::setUp();
         \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::fake('local');
         \Illuminate\Support\Facades\Storage::disk('public')->put('payment-settings/test-qr.png', 'test QR');
         \App\Models\PaymentSetting::create(['account_name' => 'Utopia Bay Resort', 'khqr_image' => 'payment-settings/test-qr.png', 'aba_khqr_enabled' => true]);
         $this->customer = User::factory()->create();
@@ -66,7 +67,7 @@ class CustomerPaymentTest extends TestCase
         $slip = $this->booking->paymentSlip()->firstOrFail();
         $this->assertSame('Pending', $payment->status);
         $this->assertSame('Pending', $this->booking->fresh()->status);
-        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($slip->file_path);
+        \Illuminate\Support\Facades\Storage::disk('local')->assertExists($slip->file_path);
         $this->get(route('customer.payments.booking', $this->booking))->assertOk()->assertSee('slip.png');
         $this->post(route('customer.payments.booking.store', $this->booking), ['payment_method' => 'ABA / KHQR',
             'payment_slip' => \Illuminate\Http\UploadedFile::fake()->image('replacement.jpg')])->assertSessionHasNoErrors();

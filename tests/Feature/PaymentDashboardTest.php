@@ -9,6 +9,8 @@ use App\Models\RoomType;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PaymentDashboardTest extends TestCase
@@ -33,9 +35,13 @@ class PaymentDashboardTest extends TestCase
     {
         $staff = User::factory()->staff()->create();
 
-        $this->actingAs($staff)
+        $response = $this->actingAs($staff)
             ->get(route('dashboard'))
             ->assertOk();
+
+        $this->assertSame(0, $response->viewData('totalPayments'));
+        $this->assertSame(0.0, $response->viewData('totalRevenue'));
+        $this->assertSame(0.0, $response->viewData('todayRevenue'));
     }
 
     public function test_dashboard_calculates_payment_statistics_correctly(): void
@@ -51,7 +57,7 @@ class PaymentDashboardTest extends TestCase
             'event_booking_id' => null,
             'amount' => 150.00,
             'payment_method' => 'Cash',
-            'payment_date' => '2026-10-01',
+            'payment_date' => today(),
             'status' => 'Paid',
             'reference_number' => 'PAY-DASH-ROOM-PAID',
         ]);
@@ -89,10 +95,20 @@ class PaymentDashboardTest extends TestCase
             'reference_number' => 'PAY-DASH-ROOM-REFUNDED',
         ]);
 
+        $paymentAggregateQueries = [];
+        DB::listen(function (QueryExecuted $query) use (&$paymentAggregateQueries): void {
+            $sql = strtolower($query->sql);
+            if (str_contains($sql, 'payments') && str_contains($sql, 'sum(')) {
+                $paymentAggregateQueries[] = $sql;
+            }
+        });
+
         $response = $this->actingAs($staff)->get(route('dashboard'));
 
         $response->assertOk();
+        $this->assertCount(1, $paymentAggregateQueries, 'Payment summary should use one aggregate query.');
         $this->assertEqualsWithDelta(400.00, (float) $response->viewData('totalRevenue'), 0.001);
+        $this->assertEqualsWithDelta(150.00, (float) $response->viewData('todayRevenue'), 0.001);
         $this->assertSame(4, $response->viewData('totalPayments'));
         $this->assertSame(2, $response->viewData('paidPayments'));
         $this->assertSame(1, $response->viewData('pendingPayments'));

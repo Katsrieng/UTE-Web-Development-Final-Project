@@ -1485,12 +1485,25 @@ a.service-card:focus-visible { outline: 3px solid var(--utopia-ocean); outline-o
 }
 
 @media (min-width: 992px) {
+    .management-shell {
+        padding-left: 270px;
+    }
+
     .management-sidebar {
-        position: sticky;
-        top: 0;
-        height: 100vh;
+        position: fixed;
+        inset: 0 auto 0 0;
+        height: 100dvh;
         visibility: visible !important;
         transform: none !important;
+    }
+
+    .management-sidebar .offcanvas-body,
+    .management-nav {
+        min-height: 0;
+    }
+
+    .sidebar-footer {
+        flex-shrink: 0;
     }
 }
 
@@ -1525,6 +1538,10 @@ a.service-card:focus-visible { outline: 3px solid var(--utopia-ocean); outline-o
 }
 
 @media print {
+    .management-shell {
+        padding-left: 0;
+    }
+
     .site-header,
     .site-footer,
     .management-sidebar,

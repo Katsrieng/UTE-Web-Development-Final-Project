@@ -1,4 +1,4 @@
-<div class="d-flex flex-wrap gap-2 {{ $compact ?? false ? 'justify-content-end' : '' }}">
+<div class="d-flex {{ $compact ?? false ? 'flex-nowrap' : 'flex-wrap' }} gap-2">
 @if(auth()->user()->can('update',$eventBooking) && !$eventBooking->staffEditBlockReason())
 
 @staffroute('management.event-reservations.edit')

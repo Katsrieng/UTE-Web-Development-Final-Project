@@ -29,7 +29,7 @@
                     <th>Event</th>
                     <th>Date &amp; time</th>
                     <th>Status</th>
-                    <th class="text-end pe-4">Action</th>
+                    <th class="text-end pe-4 text-nowrap">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,14 +52,15 @@
                             <span class="text-muted small">{{ $eventBooking->starts_at->format('g:i A') }}–{{ $eventBooking->ends_at->format('g:i A') }}</span>
                         </td>
                         <td><span class="badge text-bg-{{ $statusColor }}">{{ ucfirst($eventBooking->status) }}</span></td>
-                        <td class="text-end pe-4">
+                        <td class="text-end pe-4 text-nowrap">
+                            <div class="d-flex flex-nowrap align-items-center justify-content-end gap-2">
+                                @staffroute('management.event-reservations.show')
+                                    <a href="{{ route('management.event-reservations.show', $eventBooking) }}"
+                                       class="btn btn-sm btn-outline-primary">View</a>
+                                @endstaffroute
 
-@staffroute('management.event-reservations.show')
-<a href="{{ route('management.event-reservations.show', $eventBooking) }}"
-                               class="btn btn-sm btn-outline-primary mb-2">View</a>
-@endstaffroute
-
-                            @include('management.event-reservations._record-actions', ['compact'=>true])
+                                @include('management.event-reservations._record-actions', ['compact'=>true])
+                            </div>
                         </td>
                     </tr>
                 @empty

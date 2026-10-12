@@ -16,13 +16,14 @@ class PaymentSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_custom_qr_removal_falls_back_to_demo_without_disabling_payments(): void
+    public function test_custom_qr_removal_falls_back_to_bundled_aba_qr_without_disabling_payments(): void
     {
         $this->grantStaffPermissions('manage_payment_settings');
         Storage::fake('public');
         Storage::disk('public')->put('payment-settings/custom.png', 'custom QR');
         $settings = PaymentSetting::create(['account_name' => 'Hotel Account', 'khqr_image' => 'payment-settings/custom.png', 'aba_khqr_enabled' => true]);
         $this->assertTrue($settings->khqrAvailable());
+        $this->assertSame('Hotel Account', $settings->qrAccountName());
         $this->assertStringContainsString('payment-settings/custom.png', $settings->qrUrl());
         $this->actingAs(User::factory()->create())->delete(route('payment-settings.remove-qr'))->assertForbidden();
         Storage::disk('public')->assertExists('payment-settings/custom.png');
@@ -33,9 +34,10 @@ class PaymentSettingsTest extends TestCase
         $this->assertTrue($settings->aba_khqr_enabled);
         $this->assertTrue($settings->khqrAvailable());
         $this->assertSame(asset('images/qr-khqr.png'), $settings->qrUrl());
+        $this->assertSame('RAVANMONYVAN HAY', $settings->qrAccountName());
         Storage::disk('public')->assertMissing('payment-settings/custom.png');
         $this->assertFileExists(public_path('images/qr-khqr.png'));
-        $this->get(route('payment-settings.edit'))->assertOk()->assertSee('Default demo QR')->assertSee('images/qr-khqr.png')->assertDontSee('Remove Custom QR');
+        $this->get(route('payment-settings.edit'))->assertOk()->assertSee('Bundled ABA QR')->assertSee('RAVANMONYVAN HAY')->assertSee('images/qr-khqr.png')->assertDontSee('Remove Custom QR');
         $settings->update(['aba_khqr_enabled' => false]);
         $this->assertFalse($settings->khqrAvailable());
         $this->assertSame(asset('images/qr-khqr.png'), $settings->qrUrl());
@@ -94,6 +96,6 @@ class PaymentSettingsTest extends TestCase
         $this->get($url)->assertOk()->assertSee('ABA/KHQR payment is temporarily unavailable')->assertDontSee('payment-settings/managed.png');
         $settings->update(['aba_khqr_enabled' => true]);
         Storage::disk('public')->delete('payment-settings/managed.png');
-        $this->get($url)->assertOk()->assertDontSee('ABA/KHQR payment is temporarily unavailable')->assertSee('images/qr-khqr.png')->assertDontSee('payment-settings/managed.png');
+        $this->get($url)->assertOk()->assertDontSee('ABA/KHQR payment is temporarily unavailable')->assertSee('images/qr-khqr.png')->assertSee('RAVANMONYVAN HAY')->assertSee('Pay the exact amount due in')->assertDontSee('Hotel Managed Account')->assertDontSee('Reference 456')->assertDontSee('payment-settings/managed.png');
     }
 }

@@ -2,10 +2,18 @@
     <h3 class="h6 mb-1"><i class="bi bi-qr-code me-1" aria-hidden="true"></i> Pay with ABA / KHQR</h3>
     <p class="small text-muted mb-3">Scan with ABA Mobile, Bakong, or any KHQR-supported banking app.</p>
     @if($paymentSettings->khqrAvailable())
-        <div class="payment-qr-card text-center mb-3"><img src="{{ $paymentSettings->qrUrl() }}" alt="Hotel ABA / KHQR payment code" class="img-fluid"></div>
+        <div class="payment-qr-card text-center mb-3">
+            @if($paymentSettings->hasCustomQr())
+                <img src="{{ $paymentSettings->qrUrl() }}" alt="Hotel ABA / KHQR payment code" class="img-fluid">
+            @else
+                <svg class="bundled-payment-qr" viewBox="270 490 365 365" role="img" aria-label="ABA KHQR code for {{ $paymentSettings->qrAccountName() }}"><image href="{{ $paymentSettings->qrUrl() }}" width="905" height="1280" /></svg>
+            @endif
+            <a class="d-block small mt-2" href="{{ $paymentSettings->qrUrl() }}" target="_blank" rel="noopener">Open full QR image</a>
+        </div>
+        <p class="small mb-3">Pay the exact amount due in <strong>USD</strong>. In your banking app, select USD and check that the recipient is <strong>{{ $paymentSettings->qrAccountName() }}</strong> before confirming. If your app only offers KHR, contact the hotel before paying.</p>
     @endif
     <div class="payment-qr-details mb-3">
-        <div><span class="payment-detail-label">Payment account</span><strong class="d-block">{{ $paymentSettings->account_name }}</strong>@if($paymentSettings->account_label)<span class="d-block small text-muted">{{ $paymentSettings->account_label }}</span>@endif</div>
+        <div><span class="payment-detail-label">Payment account</span><strong class="d-block">{{ $paymentSettings->qrAccountName() }}</strong>@if($paymentSettings->hasCustomQr() && $paymentSettings->account_label)<span class="d-block small text-muted">{{ $paymentSettings->account_label }}</span>@endif</div>
         <div><span class="payment-detail-label">{{ $booking ? 'Booking reference' : 'Membership' }}</span><strong class="d-block">{{ $booking ? '#'.$booking->id : $plan->name }}</strong></div>
         <div><span class="payment-detail-label">Amount due</span><strong class="d-block payment-qr-amount">${{ number_format($amount, 2) }}</strong></div>
     </div>

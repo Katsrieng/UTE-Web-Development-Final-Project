@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 class PaymentSettingsController extends Controller
 {
     public function __construct(private MediaStorage $media) {}
+
     public function edit()
     {
         return view('payments.settings', ['settings' => PaymentSetting::current()]);
@@ -34,7 +35,7 @@ class PaymentSettingsController extends Controller
                 $data['khqr_image'] = $path;
             }
             DB::transaction(function () use ($data, $path) {
-                PaymentSetting::firstOrCreate(['id' => 1], ['account_name' => 'Utopia Bay Resort']);
+                PaymentSetting::firstOrCreate(['id' => 1], ['account_name' => PaymentSetting::BUNDLED_QR_ACCOUNT_NAME]);
                 $settings = PaymentSetting::lockForUpdate()->findOrFail(1);
                 $oldPath = $settings->khqr_image;
                 $settings->update($data);
@@ -43,7 +44,9 @@ class PaymentSettingsController extends Controller
                 }
             });
         } catch (\Throwable $exception) {
-            if ($path) { $this->media->deletePublic($path); }
+            if ($path) {
+                $this->media->deletePublic($path);
+            }
             throw $exception;
         }
 
@@ -54,7 +57,9 @@ class PaymentSettingsController extends Controller
     {
         DB::transaction(function () {
             $settings = PaymentSetting::lockForUpdate()->find(1);
-            if (! $settings || ! $settings->khqr_image) { return; }
+            if (! $settings || ! $settings->khqr_image) {
+                return;
+            }
             $oldPath = $settings->khqr_image;
             $settings->update(['khqr_image' => null]);
             if ($this->ownedQr($oldPath)) {
@@ -62,7 +67,7 @@ class PaymentSettingsController extends Controller
             }
         });
 
-        return redirect()->route('payment-settings.edit')->with('success', 'Custom QR removed. The default demo QR is now used.');
+        return redirect()->route('payment-settings.edit')->with('success', 'Custom QR removed. The bundled ABA QR is now used.');
     }
 
     private function ownedQr(string $path): bool
